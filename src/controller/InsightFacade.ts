@@ -18,27 +18,21 @@ export default class InsightFacade implements IInsightFacade {
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
         // TODO: AL - Test whether string is blankspace, field is underscored or ID exists (COMPLETED)
-        if (!(this.isValidId(id))) {
-            throw new InsightError();
+        if (this.validID(id)) {
+            throw new InsightError("Invalid Id");
+        }
+        if (this.isAdded(id)) {
+            throw new InsightError("It's already exists");
         }
         // DONE
         // TODO: Al - Figure out how to parse the dataset
         // NOT DONE
         JSZip.loadAsync(content, {base64: true}).then((data) => {
             Log.test(data);
-        }).catch( (err: any) => { throw new InsightError("Invalid Zip File"); });
+        }).catch((err: any) => {
+            throw new InsightError("Invalid Zip File");
+        });
         return Promise.reject("Not implemented.");
-    }
-
-    private isValidId(id: string): boolean {
-        // Tests whether or not ID provided is valid
-        if (this.validID(id)) {
-            return true;
-        }
-        if (this.isAdded(id)) {
-            return false;
-        }
-        return true;
     }
 
     private validID(id: string): boolean {
