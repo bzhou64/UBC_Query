@@ -2,6 +2,7 @@ import Log from "../Util";
 import {IInsightFacade, InsightDataset, InsightDatasetKind} from "./IInsightFacade";
 import {InsightError, NotFoundError} from "./IInsightFacade";
 import DataSets from "./DataSets";
+import * as JSZip from "jszip";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -23,6 +24,9 @@ export default class InsightFacade implements IInsightFacade {
         // DONE
         // TODO: Al - Figure out how to parse the dataset
         // NOT DONE
+        JSZip.loadAsync(content, {base64: true}).then((data) => {
+            Log.test(data);
+        }).catch( (err: any) => { throw new InsightError("Invalid Zip File"); });
         return Promise.reject("Not implemented.");
     }
     private isValidId(id: string): boolean {
