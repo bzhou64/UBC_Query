@@ -25,31 +25,41 @@ export default class InsightFacade implements IInsightFacade {
         // NOT DONE
         return Promise.reject("Not implemented.");
     }
+
     private isValidId(id: string): boolean {
         // Tests whether or not ID provided is valid
-        if (id === " ") {
+        if (this.validID(id)) {
+            return true;
+        }
+        if (this.isAdded(id)) {
             return false;
         }
-        if (id.includes("_")) {
-            return false;
-        }
+        return true;
+    }
+
+    private validID(id: string): boolean {
+        // TODO : GET THE REGEX EQUIVALENT
+        return (!(id.includes(" ")) || !(id.includes("_")));
+    }
+
+    private isAdded(id: string): boolean {
         this.listDatasets().then((datasets: InsightDataset[]) => {
             for (const dset of datasets) {
                 if (dset.id === id) {
-                    return false;
+                    return true;
                 }
             }
         }).catch((err: any) => {
-            return false;
+            return true;
         });
-
-        return true;
+        return false;
     }
+
     public removeDataset(id: string): Promise<string> {
         return Promise.reject("Not implemented.");
     }
 
-    public performQuery(query: any): Promise <any[]> {
+    public performQuery(query: any): Promise<any[]> {
         return Promise.reject("Not implemented.");
     }
 
