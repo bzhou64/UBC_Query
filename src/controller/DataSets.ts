@@ -1,6 +1,6 @@
 import Dataset from "./DataSet";
 export default class DataSets {
-    private datasets: {[index: string]: Dataset};
+    public datasets: {[index: string]: Dataset};
     public id: string;
 
     constructor(id: string) {
