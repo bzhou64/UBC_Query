@@ -9,5 +9,4 @@ export default class DataSets {
     public addDataset(dataset: Dataset) {
         this.datasets[dataset.id] = dataset;
     }
-
 }

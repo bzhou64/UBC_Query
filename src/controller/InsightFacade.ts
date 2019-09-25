@@ -1,6 +1,7 @@
 import Log from "../Util";
 import {IInsightFacade, InsightDataset, InsightDatasetKind} from "./IInsightFacade";
 import {InsightError, NotFoundError} from "./IInsightFacade";
+import DataSets from "./DataSets";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -8,6 +9,7 @@ import {InsightError, NotFoundError} from "./IInsightFacade";
  *
  */
 export default class InsightFacade implements IInsightFacade {
+    private dataSets: DataSets;
 
     constructor() {
         Log.trace("InsightFacadeImpl::init()");
@@ -52,6 +54,19 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public listDatasets(): Promise<InsightDataset[]> {
-        return Promise.reject("Not implemented.");
+        let insightDatasets: InsightDataset[];
+        insightDatasets = [];
+        for (let [datasetId, dataSet] of Object.entries(this.dataSets)) {
+            let insightDataset: InsightDataset = {
+                id: datasetId,
+                kind: InsightDatasetKind.Courses,
+                numRows: Object.keys(dataSet).length
+            };
+            insightDatasets.push(insightDataset);
+        }
+        return new Promise((resolve, reject) => {
+            resolve(insightDatasets);
+        });
+
     }
 }
