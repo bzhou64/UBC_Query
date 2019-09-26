@@ -18,7 +18,7 @@ export default class InsightFacade implements IInsightFacade {
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
         // TODO: AL - Test whether string is blankspace, field is underscored or ID exists (COMPLETED)
-        if (this.validID(id)) {
+        if (!this.isIDValid(id)) {
             throw new InsightError("Invalid Id");
         }
         if (this.isAdded(id)) {
@@ -35,9 +35,9 @@ export default class InsightFacade implements IInsightFacade {
         return Promise.reject("Not implemented.");
     }
 
-    private validID(id: string): boolean {
+    private isIDValid(id: string): boolean {
         // TODO : GET THE REGEX EQUIVALENT
-        return (!(id.includes(" ")) || !(id.includes("_")));
+        return (!(id.includes(" ")) && !(id.includes("_")));
     }
 
     private isAdded(id: string): boolean {
