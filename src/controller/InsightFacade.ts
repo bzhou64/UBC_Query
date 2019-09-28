@@ -3,7 +3,6 @@ import {IInsightFacade, InsightDataset, InsightDatasetKind} from "./IInsightFaca
 import {InsightError, NotFoundError} from "./IInsightFacade";
 import DataSets from "./DataSets";
 import * as JSZip from "jszip";
-import * as fs from "fs";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -19,55 +18,61 @@ export default class InsightFacade implements IInsightFacade {
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
         // TODO: AL - Test whether string is blankspace, field is underscored or ID exists (COMPLETED)
-        if (!(this.isValidId(id))) {
-            throw new InsightError();
+        if (!this.isIDValid(id)) {
+            throw new InsightError("Invalid Id");
+        }
+        if (this.isAdded(id)) {
+            throw new InsightError("It's already exists");
         }
         // DONE
         // TODO: Al - Figure out how to parse the dataset
         // NOT DONE
+        JSZip.loadAsync(content, {base64: true}).then((data) => {
+            Log.test(data);
+        }).catch((err: any) => {
+            throw new InsightError("Invalid Zip File");
+        });
         return Promise.reject("Not implemented.");
     }
 
-    private decodeZip(content: string) {
-        JSZip.loadAsync(content, {base64: true}).then((zip) => {
-            return new Promise((resolve, reject) => {
-                resolve(zip.files);
-            });
-        });
+    private isIDValid(id: string): boolean {
+        // TODO : GET THE REGEX EQUIVALENT
+        return (!(id.includes(" ")) && !(id.includes("_")));
     }
 
-    private isValidId(id: string): boolean {
-        // Tests whether or not ID provided is valid
-        if (id === " ") {
-            return false;
-        }
-        if (id.includes("_")) {
-            return false;
-        }
+    private isAdded(id: string): boolean {
         this.listDatasets().then((datasets: InsightDataset[]) => {
             for (const dset of datasets) {
                 if (dset.id === id) {
-                    return false;
+                    return true;
                 }
             }
         }).catch((err: any) => {
-            return false;
+            return true;
         });
-
-        return true;
+        return false;
     }
+
     public removeDataset(id: string): Promise<string> {
-        return Promise.reject("Not implemented.");
+        // Check if id is valid
+        // Check if it is in the list of datasets
+        // If it is then remove it
+        delete this.dataSets.datasets[id];
+        // TODO: delete from disk
+        return new Promise((resolve) => {
+            resolve(id);
+        });
+        // return Promise.reject("Not implemented.");
     }
 
-    public performQuery(query: any): Promise <any[]> {
+    public performQuery(query: any): Promise<any[]> {
         return Promise.reject("Not implemented.");
     }
 
     public listDatasets(): Promise<InsightDataset[]> {
         let insightDatasets: InsightDataset[];
         insightDatasets = [];
-        for (let [datasetId, dataSet] of Object.entries(this.dataSets)) {
+        for (let [datasetId, dataSet] of Object.entries(this.dataSets.datasets)) {
             let insightDataset: InsightDataset = {
                 id: datasetId,
                 kind: InsightDatasetKind.Courses,
