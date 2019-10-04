@@ -15,6 +15,7 @@ import {rejects} from "assert";
  */
 export default class InsightFacade implements IInsightFacade {
     private datasets: DataSets;
+    private dataDir = "./data/";
 
     constructor() {
         Log.trace("InsightFacadeImpl::init()");
@@ -22,14 +23,13 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
-        let dataDir = "./data/";
         return new Promise<string[]>((resolve, reject) => {
-            fs.readdir(dataDir, (err, filenames) => {
+            fs.readdir(this.dataDir, (err, filenames) => {
                 if (err) {
                     throw new InsightError("Cannot read from data directory");
                 }
                 filenames.forEach((filename) => {
-                    let fileContent = fs.readFileSync(dataDir + filename, "utf8");
+                    let fileContent = fs.readFileSync(this.dataDir + filename, "utf8");
                     let currDatasetRead: DataSet = JSON.parse(fileContent);
                     this.datasets.addDataset(currDatasetRead);
                 });
@@ -77,10 +77,10 @@ export default class InsightFacade implements IInsightFacade {
                                     if (Object.keys(currDataset.sections).length) {
                                         this.datasets.addDataset(currDataset);
                                         resolve(Object.keys(this.datasets.datasets));
-                                        if (!fs.existsSync(dataDir)) {
-                                            fs.mkdirSync(dataDir);
+                                        if (!fs.existsSync(this.dataDir)) {
+                                            fs.mkdirSync(this.dataDir);
                                         }
-                                        fs.writeFileSync(dataDir + currDataset.id, JSON.stringify(currDataset));
+                                        fs.writeFileSync(this.dataDir + currDataset.id, JSON.stringify(currDataset));
                                     } else {
                                         throw new InsightError("No valid section in Zip File");
                                     }
@@ -128,14 +128,27 @@ export default class InsightFacade implements IInsightFacade {
 
     public removeDataset(id: string): Promise<string> {
         // Check if id is valid
-        // Check if it is in the list of datasets
-        // If it is then remove it
-        delete this.datasets.datasets[id];
-        // TODO: delete from disk
-        return new Promise((resolve) => {
-            resolve(id);
-        });
-        // return Promise.reject("Not implemented.");
+        if (this.isIDValid(id)) {
+            if (this.isAdded(id)) {
+                try {
+                    delete this.datasets.datasets[id];
+                } catch (e) {
+                    throw new InsightError("Cannot remove dataset from memory");
+                }
+                try {
+                    fs.unlinkSync(this.dataDir + id);
+                } catch (e) {
+                    throw new InsightError("Cannot remove dataset from disk");
+                }
+                return new Promise((resolve) => {
+                    resolve(id);
+                });
+            } else {
+                throw new NotFoundError("Dataset to remove is not added");
+            }
+        } else {
+            throw new InsightError("Invalid ID");
+        }
     }
 
     public performQuery(query: any): Promise<any[]> {
