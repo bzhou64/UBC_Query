@@ -10,6 +10,8 @@ export default class Section {
     public audit: number;
     public uuid: string;
     public year: number;
+    public mfield: {[index: string]: number};
+    public sfield: {[index: string]: string};
 
     constructor(dept: string, id: string, avg: number, instructor: string,
                 title: string, pass: number, fail: number, audit: number, uuid: string, year: number) {

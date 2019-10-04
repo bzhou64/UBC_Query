@@ -4,6 +4,7 @@ import {InsightDataset, InsightError} from "./IInsightFacade";
 import SComparison from "./SComparison";
 import MComparison from "./MComparison";
 import LogicComparison from "./LogicComparison";
+import InsightFacade from "./InsightFacade";
 
 export default class Negation extends Filter {
     private filter: Filter;
@@ -28,13 +29,34 @@ export default class Negation extends Filter {
             throw new InsightError("Invalid Field");
         }
     }
-    protected applyFilter(ds: DataSets): Promise<any[]> {
-        return undefined;
+    public applyFilter(ds: DataSets, resultSoFar: any[], insF: InsightFacade): Promise<any[]> {
+        try {
+            let tempResultSoFar: any[] = [];
+            insF.listDatasets().then((insD) => {
+                this.isValid(insD).then((result) => {
+                    if (result) {
+                        let tempArray: Promise<any[]> = this.filter.applyFilter(ds, resultSoFar, insF);
+                        // this might not work since I'm comparing objects in an array rather than primitive type
+                        // but it's referencing the same object so it should work. Will have to test it out
+                        tempArray.then((arr) => {
+                            tempResultSoFar = resultSoFar.filter((val) => !arr.includes(val));
+                            });
+                        }
+                    });
+                });
+            return new Promise<any[]>((resolve) => {
+                resolve (tempResultSoFar);
+            });
+            } catch (e) {
+            throw new InsightError(e);
+        }
     }
-
+    // couldn't think of a case where negation would be invalid. The only case is where the filter given is wrong
+    // but the constructor checks that already
     protected isValid(insDs: InsightDataset[]): Promise<boolean> {
-        // TODO: Implement the rest of these tests
-        return undefined;
+        return new Promise<boolean>((resolve) => {
+            resolve (true);
+        });
     }
 
 }

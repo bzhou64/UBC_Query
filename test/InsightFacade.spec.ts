@@ -1,9 +1,12 @@
 import { expect } from "chai";
 import * as fs from "fs-extra";
-import {InsightDatasetKind} from "../src/controller/IInsightFacade";
+import {InsightDatasetKind, InsightError} from "../src/controller/IInsightFacade";
 import InsightFacade from "../src/controller/InsightFacade";
 import Log from "../src/Util";
 import TestUtil from "./TestUtil";
+import * as JSZip from "jszip";
+import * as path from "path";
+import {JSZipObject} from "jszip";
 
 // This should match the schema given to TestUtil.validate(..) in TestUtil.readTestQueries(..)
 // except 'filename' which is injected when the file is read.
@@ -57,13 +60,27 @@ describe("InsightFacade Add/Remove Dataset", function () {
 
     // This is a unit test. You should create more like this!
     it("Should add a valid dataset", function () {
+        let temp: JSZipObject[] = [];
         const id: string = "courses";
         const expected: string[] = [id];
-        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
+        /*return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
             expect(result).to.deep.equal(expected);
         }).catch((err: any) => {
             expect.fail(err, expected, "Should not have rejected");
-        });
+        });*/
+        JSZip.loadAsync(datasets["courses"], {base64: true}).then((data) => {
+            // Log.test(data);
+            /*data.folder("files").forEach((relativePath, file) => {
+                Log.test(file);
+            });*/
+            data.forEach((relativePath, file) => {
+                // Log.test(file);
+                temp.push(file);
+            });
+            for (let entry of temp) {
+                Log.test(entry);
+            }
+         }).catch( (err: any) => { throw new InsightError("Invalid Zip File"); });
 
     });
 });
