@@ -57,11 +57,9 @@ export default class InsightFacade implements IInsightFacade {
                                     }
                                 }
                                 Promise.all(promisesFiles).then((filesJSON) => {
-                                    let numSec = 0;
                                     filesJSON.forEach((fileJSON: any) => {
                                         let sections: any[] = fileJSON["result"];
                                         for (let section of sections) {
-                                            numSec++;
                                             if (section.Subject && section.Course &&
                                                 section.Avg  && section.Professor && section.Title
                                                 && section.Pass && section.Fail && section.Audit
@@ -75,7 +73,6 @@ export default class InsightFacade implements IInsightFacade {
                                             }
                                         }
                                     });
-                                    Log.trace(numSec);
                                     if (Object.keys(currDataset.sections).length) {
                                         this.datasets.addDataset(currDataset);
                                         let my: any = this.datasets.datasets["courses"].sections;
