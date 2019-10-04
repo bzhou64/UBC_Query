@@ -122,8 +122,7 @@ export default class InsightFacade implements IInsightFacade {
         }
     }
     private isIDValid(id: string): boolean {
-        // TODO : GET THE REGEX EQUIVALENT
-        return (!(id.includes(" ")) && !(id.includes("_")));
+        return !(id.includes("_") || id === "" || !id.replace(/\s/g, "").length);
     }
 
     private isAdded(id: string): Promise<boolean> {
