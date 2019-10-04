@@ -27,7 +27,7 @@
         "max-classes-per-file": false,
         "trailing-comma": false,
         "object-literal-shorthand": false,
-        "max-func-body-length": [true, 100, {"ignore-comments": true, "ignore-parameters-to-function-regex": "^describe$" }],
+        "max-func-body-length": [true, 50, {"ignore-comments": true, "ignore-parameters-to-function-regex": "^describe$" }],
         "max-file-line-count": [true, 300]
     }
 }
