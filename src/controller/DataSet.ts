@@ -1,14 +1,15 @@
 import Section from "./Section";
 
 export default class DataSet {
-    private sections: {[index: string]: Section};
+    public sections: {[index: string]: Section};
     public id: string;
 
     constructor(id: string) {
         this.id = id;
+        this.sections = {};
     }
     public addSection(section: Section) {
-        this.sections[section.dept + "_" + section.id + "_" + section.section] = section;
+        this.sections[section.uuid] = section;
     }
 
 }

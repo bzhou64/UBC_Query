@@ -13,26 +13,25 @@ export default class LogicComparison extends Filter {
      */
     constructor(kkey: string, vvalue: any) {
         super(kkey, vvalue);
-        // tslint:disable-next-line:prefer-for-of
-        for (let i = 0; i < vvalue.length; i++) {
-            if (vvalue[i].hasOwnProperty("AND")) {
-                this.listoffilters.push(new LogicComparison ("AND", vvalue[i].AND));
-            } else if (vvalue[i].hasOwnProperty("OR")) {
-                this.listoffilters.push(new LogicComparison ("OR", vvalue[i].OR));
-            } else if (vvalue[i].hasOwnProperty("IS")) {
-                this.listoffilters.push(new SComparison ("IS", vvalue[i].IS));
-            } else if (vvalue[i].hasOwnProperty("LT")) {
-                this.listoffilters.push(new MComparison ("LT", vvalue[i].LT));
-            } else if (vvalue[i].hasOwnProperty("GT")) {
-                this.listoffilters.push(new MComparison ("GT", vvalue[i].GT));
-            } else if (vvalue[i].hasOwnProperty("EQ")) {
-                this.listoffilters.push(new MComparison ("EQ", vvalue[i].EQ));
-            } else if (vvalue[i].hasOwnProperty("NOT")) {
-                this.listoffilters.push(new Negation ("NOT", vvalue[i].NOT));
-            } else {
-                throw new InsightError("Invalid Field");
-            }
-        }
+        // for (let i = 0; i < vvalue.length; i++) {
+        //     if (vvalue[i].hasOwnProperty("AND")) {
+        //         this.listoffilters.push(new LogicComparison ("AND", vvalue[i].AND));
+        //     } else if (vvalue[i].hasOwnProperty("OR")) {
+        //         this.listoffilters.push(new LogicComparison ("OR", vvalue[i].OR));
+        //     } else if (vvalue[i].hasOwnProperty("IS")) {
+        //         this.listoffilters.push(new SComparison ("IS", vvalue[i].IS));
+        //     } else if (vvalue[i].hasOwnProperty("LT")) {
+        //         this.listoffilters.push(new MComparison ("LT", vvalue[i].LT));
+        //     } else if (vvalue[i].hasOwnProperty("GT")) {
+        //         this.listoffilters.push(new MComparison ("GT", vvalue[i].GT));
+        //     } else if (vvalue[i].hasOwnProperty("EQ")) {
+        //         this.listoffilters.push(new MComparison ("EQ", vvalue[i].EQ));
+        //     } else if (vvalue[i].hasOwnProperty("NOT")) {
+        //         this.listoffilters.push(new Negation ("NOT", vvalue[i].NOT));
+        //     } else {
+        //         throw new InsightError("Invalid Field");
+        //     }
+        // }
     }
 
     protected applyFilter(ds: DataSets): Promise<any[]> {

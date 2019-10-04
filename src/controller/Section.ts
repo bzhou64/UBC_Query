@@ -1,6 +1,5 @@
 // Assumes that the section is valid
 export default class Section {
-    public section: string;
     public dept: string;
     public id: string;
     public avg: number;
