@@ -37,7 +37,6 @@ export default class InsightFacade implements IInsightFacade {
                     throw new InsightError("Invalid Id");
                 }
                 this.isAdded(id).then((cond) => {
-                    Log.trace("in isAdded");
                     if (cond) {
                         reject(new InsightError("Dataset already exists"));
                     } else {
@@ -58,9 +57,11 @@ export default class InsightFacade implements IInsightFacade {
                                     }
                                 }
                                 Promise.all(promisesFiles).then((filesJSON) => {
+                                    let numSec = 0;
                                     filesJSON.forEach((fileJSON: any) => {
                                         let sections: any[] = fileJSON["result"];
                                         for (let section of sections) {
+                                            numSec++;
                                             if (section.Subject && section.Course &&
                                                 section.Avg  && section.Professor && section.Title
                                                 && section.Pass && section.Fail && section.Audit
@@ -74,13 +75,21 @@ export default class InsightFacade implements IInsightFacade {
                                             }
                                         }
                                     });
+                                    Log.trace(numSec);
                                     if (Object.keys(currDataset.sections).length) {
                                         this.datasets.addDataset(currDataset);
-                                        resolve(Object.keys(this.datasets.datasets));
-                                        if (!fs.existsSync(this.dataDir)) {
-                                            fs.mkdirSync(this.dataDir);
+                                        let my: any = this.datasets.datasets["courses"].sections;
+                                        Log.trace(Object.keys(my).length);
+                                        try {
+                                            if (!fs.existsSync(this.dataDir)) {
+                                                fs.mkdirSync(this.dataDir);
+                                            }
+                                            fs.writeFileSync(this.dataDir + currDataset.id,
+                                                JSON.stringify(currDataset));
+                                        } catch (e) {
+                                            throw new InsightError("Cannot write to disk");
                                         }
-                                        fs.writeFileSync(this.dataDir + currDataset.id, JSON.stringify(currDataset));
+                                        resolve(Object.keys(this.datasets.datasets));
                                     } else {
                                         throw new InsightError("No valid section in Zip File");
                                     }
