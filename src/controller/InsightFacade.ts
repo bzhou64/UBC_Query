@@ -6,7 +6,6 @@ import * as JSZip from "jszip";
 import * as fs from "fs";
 import DataSet from "./DataSet";
 import Section from "./Section";
-import {rejects} from "assert";
 
 /**
  * This is the main programmatic entry point for the project.
