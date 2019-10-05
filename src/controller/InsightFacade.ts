@@ -42,24 +42,23 @@ export default class InsightFacade implements IInsightFacade {
                         zipFile.loadAsync(content, {base64: true}).then((data) => {
                                 let promisesFiles: any[] = this.createFileReadPromises(data);
                                 Promise.all(promisesFiles).then((filesJSON) => {
-                                    let totalSec = 0;
-                                    let validSec = 0;
+                                    // let totalSec = 0;
+                                    // let validSec = 0;
                                     filesJSON.forEach((fileJSON: any) => {
                                         if (fileJSON != null) {
-                                            let sections: any[] = fileJSON["result"];
-                                            for (let section of sections) {
-                                                totalSec++;
+                                            for (let section of fileJSON["result"]) {
+                                                // totalSec++;
                                                 let sectionObj: Section = this.createValidSection(section);
                                                 // Log.trace(sectionObj);
                                                 if (sectionObj) {
-                                                    validSec++;
+                                                    // validSec++;
                                                     currDataset.addSection(sectionObj);
                                                 }
                                             }
                                         }
                                     });
-                                    Log.trace(validSec);
-                                    Log.trace(totalSec);
+                                    // Log.trace(validSec);
+                                    // Log.trace(totalSec);
                                     if (Object.keys(currDataset.sections).length) {
                                         this.addDatasetDisk(currDataset);
                                         resolve(Object.keys(this.datasets.datasets));
