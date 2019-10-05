@@ -1,12 +1,9 @@
 import { expect } from "chai";
 import * as fs from "fs-extra";
-import {InsightDatasetKind, InsightError} from "../src/controller/IInsightFacade";
+import {InsightDataset, InsightDatasetKind, InsightError, NotFoundError} from "../src/controller/IInsightFacade";
 import InsightFacade from "../src/controller/InsightFacade";
 import Log from "../src/Util";
 import TestUtil from "./TestUtil";
-import * as JSZip from "jszip";
-import * as path from "path";
-import {JSZipObject} from "jszip";
 
 // This should match the schema given to TestUtil.validate(..) in TestUtil.readTestQueries(..)
 // except 'filename' which is injected when the file is read.
@@ -23,6 +20,14 @@ describe("InsightFacade Add/Remove Dataset", function () {
     // automatically be loaded in the 'before' hook.
     const datasetsToLoad: { [id: string]: string } = {
         courses: "./test/data/courses.zip",
+        illegal_id: "./test/data/illegal_id.zip",
+        noCoursesDir: "./test/data/noCoursesDir.zip",
+        incorrectCoursesDir: "./test/data/incorrectCoursesDir.zip",
+        noCourseSections: "./test/data/noCourseSections.zip",
+        garbageInCourses: "./test/data/garbageInCourses.zip",
+        validWithGarbage: "./test/data/validWithGarbage.zip",
+        corrupt: "./test/data/corrupt.zip",
+
     };
     let datasets: { [id: string]: string } = {};
     let insightFacade: InsightFacade;
@@ -57,31 +62,212 @@ describe("InsightFacade Add/Remove Dataset", function () {
     afterEach(function () {
         Log.test(`AfterTest: ${this.currentTest.title}`);
     });
-
+    // Unit Tests for removeDataset
     // This is a unit test. You should create more like this!
     it("Should add a valid dataset", function () {
-        let temp: JSZipObject[] = [];
         const id: string = "courses";
         const expected: string[] = [id];
-        /*return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
             expect(result).to.deep.equal(expected);
+            return insightFacade.listDatasets().then((returnedData: InsightDataset[]) => {
+                expect(returnedData).to.have.length(1);
+            }).catch((err: any) => {
+                expect.fail(err, expected, "Should not have rejected");
+            });
         }).catch((err: any) => {
             expect.fail(err, expected, "Should not have rejected");
-        });*/
-        JSZip.loadAsync(datasets["courses"], {base64: true}).then((data) => {
-            // Log.test(data);
-            /*data.folder("files").forEach((relativePath, file) => {
-                Log.test(file);
-            });*/
-            data.forEach((relativePath, file) => {
-                // Log.test(file);
-                temp.push(file);
-            });
-            for (let entry of temp) {
-                Log.test(entry);
-            }
-         }).catch( (err: any) => { throw new InsightError("Invalid Zip File"); });
+        });
 
+    });
+    // This is a unit test. You should create more like this!
+    it("Should add a valid dataset with garbage", function () {
+        const id: string = "validWithGarbage";
+        const expected: string[] = [id];
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
+            expect(result).to.deep.equal(expected);
+            return insightFacade.listDatasets().then((returnedData: InsightDataset[]) => {
+                expect(returnedData).to.have.length(1);
+            }).catch((err: any) => {
+                expect.fail(err, expected, "Should not have rejected");
+            });
+        }).catch((err: any) => {
+            expect.fail(err, expected, "Should not have rejected");
+        });
+
+    });
+    // // reject with undefined id (also undefined dataset)
+    // it("Reject adding dataset with undefined id", function () {
+    //     const id: string = undefined;
+    //     const expected: string[] = [id];
+    //     return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
+    //         expect.fail(result, expected, "Should be rejected");
+    //     }).catch((err: any) => {
+    //         expect(err).to.be.instanceOf(InsightError);
+    //     });
+    // });
+    // reject with corrupted zip file
+    it("Reject adding dataset with corrupted zip file", function () {
+        const id: string = "corrupt";
+        const expected: string[] = [id];
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
+            expect.fail(result, expected, "Should be rejected");
+        }).catch((err: any) => {
+            expect(err).to.be.instanceOf(InsightError);
+        });
+    });
+    // reject with illegal id (whitespace)
+    it("Reject adding dataset with id containing only whitespace", function () {
+        const id: string = " ";
+        const expected: string[] = [id];
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
+            expect.fail(result, expected, "Should be rejected");
+        }).catch((err: any) => {
+            expect(err).to.be.instanceOf(InsightError);
+        });
+    });
+    // reject with illegal id (containing underscore)
+    it("Reject adding dataset with underscore in id", function () {
+        const id: string = "illegal_id";
+        const expected: string[] = [id];
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
+            expect.fail(result, expected, "Should be rejected");
+        }).catch((err: any) => {
+            expect(err).to.be.instanceOf(InsightError);
+        });
+    });
+    // reject with duplicate dataset
+    it("Reject duplicate addition", function () {
+        const id: string = "courses";
+        const expected: string[] = [id];
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
+            // expect(result).to.deep.equal(expected);
+            return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses)
+                .then((resultDeep: string[]) => {
+                    expect.fail(result, expected, "Should be rejected");
+                }).catch((err: any) => {
+                    expect(err).to.be.instanceOf(InsightError);
+                });
+        });
+    });
+    // reject non-existent dataset
+    it("Reject adding non-existent dataset", function () {
+        const id: string = "nonexistent";
+        const expected: string[] = [id];
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
+            expect.fail(result, expected, "Should be rejected");
+        }).catch((err: any) => {
+            expect(err).to.be.instanceOf(InsightError);
+        });
+    });
+    // reject dataset with no courses directory
+    it("Reject dataset with no courses directory", function () {
+        const id: string = "noCoursesDir";
+        const expected: string[] = [id];
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
+            expect.fail(result, expected, "Should be rejected");
+        }).catch((err: any) => {
+            expect(err).to.be.instanceOf(InsightError);
+        });
+    });
+    // reject dataset with incorrect courses directory
+    it("Reject dataset with incorrect courses directory", function () {
+        const id: string = "incorrectCoursesDir";
+        const expected: string[] = [id];
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
+            expect.fail(result, expected, "Should be rejected");
+        }).catch((err: any) => {
+            expect(err).to.be.instanceOf(InsightError);
+        });
+    });
+    // reject dataset with > 1 courses but no sections
+    it("Reject dataset with > 1 courses but no sections", function () {
+        const id: string = "noCourseSections";
+        const expected: string[] = [id];
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
+            expect.fail(result, expected, "Should be rejected");
+        }).catch((err: any) => {
+            expect(err).to.be.instanceOf(InsightError);
+        });
+    });
+    // reject dataset with garbage in courses folder
+    it("Reject dataset with garbage in courses folder", function () {
+        const id: string = "garbageInCourses";
+        const expected: string[] = [id];
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
+            expect.fail(result, expected, "Should be rejected");
+        }).catch((err: any) => {
+            expect(err).to.be.instanceOf(InsightError);
+        });
+    });
+    // Unit Tests for removeDataset
+    // Should pass on removal of a valid dataset
+    it("Should pass on removal of a valid dataset", function () {
+        const id: string = "courses";
+        const expected: string[] = [id];
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
+            // expect(result).to.deep.equal(expected);
+            return insightFacade.removeDataset(id)
+                .then((resultDeep: string) => {
+                    expect(resultDeep).to.deep.equal(id);
+                }).catch((err: any) => {
+                    expect.fail(err, expected, "Should not have rejected");
+                });
+        });
+    });
+    // // reject with undefined id (also undefined dataset)
+    // it("Reject removing dataset with undefined id", function () {
+    //     const id: string = undefined;
+    //     const expected: string[] = [id];
+    //     return insightFacade.removeDataset(id).then((result: string) => {
+    //         expect.fail(result, expected, "Should be rejected");
+    //     }).catch((err: any) => {
+    //         expect(err).to.be.instanceOf(InsightError);
+    //     });
+    // });
+    // reject with illegal id (whitespace)
+    it("Reject removing dataset with id containing only whitespace", function () {
+        const id: string = " ";
+        const expected: string[] = [id];
+        return insightFacade.removeDataset(id).then((result: string) => {
+            expect.fail(result, expected, "Should be rejected");
+        }).catch((err: any) => {
+            expect(err).to.be.instanceOf(InsightError);
+        });
+    });
+    // reject with illegal id (containing underscore)
+    it("Reject removing dataset with underscore in id", function () {
+        const id: string = "illegal_id";
+        const expected: string[] = [id];
+        return insightFacade.removeDataset(id).then((result: string) => {
+            expect.fail(result, expected, "Should be rejected");
+        }).catch((err: any) => {
+            expect(err).to.be.instanceOf(InsightError);
+        });
+    });
+    // reject with removal of non-existent dataset with no dataset added
+    it("Reject removing a dataset from empty datasets", function () {
+        const id: string = "courses";
+        const expected: string[] = [id];
+        return insightFacade.removeDataset(id).then((result: string) => {
+            expect.fail(result, expected, "Should be rejected");
+        }).catch((err: any) => {
+            expect(err).to.be.instanceOf(NotFoundError);
+        });
+    });
+    // reject removing a dataset not been added yet but some data added
+    it("Reject removing a dataset not been added yet", function () {
+        const idAdd: string = "courses";
+        const idRemove: string = "nonexistent";
+        const expected: string[] = [idAdd];
+        return insightFacade.addDataset(idAdd, datasets[idAdd], InsightDatasetKind.Courses).then((result: string[]) => {
+            // expect(result).to.deep.equal(expected);
+            return insightFacade.removeDataset(idRemove)
+                .then((resultDeep: string) => {
+                    expect.fail(resultDeep, expected, "Should be rejected");
+                }).catch((err: any) => {
+                    expect(err).to.be.instanceOf(NotFoundError);
+                });
+        });
     });
 });
 
