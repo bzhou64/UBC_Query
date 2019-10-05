@@ -14,7 +14,6 @@ export default class LogicComparison extends Filter {
      */
     constructor(kkey: string, vvalue: any) {
         super(kkey, vvalue);
-        // // tslint:disable-next-line:prefer-for-of
         // for (let i = 0; i < vvalue.length; i++) {
         //     if (vvalue[i].hasOwnProperty("AND")) {
         //         this.listoffilters.push(new LogicComparison ("AND", vvalue[i].AND));
