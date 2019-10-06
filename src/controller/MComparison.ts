@@ -28,14 +28,14 @@ export default class MComparison extends Filter {
                 this.isValid().then((result) => {
                         if (result) {
                             let sections: { [index: string]: Section } = ds.sections;
-                            if (super.key === "LT") {
+                            if (this.key === "LT") {
                                 Object.keys(sections).map((key) => {
                                     if (sections[key].mfield[this.fieldToSearch] < this.fieldvalue) {
                                         tempResultSoFar.push(sections[key]);
                                     }
                                 });
                             }
-                            if (super.key === "EQ") {
+                            if (this.key === "EQ") {
                                 Object.keys(sections).map((key) => {
                                     if (sections[key].mfield[this.fieldToSearch] === this.fieldvalue) {
                                         tempResultSoFar.push(sections[key]);
@@ -67,7 +67,7 @@ export default class MComparison extends Filter {
         if (isNaN(this.fieldvalue)) {
             throw new InsightError("Numeric Comparison using Non Numeric field");
         }
-        if (!MComparison.isKeyValid(super.key)) {
+        if (!MComparison.isKeyValid(this.key)) {
             throw new InsightError("MCOMPARATOR is invalid");
         }
         if (!MComparison.isFieldToSearchValid(this.fieldToSearch)) {

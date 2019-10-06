@@ -52,7 +52,7 @@ export default class Negation extends Filter {
     // couldn't think of a case where negation would be invalid. The only case is where the filter given is wrong
     // but the constructor checks that already
     protected isValid(): Promise<boolean> {
-        if (super.key !== "NOT") {
+        if (this.key !== "NOT") {
             throw new InsightError("NOT is invalid");
         } else {
             return new Promise<boolean>((resolve) => {

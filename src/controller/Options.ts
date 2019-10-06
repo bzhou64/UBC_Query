@@ -28,9 +28,8 @@ export default class Options {
       @specs: Apply both the columnar and order sorting
       @output: Expected data set as string
      */
-    public applyColumnsAndOrder(uds: any[]): Promise<string> {
+    public applyColumnsAndOrder(uds: any[]): Promise<any[]> {
         let records: any[];
-        let recordoutput: string;
         this.isValid(this.listDatasets).then((r) => {
             if (r) {
                 // Begin the function
@@ -40,9 +39,8 @@ export default class Options {
                 // now sort the set
                 records.sort((a: any, b: any) => (a[this.order.toString()] > b[this.order.toString()]) ? 1 : -1);
                 // convert to JSON value
-                recordoutput = JSON.stringify(records);
                 // return the JSON value
-                return Promise.resolve(recordoutput);
+                return Promise.resolve(records);
             }
             return Promise.reject(new InsightError());
         }).catch((err: InsightError) => {

@@ -95,7 +95,7 @@ export default class SComparison extends Filter {
         if (!isNaN(this.fieldvalue)) {
             throw new InsightError("String Comparison using Numeric field");
         }
-        if (!SComparison.isKeyValid(super.key)) {
+        if (!SComparison.isKeyValid(this.key)) {
             throw new InsightError("SCOMPARATOR given is invalid");
         }
         if (this.fieldvalue === null) {

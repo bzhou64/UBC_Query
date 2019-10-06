@@ -25,5 +25,16 @@ export default class Section {
         this.audit = audit;
         this.uuid = uuid;
         this.year = year;
+
+        this.sfield["dept"] = dept;
+        this.sfield["id"] = id;
+        this.sfield["instructor"] = instructor;
+        this.sfield["title"] = title;
+        this.sfield["uuid"] = uuid;
+        this.mfield["avg"] = avg;
+        this.mfield["pass"] = pass;
+        this.mfield["fail"] = fail;
+        this.mfield["audit"] = audit;
+        this.mfield["year"] = year;
     }
 }

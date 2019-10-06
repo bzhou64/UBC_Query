@@ -6,6 +6,7 @@ import * as JSZip from "jszip";
 import * as fs from "fs";
 import DataSet from "./DataSet";
 import Section from "./Section";
+import Query from "./Query";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -194,7 +195,10 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public performQuery(query: any): Promise<any[]> {
-        return Promise.reject("Not implemented.");
+        let queryObj: Query = new Query(query, this.datasets);
+        return new Promise<any[]>((resolve, reject) => {
+            resolve(queryObj.result);
+        });
     }
 
     public listDatasets(): Promise<InsightDataset[]> {

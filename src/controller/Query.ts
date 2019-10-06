@@ -15,6 +15,8 @@ import SComparison from "./SComparison";
 import MComparison from "./MComparison";
 import Negation from "./Negation";
 import DataSet from "./DataSet";
+import Options from "./Options";
+import Log from "../Util";
 
 export default class Query {
     private queryObj: any;
@@ -22,16 +24,13 @@ export default class Query {
     private filter: Filter;
     private datasetId: string;
     private dataset: DataSet;
+    public result: any[] = [];
     constructor(query: any, datasets: DataSets) {
         /* Should we include error handling here - if syntactically incorrect JSON
            Maybe just catch any error thrown
         */
         // DONE
-        try {
-            this.queryObj = JSON.parse(query);
-        } catch (e) {
-            throw (new InsightError("invalid query json formatting"));
-        }
+        this.queryObj = query;
         this.datasets = datasets;
         let options = this.queryObj["OPTIONS"];
         if (options === undefined) {
@@ -51,7 +50,8 @@ export default class Query {
         if (columns.length === 0) {
             throw (new InsightError("No column specified in options"));
         }
-        let columnsOrder = columns.push(order);
+        let columnsOrder = columns.slice();
+        columnsOrder.push(order);
         this.datasetId = this.datasetIdOptions(columnsOrder);
         if (this.datasetId === null) {
             throw (new InsightError("Querying multiple datasets in OPTIONS"));
@@ -70,33 +70,43 @@ export default class Query {
         }
         let whereOpt = Object.keys(where)[0];
         if (whereOpt === "AND") {
-            this.filter = new LogicComparison ("AND", where.whereOpt);
+            this.filter = new LogicComparison ("AND", where[whereOpt]);
         } else if (whereOpt === "OR") {
-            this.filter = new LogicComparison ("OR", where.whereOpt);
+            this.filter = new LogicComparison ("OR", where[whereOpt]);
         } else if (whereOpt === "IS") {
-            this.filter = new SComparison ("IS", where.whereOpt);
+            this.filter = new SComparison ("IS", where[whereOpt]);
         } else if (whereOpt === "LT") {
-            this.filter = new MComparison ("LT", where.whereOpt);
+            this.filter = new MComparison ("LT", where[whereOpt]);
         } else if (whereOpt === "GT") {
-            this.filter = new MComparison ("GT", where.whereOpt);
+            this.filter = new MComparison ("GT", where[whereOpt]);
         } else if (whereOpt === "EQ") {
-            this.filter = new MComparison ("EQ", where.whereOpt);
+            this.filter = new MComparison ("EQ", where[whereOpt]);
         } else if (whereOpt === "NOT") {
-            this.filter = new Negation ("NOT", where.whereOpt);
+            this.filter = new Negation ("NOT", where[whereOpt]);
         } else {
             throw new InsightError("Invalid WHERE field");
         }
-        // this.filter.applyFilter(this.dataset,[],);
+        let optionsObj: Options = new Options(options, Object.keys(this.datasets.datasets));
+        this.filter.applyFilter(this.dataset, Object.values(this.dataset.sections)).then(
+            (result: any[]) => {
+                optionsObj.applyColumnsAndOrder(result).then((ans: any[]) => {
+                    this.result = result;
+                });
+            }
+        );
     }
-    private datasetIdOptions(columnsOrder: []): string {
+    private datasetIdOptions(columnsOrder: string[]): string {
         // INTUITION: size of set should be = 1 if they are all in the same dataset "courses_xxx"
         let colName = "";
-        for (const col in columnsOrder) {
+        columnsOrder.forEach((col) => {
             let currName = col.split("_")[0];
+            if (colName === "") {
+                colName = currName;
+            }
             if (colName !== "" && currName !== colName) {
                 return null;
             }
-        }
+        });
         return colName;
     }
     // TODO: Function that tests validity of query

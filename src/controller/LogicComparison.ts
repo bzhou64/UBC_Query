@@ -16,21 +16,22 @@ export default class LogicComparison extends Filter {
      */
     constructor(kkey: string, vvalue: any) {
         super(kkey, vvalue);
+        this.listoffilters = [];
         for (let property of vvalue) {
-            if (vvalue.hasOwnProperty("AND")) {
-                this.listoffilters.push(new LogicComparison ("AND", vvalue.AND));
-            } else if (vvalue.hasOwnProperty("OR")) {
-                this.listoffilters.push(new LogicComparison ("OR", vvalue.OR));
-            } else if (vvalue.hasOwnProperty("IS")) {
-                this.listoffilters.push(new SComparison ("IS", vvalue.IS));
-            } else if (vvalue.hasOwnProperty("LT")) {
-                this.listoffilters.push(new MComparison ("LT", vvalue.LT));
-            } else if (vvalue.hasOwnProperty("GT")) {
-                this.listoffilters.push(new MComparison ("GT", vvalue.GT));
-            } else if (vvalue.hasOwnProperty("EQ")) {
-                this.listoffilters.push(new MComparison ("EQ", vvalue.EQ));
-            } else if (vvalue.hasOwnProperty("NOT")) {
-                this.listoffilters.push(new Negation ("NOT", vvalue.NOT));
+            if (property.hasOwnProperty("AND")) {
+                this.listoffilters.push(new LogicComparison ("AND", property[property]));
+            } else if (property.hasOwnProperty("OR")) {
+                this.listoffilters.push(new LogicComparison ("OR", property[property]));
+            } else if (property.hasOwnProperty("IS")) {
+                this.listoffilters.push(new SComparison ("IS", property[property]));
+            } else if (property.hasOwnProperty("LT")) {
+                this.listoffilters.push(new MComparison ("LT", property[property]));
+            } else if (property.hasOwnProperty("GT")) {
+                this.listoffilters.push(new MComparison ("GT", property[property]));
+            } else if (property.hasOwnProperty("EQ")) {
+                this.listoffilters.push(new MComparison ("EQ", property[property]));
+            } else if (property.hasOwnProperty("NOT")) {
+                this.listoffilters.push(new Negation ("NOT", property[property]));
             } else {
                 throw new InsightError("Invalid Field");
             }
@@ -65,7 +66,7 @@ export default class LogicComparison extends Filter {
             let tempResultSoFar: any[];
             this.isValid().then((result) => {
                 if (result) {
-                    if (super.key === "AND") {
+                    if (this.key === "AND") {
                         let tempFilterResults: any[] = [];
                         this.listoffilters.forEach((filter) => {
                             filter.applyFilter(ds, resultSoFar).then((thing) => {
@@ -77,7 +78,7 @@ export default class LogicComparison extends Filter {
                             tempResultSoFar = tempResultSoFar.filter((val) => res.includes(val));
                         }
                     }
-                    if (super.key === "OR") {
+                    if (this.key === "OR") {
                         let tempFilterResults: any[] = [];
                         this.listoffilters.forEach((filter) => {
                             filter.applyFilter(ds, resultSoFar).then((thing) => {
@@ -106,7 +107,7 @@ export default class LogicComparison extends Filter {
     }
 
     protected isValid(): Promise<boolean> {
-        if ((super.key !== "AND") && (super.key !== "OR")) {
+        if ((this.key !== "AND") && (this.key !== "OR")) {
             throw new InsightError("LOGIC given is invalid");
         }
         return new Promise<boolean>((resolve) => {
