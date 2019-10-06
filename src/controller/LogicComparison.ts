@@ -63,7 +63,7 @@ export default class LogicComparison extends Filter {
     // if key is "OR", do the same as "AND" but update tempResultSoFar so that
     public applyFilter(ds: DataSet, resultSoFar: any[]): Promise<any[]> {
         try {
-            let tempResultSoFar: any[];
+            // let tempResultSoFar: any[];
             this.isValid().then((result) => {
                 if (result) {
                     if (this.key === "AND") {
@@ -73,9 +73,9 @@ export default class LogicComparison extends Filter {
                                 tempFilterResults.push(thing);
                             });
                         });
-                        tempResultSoFar = tempFilterResults[0];
+                        // tempResultSoFar = tempFilterResults[0];
                         for (let res of tempFilterResults) {
-                            tempResultSoFar = tempResultSoFar.filter((val) => res.includes(val));
+                            resultSoFar = resultSoFar.filter((val) => res.includes(val));
                         }
                     }
                     if (this.key === "OR") {
@@ -85,21 +85,18 @@ export default class LogicComparison extends Filter {
                                 tempFilterResults.push(thing);
                             });
                         });
-                        // made a set so that duplicates won't be added
-                        let tempSet = new Set();
                         for (let res of tempFilterResults) {
                             for (let val of res) {
-                                tempSet.add(val);
+                                if (!resultSoFar.includes(val)) {
+                                    resultSoFar.push(val);
+                                }
                             }
-                        }
-                        for (let setVal of tempSet) {
-                            tempResultSoFar.push(setVal);
                         }
                     }
                 }
             });
             return new Promise<any[]>((resolve) => {
-                resolve(tempResultSoFar);
+                resolve(resultSoFar);
             });
             } catch (e) {
             throw new InsightError(e);

@@ -34,47 +34,42 @@ export default class SComparison extends Filter {
                             let sections: { [index: string]: Section } = ds.sections;
                             if (this.fieldvalue.includes("*")) {
                                 if (this.fieldvalue === "*") {
-                                    Object.keys(sections).map((key) => {
-                                        tempResultSoFar.push(sections[key]);
-                                    });
+                                    for (let [str, Sec] of Object.entries(sections)) {
+                                            tempResultSoFar.push(Sec);
+                                    }
                                 }
                                 if ((this.fieldvalue.substr(0, 1) === "*") &&
                                     (this.fieldvalue.substr(this.fieldvalue.length() - 1) === "*")) {
-                                    Object.keys(sections).map((key) => {
-                                        if (SComparison.twoAsterisksHelper(
-                                            sections[key].sfield[this.fieldToSearch], this.fieldvalue)) {
-                                            tempResultSoFar.push(sections[key]);
+                                    for (let [str, Sec] of Object.entries(sections)) {
+                                       if (SComparison.twoAsterisksHelper(Sec.sfield[this.fieldToSearch],
+                                           this.fieldvalue)) {
+                                            tempResultSoFar.push(Sec);
                                         }
-                                    });
+                                    }
                                 }
                                 if (this.fieldvalue.substr(0, 1) === "*") {
-                                    Object.keys(sections).map((key) => {
-                                        if (SComparison.asteriskAtStartHelper(sections[key].sfield[this.fieldToSearch],
+                                    for (let [str, Sec] of Object.entries(sections)) {
+                                        if (SComparison.asteriskAtStartHelper(Sec.sfield[this.fieldToSearch],
                                             this.fieldvalue)) {
-                                            tempResultSoFar.push(sections[key]);
+                                            tempResultSoFar.push(Sec);
                                         }
-                                    });
+                                    }
                                 }
+
                                 if (this.fieldvalue.substr(this.fieldvalue.length - 1)) {
-                                    Object.keys(sections).map((key) => {
-                                        if (SComparison.asteriskAtEndHelper(sections[key].sfield[this.fieldToSearch],
+                                    for (let [str, Sec] of Object.entries(sections)) {
+                                        if (SComparison.asteriskAtEndHelper(Sec.sfield[this.fieldToSearch],
                                             this.fieldvalue)) {
-                                            tempResultSoFar.push(sections[key]);
+                                            tempResultSoFar.push(Sec);
                                         }
-                                    });
+                                    }
                                 }
                             }
-
-                            /*for (let key in sections) {
-                                if (sections[key].sfield[this.fieldToSearch] === this.fieldvalue) {
-                                    tempResultSoFar.push(sections[key]);
+                            for (let [str, Sec] of Object.entries(sections)) {
+                                if (Sec.sfield[this.fieldToSearch] === this.fieldvalue) {
+                                    tempResultSoFar.push(Sec);
                                 }
-                            }*/
-                            Object.keys(sections).map((key) => {
-                                if (sections[key].sfield[this.fieldToSearch] === this.fieldvalue) {
-                                    tempResultSoFar.push(sections[key]);
-                                }
-                            });
+                            }
                         }
                     });
             }

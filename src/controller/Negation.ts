@@ -32,18 +32,17 @@ export default class Negation extends Filter {
     }
     public applyFilter(ds: DataSet, resultSoFar: any[]): Promise<any[]> {
         try {
-            let tempResultSoFar: any[] = [];
             this.isValid().then((result) => {
                     if (result) {
                         // this might not work since I'm comparing objects in an array rather than primitive type
                         // but it's referencing the same object so it should work. Will have to test it out
                         this.filter.applyFilter(ds, resultSoFar).then((arr) => {
-                            tempResultSoFar = resultSoFar.filter((val) => !arr.includes(val));
+                            resultSoFar = resultSoFar.filter((val) => !arr.includes(val));
                             });
                         }
                     });
             return new Promise<any[]>((resolve) => {
-                resolve (tempResultSoFar);
+                resolve (resultSoFar);
             });
             } catch (e) {
             throw new InsightError(e);

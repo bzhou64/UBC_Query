@@ -29,24 +29,24 @@ export default class MComparison extends Filter {
                         if (result) {
                             let sections: { [index: string]: Section } = ds.sections;
                             if (this.key === "LT") {
-                                Object.keys(sections).map((key) => {
-                                    if (sections[key].mfield[this.fieldToSearch] < this.fieldvalue) {
-                                        tempResultSoFar.push(sections[key]);
+                                for (let [str, Sec] of Object.entries(sections)) {
+                                    if (Sec.mfield[this.fieldToSearch] < this.fieldvalue) {
+                                        tempResultSoFar.push(Sec);
                                     }
-                                });
+                                }
                             }
                             if (this.key === "EQ") {
-                                Object.keys(sections).map((key) => {
-                                    if (sections[key].mfield[this.fieldToSearch] === this.fieldvalue) {
-                                        tempResultSoFar.push(sections[key]);
+                                for (let [str, Sec] of Object.entries(sections)) {
+                                    if (Sec.mfield[this.fieldToSearch] === this.fieldvalue) {
+                                        tempResultSoFar.push(Sec);
                                     }
-                                });
+                                }
                             } else {
-                                Object.keys(sections).map((key) => {
-                                    if (sections[key].mfield[this.fieldToSearch] > this.fieldvalue) {
-                                        tempResultSoFar.push(sections[key]);
+                                for (let [str, Sec] of Object.entries(sections)) {
+                                    if (Sec.mfield[this.fieldToSearch] > this.fieldvalue) {
+                                        tempResultSoFar.push(Sec);
                                     }
-                                });
+                                }
                             }
                         }
                     });
