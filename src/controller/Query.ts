@@ -7,13 +7,97 @@ This is the query class that will contain methods which will
 - Should be used in InsightFacade.performQuery()
  */
 
+import {InsightError} from "./IInsightFacade";
+import DataSets from "./DataSets";
+import Filter from "./Filter";
+import LogicComparison from "./LogicComparison";
+import SComparison from "./SComparison";
+import MComparison from "./MComparison";
+import Negation from "./Negation";
+import DataSet from "./DataSet";
+
 export default class Query {
     private queryObj: any;
-    constructor(query: any) {
+    private datasets: DataSets;
+    private filter: Filter;
+    private datasetId: string;
+    private dataset: DataSet;
+    constructor(query: any, datasets: DataSets) {
         /* Should we include error handling here - if syntactically incorrect JSON
            Maybe just catch any error thrown
         */
-        this.queryObj = JSON.parse(query);
+        // DONE
+        try {
+            this.queryObj = JSON.parse(query);
+        } catch (e) {
+            throw (new InsightError("invalid query json formatting"));
+        }
+        this.datasets = datasets;
+        let options = this.queryObj["OPTIONS"];
+        if (options === undefined) {
+            throw (new InsightError("OPTIONS clause missing in query"));
+        }
+        if (Object.keys(options).length !== 2) {
+            throw (new InsightError("Too many or too few OPTIONS"));
+        }
+        let columns = options["COLUMNS"];
+        if (columns === undefined && !Array.isArray(columns)) {
+            throw (new InsightError("Columns missing from options or not an array"));
+        }
+        let order = options["ORDER"];
+        if (order === undefined) {
+            throw (new InsightError("Order missing from options"));
+        }
+        if (columns.length === 0) {
+            throw (new InsightError("No column specified in options"));
+        }
+        let columnsOrder = columns.push(order);
+        this.datasetId = this.datasetIdOptions(columnsOrder);
+        if (this.datasetId === null) {
+            throw (new InsightError("Querying multiple datasets in OPTIONS"));
+        }
+        if (!this.datasets.datasets.hasOwnProperty(this.datasetId)) {
+            throw (new InsightError("Querying non-existent dataset in OPTIONS"));
+        }
+        this.dataset = this.datasets.datasets[this.datasetId];
+        // Check where stuff
+        let where = this.queryObj["WHERE"];
+        if (where === undefined) {
+            throw (new InsightError("WHERE missing in query"));
+        }
+        if (Object.keys(where).length !== 1) {
+            throw (new InsightError("Too many keys in where"));
+        }
+        let whereOpt = Object.keys(where)[0];
+        if (whereOpt === "AND") {
+            this.filter = new LogicComparison ("AND", where.whereOpt);
+        } else if (whereOpt === "OR") {
+            this.filter = new LogicComparison ("OR", where.whereOpt);
+        } else if (whereOpt === "IS") {
+            this.filter = new SComparison ("IS", where.whereOpt);
+        } else if (whereOpt === "LT") {
+            this.filter = new MComparison ("LT", where.whereOpt);
+        } else if (whereOpt === "GT") {
+            this.filter = new MComparison ("GT", where.whereOpt);
+        } else if (whereOpt === "EQ") {
+            this.filter = new MComparison ("EQ", where.whereOpt);
+        } else if (whereOpt === "NOT") {
+            this.filter = new Negation ("NOT", where.whereOpt);
+        } else {
+            throw new InsightError("Invalid WHERE field");
+        }
+        // this.filter.applyFilter(this.dataset,[],);
+    }
+    private datasetIdOptions(columnsOrder: []): string {
+        // INTUITION: size of set should be = 1 if they are all in the same dataset "courses_xxx"
+        let colName = "";
+        for (const col in columnsOrder) {
+            let currName = col.split("_")[0];
+            if (colName !== "" && currName !== colName) {
+                return null;
+            }
+        }
+        return colName;
     }
     // TODO: Function that tests validity of query
     /*

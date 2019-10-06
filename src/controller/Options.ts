@@ -9,7 +9,7 @@ export default class Options {
     private columns: any[];
     private order: any;
 
-    constructor(options: any) {
+    constructor(options: any, ) {
         if (options.hasOwnProperty("COLUMNS")) {
             this.columns = options.COLUMNS; } else {
             throw new InsightError("No Column Field Specified");

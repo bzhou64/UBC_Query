@@ -124,9 +124,13 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     private loadDatasetDisk(filename: string) {
-        let fileContent = fs.readFileSync(this.dataDir + filename, "utf8");
-        let currDatasetRead: DataSet = JSON.parse(fileContent);
-        this.datasets.addDataset(currDatasetRead);
+        try {
+            let fileContent = fs.readFileSync(this.dataDir + filename, "utf8");
+            let currDatasetRead: DataSet = JSON.parse(fileContent);
+            this.datasets.addDataset(currDatasetRead);
+        } catch (e) {
+            throw new InsightError("Cannot read file from disk");
+        }
     }
     private addDatasetDisk(currDataset: DataSet) {
         this.datasets.addDataset(currDataset);
@@ -141,7 +145,8 @@ export default class InsightFacade implements IInsightFacade {
         }
     }
     private isIDValid(id: string): boolean {
-        return !(id.includes("_") || id === "" || !id.replace(/\s/g, "").length);
+        return !(id === undefined ||  id === null ||
+            id.includes("_") || id === "" || !id.replace(/\s/g, "").length);
     }
 
     private isAdded(id: string): Promise<boolean> {

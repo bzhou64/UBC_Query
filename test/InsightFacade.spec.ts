@@ -95,16 +95,16 @@ describe("InsightFacade Add/Remove Dataset", function () {
         });
 
     });
-    // // reject with undefined id (also undefined dataset)
-    // it("Reject adding dataset with undefined id", function () {
-    //     const id: string = undefined;
-    //     const expected: string[] = [id];
-    //     return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
-    //         expect.fail(result, expected, "Should be rejected");
-    //     }).catch((err: any) => {
-    //         expect(err).to.be.instanceOf(InsightError);
-    //     });
-    // });
+    // reject with undefined id (also undefined dataset)
+    it("Reject adding dataset with undefined id", function () {
+        const id: string = undefined;
+        const expected: string[] = [id];
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
+            expect.fail(result, expected, "Should be rejected");
+        }).catch((err: any) => {
+            expect(err).to.be.instanceOf(InsightError);
+        });
+    });
     // reject with corrupted zip file
     it("Reject adding dataset with corrupted zip file", function () {
         const id: string = "corrupt";
@@ -214,16 +214,34 @@ describe("InsightFacade Add/Remove Dataset", function () {
                 });
         });
     });
-    // // reject with undefined id (also undefined dataset)
-    // it("Reject removing dataset with undefined id", function () {
-    //     const id: string = undefined;
-    //     const expected: string[] = [id];
-    //     return insightFacade.removeDataset(id).then((result: string) => {
-    //         expect.fail(result, expected, "Should be rejected");
-    //     }).catch((err: any) => {
-    //         expect(err).to.be.instanceOf(InsightError);
-    //     });
-    // });
+    it("Should pass with empty list on removal of a valid dataset", function () {
+        const id: string = "courses";
+        const expected: string[] = [id];
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
+            // expect(result).to.deep.equal(expected);
+            return insightFacade.removeDataset(id)
+                .then((resultDeep: string) => {
+                    insightFacade.listDatasets().then((val: InsightDataset[]) => {
+                        expect(val.length).to.equal(0);
+                    }).catch((reason: any) => {
+                        expect.fail(reason, expected, "Should not have rejected listing");
+                    });
+                    expect(resultDeep).to.deep.equal(id);
+                }).catch((err: any) => {
+                    expect.fail(err, expected, "Should not have rejected removing");
+                });
+        });
+    });
+    // reject with undefined id (also undefined dataset)
+    it("Reject removing dataset with undefined id", function () {
+        const id: string = undefined;
+        const expected: string[] = [id];
+        return insightFacade.removeDataset(id).then((result: string) => {
+            expect.fail(result, expected, "Should be rejected");
+        }).catch((err: any) => {
+            expect(err).to.be.instanceOf(InsightError);
+        });
+    });
     // reject with illegal id (whitespace)
     it("Reject removing dataset with id containing only whitespace", function () {
         const id: string = " ";
