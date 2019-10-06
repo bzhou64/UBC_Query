@@ -89,9 +89,7 @@ export default class Query {
         let optionsObj: Options = new Options(options, Object.keys(this.datasets.datasets));
         this.filter.applyFilter(this.dataset, Object.values(this.dataset.sections)).then(
             (result: any[]) => {
-                optionsObj.applyColumnsAndOrder(result).then((ans: any[]) => {
-                    this.result = result;
-                });
+                this.result = optionsObj.applyColumnsAndOrder(result);
             }
         );
     }

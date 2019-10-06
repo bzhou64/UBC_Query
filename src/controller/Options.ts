@@ -28,25 +28,19 @@ export default class Options {
       @specs: Apply both the columnar and order sorting
       @output: Expected data set as string
      */
-    public applyColumnsAndOrder(uds: any[]): Promise<any[]> {
-        let records: any[];
-        this.isValid(this.listDatasets).then((r) => {
-            if (r) {
-                // Begin the function
-                for (const record of uds) {
-                  records.push(this.selectColumnsAsObj(record));
-                }
-                // now sort the set
-                records.sort((a: any, b: any) => (a[this.order.toString()] > b[this.order.toString()]) ? 1 : -1);
-                // convert to JSON value
-                // return the JSON value
-                return Promise.resolve(records);
+    public applyColumnsAndOrder(uds: any[]): any[] {
+        let records: any[] = [];
+        if (this.isValid(this.listDatasets)) {
+            // Begin the function
+            for (const record of uds) {
+                records.push(this.selectColumnsAsObj(record));
             }
-            return Promise.reject(new InsightError());
-        }).catch((err: InsightError) => {
-            return Promise.reject(new InsightError());
-        });
-        return Promise.reject(new InsightError(""));
+            // now sort the set
+            records.sort((a: any, b: any) => (a[this.order.toString()] > b[this.order.toString()]) ? 1 : -1);
+        } else {
+            throw new InsightError("Invalid Columns and Errors");
+        }
+        return records;
     }
     // Helper that allows us to make the record
     // outputs a JSON object syntax {"field1":value1, "field2":value2, "field3":value3, ... "fieldn":valuen}
@@ -94,7 +88,7 @@ export default class Options {
         @spec  : test if COLUMNS and ORDER are valid for the query
         @output: true if valid, error if not valid (with description)
      */
-    private isValid(datasetsList: string[]): Promise <boolean> {
+    private isValid(datasetsList: string[]): boolean {
         let valid: boolean = true;
         // test one: order key needs to be in column list
         if (!this.columns.includes(this.order)) {
@@ -110,9 +104,8 @@ export default class Options {
             valid = false;
         }
         if (valid) {
-            return Promise.resolve(valid);
+            return true;
         }
-        return Promise.reject(new InsightError("Invalid Keys Used"));
     }
     // Helper that tests whether all fields are in the same dataset
     /*
