@@ -15,6 +15,9 @@ export default class MComparison extends Filter {
 
     constructor(kkey: string, vvalue: any) {
         super(kkey, vvalue);
+        if (typeof(vvalue) !== "object" || Object.keys(vvalue).length !== 1) {
+            throw new InsightError("Invalid format for M comp");
+        }
         this.field = Object.keys(vvalue)[0]; // Will return the main key "LT | GT | EQ"
         this.fieldvalue = vvalue[this.field];
     }

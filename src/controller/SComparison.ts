@@ -18,6 +18,9 @@ export default class SComparison extends Filter {
     constructor(kkey: string, vvalue: any) {
         super(kkey, vvalue);
         // this.SCOMPARATOR = kkey;
+        if (typeof(vvalue) !== "object" || Object.keys(vvalue).length !== 1) {
+            throw new InsightError("Invalid format for M comp");
+        }
         this.field = Object.keys(vvalue)[0];
         this.fieldvalue = vvalue[this.field];
     }

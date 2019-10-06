@@ -11,6 +11,12 @@ export default class Negation extends Filter {
     private filter: Filter;
 
     constructor(kkey: string, vvalue: any) {
+        if (typeof(vvalue) !== "object") {
+            throw new InsightError("Invalid value to NOT");
+        }
+        if (Object.keys(vvalue).length !== 1) {
+            throw new InsightError("Too many keys for NOT");
+        }
         super(kkey, vvalue);
         if (vvalue.hasOwnProperty("AND")) {
             this.filter = new LogicComparison ("AND", vvalue.AND);

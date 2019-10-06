@@ -16,8 +16,14 @@ export default class LogicComparison extends Filter {
      */
     constructor(kkey: string, vvalue: any) {
         super(kkey, vvalue);
+        if (!Array.isArray(vvalue) || vvalue.length === 0) {
+            throw new InsightError("Invalid argument to logic operator");
+        }
         this.listoffilters = [];
         for (let property of vvalue) {
+            if (Object.keys(property).length !== 1) {
+                throw new InsightError("Multiple keys in Logic Operator");
+            }
             if (property.hasOwnProperty("AND")) {
                 this.listoffilters.push(new LogicComparison ("AND", property.AND));
             } else if (property.hasOwnProperty("OR")) {
