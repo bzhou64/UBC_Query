@@ -40,7 +40,7 @@ export default class Query {
             throw (new InsightError("Too many or too few OPTIONS"));
         }
         let columns = options["COLUMNS"];
-        if (columns === undefined && !Array.isArray(columns)) {
+        if (columns === undefined || !Array.isArray(columns) || columns.length === 0) {
             throw (new InsightError("Columns missing from options or not an array"));
         }
         let order = options["ORDER"];

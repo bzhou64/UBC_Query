@@ -39,8 +39,6 @@ export default class Negation extends Filter {
     public applyFilter(ds: DataSet, resultSoFar: any[]): any[] {
         try {
                     if (this.isValid()) {
-                        // this might not work since I'm comparing objects in an array rather than primitive type
-                        // but it's referencing the same object so it should work. Will have to test it out
                             let tempArr: any[] = this.filter.applyFilter(ds, resultSoFar);
                             resultSoFar = resultSoFar.filter((val) => !tempArr.includes(val));
                         }
