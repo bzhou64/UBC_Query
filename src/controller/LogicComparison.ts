@@ -19,19 +19,19 @@ export default class LogicComparison extends Filter {
         this.listoffilters = [];
         for (let property of vvalue) {
             if (property.hasOwnProperty("AND")) {
-                this.listoffilters.push(new LogicComparison ("AND", property[property]));
+                this.listoffilters.push(new LogicComparison ("AND", property.AND));
             } else if (property.hasOwnProperty("OR")) {
-                this.listoffilters.push(new LogicComparison ("OR", property[property]));
+                this.listoffilters.push(new LogicComparison ("OR", property.OR));
             } else if (property.hasOwnProperty("IS")) {
-                this.listoffilters.push(new SComparison ("IS", property[property]));
+                this.listoffilters.push(new SComparison ("IS", property.IS));
             } else if (property.hasOwnProperty("LT")) {
-                this.listoffilters.push(new MComparison ("LT", property[property]));
+                this.listoffilters.push(new MComparison ("LT", property.LT));
             } else if (property.hasOwnProperty("GT")) {
-                this.listoffilters.push(new MComparison ("GT", property[property]));
+                this.listoffilters.push(new MComparison ("GT", property.GT));
             } else if (property.hasOwnProperty("EQ")) {
-                this.listoffilters.push(new MComparison ("EQ", property[property]));
+                this.listoffilters.push(new MComparison ("EQ", property.EQ));
             } else if (property.hasOwnProperty("NOT")) {
-                this.listoffilters.push(new Negation ("NOT", property[property]));
+                this.listoffilters.push(new Negation ("NOT", property.NOT));
             } else {
                 throw new InsightError("Invalid Field");
             }
@@ -61,17 +61,14 @@ export default class LogicComparison extends Filter {
     // first filter array, and then comparing tempResultSoFar and all the other filter results and keeping only the
     // sections that are in all arrays.
     // if key is "OR", do the same as "AND" but update tempResultSoFar so that
-    public applyFilter(ds: DataSet, resultSoFar: any[]): Promise<any[]> {
+    public applyFilter(ds: DataSet, resultSoFar: any[]): any[] {
         try {
             // let tempResultSoFar: any[];
-            this.isValid().then((result) => {
-                if (result) {
+                if (this.isValid()) {
                     if (this.key === "AND") {
                         let tempFilterResults: any[] = [];
                         this.listoffilters.forEach((filter) => {
-                            filter.applyFilter(ds, resultSoFar).then((thing) => {
-                                tempFilterResults.push(thing);
-                            });
+                                tempFilterResults.push(filter.applyFilter(ds, resultSoFar));
                         });
                         // tempResultSoFar = tempFilterResults[0];
                         for (let res of tempFilterResults) {
@@ -81,10 +78,9 @@ export default class LogicComparison extends Filter {
                     if (this.key === "OR") {
                         let tempFilterResults: any[] = [];
                         this.listoffilters.forEach((filter) => {
-                            filter.applyFilter(ds, resultSoFar).then((thing) => {
-                                tempFilterResults.push(thing);
-                            });
+                                tempFilterResults.push(filter.applyFilter(ds, resultSoFar));
                         });
+                        resultSoFar = [];
                         for (let res of tempFilterResults) {
                             for (let val of res) {
                                 if (!resultSoFar.includes(val)) {
@@ -94,21 +90,17 @@ export default class LogicComparison extends Filter {
                         }
                     }
                 }
-            });
-            return new Promise<any[]>((resolve) => {
-                resolve(resultSoFar);
-            });
+                return resultSoFar;
             } catch (e) {
             throw new InsightError(e);
         }
     }
 
-    protected isValid(): Promise<boolean> {
+    protected isValid(): boolean {
         if ((this.key !== "AND") && (this.key !== "OR")) {
             throw new InsightError("LOGIC given is invalid");
+        } else {
+            return true;
         }
-        return new Promise<boolean>((resolve) => {
-            resolve (true);
-        });
     }
 }

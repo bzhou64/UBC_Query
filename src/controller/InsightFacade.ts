@@ -115,7 +115,7 @@ export default class InsightFacade implements IInsightFacade {
                 year = parseInt(section.Year, 10);
             }
             let sectionObject: Section = new Section(section.Subject.toString(),
-                section.Course.toString(), parseInt(section.Avg, 10),
+                section.Course.toString(), parseFloat(section.Avg),
                 section.Professor.toString(), section.Title.toString(), parseInt(section.Pass, 10),
                 parseInt(section.Fail, 10), parseInt(section.Audit, 10), section.id.toString(),
                 year);

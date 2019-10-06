@@ -30,33 +30,26 @@ export default class Negation extends Filter {
             throw new InsightError("Invalid Field");
         }
     }
-    public applyFilter(ds: DataSet, resultSoFar: any[]): Promise<any[]> {
+    public applyFilter(ds: DataSet, resultSoFar: any[]): any[] {
         try {
-            this.isValid().then((result) => {
-                    if (result) {
+                    if (this.isValid()) {
                         // this might not work since I'm comparing objects in an array rather than primitive type
                         // but it's referencing the same object so it should work. Will have to test it out
-                        this.filter.applyFilter(ds, resultSoFar).then((arr) => {
-                            resultSoFar = resultSoFar.filter((val) => !arr.includes(val));
-                            });
+                            let tempArr: any[] = this.filter.applyFilter(ds, resultSoFar);
+                            resultSoFar = resultSoFar.filter((val) => !tempArr.includes(val));
                         }
-                    });
-            return new Promise<any[]>((resolve) => {
-                resolve (resultSoFar);
-            });
+                    return resultSoFar;
             } catch (e) {
             throw new InsightError(e);
         }
     }
     // couldn't think of a case where negation would be invalid. The only case is where the filter given is wrong
     // but the constructor checks that already
-    protected isValid(): Promise<boolean> {
+    protected isValid(): boolean {
         if (this.key !== "NOT") {
             throw new InsightError("NOT is invalid");
         } else {
-            return new Promise<boolean>((resolve) => {
-                resolve (true);
-            });
+            return true;
         }
     }
 

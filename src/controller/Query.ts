@@ -24,7 +24,7 @@ export default class Query {
     private filter: Filter;
     private datasetId: string;
     private dataset: DataSet;
-    public result: any[] = [];
+    public result: any = [];
     constructor(query: any, datasets: DataSets) {
         /* Should we include error handling here - if syntactically incorrect JSON
            Maybe just catch any error thrown
@@ -86,12 +86,11 @@ export default class Query {
         } else {
             throw new InsightError("Invalid WHERE field");
         }
-        let optionsObj: Options = new Options(options, Object.keys(this.datasets.datasets));
-        this.filter.applyFilter(this.dataset, Object.values(this.dataset.sections)).then(
-            (result: any[]) => {
-                this.result = optionsObj.applyColumnsAndOrder(result);
-            }
-        );
+        let optionsObj: Options = new Options(options, Object.keys(this.datasets.datasets), this.datasetId);
+        let filteredDataset = this.filter.applyFilter(this.dataset, Object.values(this.dataset.sections));
+        let resultsArray = optionsObj.applyColumnsAndOrder(filteredDataset);
+        // TODO: 5k + check
+        this.result = resultsArray;
     }
     private datasetIdOptions(columnsOrder: string[]): string {
         // INTUITION: size of set should be = 1 if they are all in the same dataset "courses_xxx"

@@ -18,55 +18,52 @@ export default class MComparison extends Filter {
         this.field = Object.keys(vvalue)[0]; // Will return the main key "LT | GT | EQ"
         this.fieldvalue = vvalue[this.field];
     }
-    public applyFilter(ds: DataSet, resultSoFar: any[]): Promise<any[]> {
+
+    public applyFilter(ds: DataSet, resultSoFar: any[]): any[] {
         let tempResultSoFar: any[] = [];
         this.datasetGiven = ds.id;
         try {
             if (this.isFieldValid(this.field)) {
                 this.datasetToSearch = this.field.substr(0, this.field.indexOf("_"));
                 this.fieldToSearch = this.field.substr((this.field.indexOf("_") + 1));
-                this.isValid().then((result) => {
-                        if (result) {
-                            let sections: { [index: string]: Section } = ds.sections;
-                            if (this.key === "LT") {
-                                for (let [str, Sec] of Object.entries(sections)) {
-                                    let tempSec: any = Sec;
-                                    if (tempSec[this.fieldToSearch] < this.fieldvalue) {
-                                        tempResultSoFar.push(Sec);
-                                    }
-                                }
-                            }
-                            if (this.key === "EQ") {
-                                for (let [str, Sec] of Object.entries(sections)) {
-                                    let tempSec: any = Sec;
-                                    if (tempSec[this.fieldToSearch] === this.fieldvalue) {
-                                        tempResultSoFar.push(Sec);
-                                    }
-                                }
-                            } else {
-                                for (let [str, Sec] of Object.entries(sections)) {
-                                    let tempSec: any = Sec;
-                                    if (tempSec[this.fieldToSearch] > this.fieldvalue) {
-                                        tempResultSoFar.push(Sec);
-                                    }
-                                }
+                if (this.isValid()) {
+                    let sections: { [index: string]: Section } = ds.sections;
+                    if (this.key === "LT") {
+                        for (let [str, Sec] of Object.entries(sections)) {
+                            let tempSec: any = Sec;
+                            if (tempSec[this.fieldToSearch] < this.fieldvalue) {
+                                tempResultSoFar.push(Sec);
                             }
                         }
-                    });
+                    } else if (this.key === "EQ") {
+                        for (let [str, Sec] of Object.entries(sections)) {
+                            let tempSec: any = Sec;
+                            if (tempSec[this.fieldToSearch] === this.fieldvalue) {
+                                tempResultSoFar.push(Sec);
+                            }
+                        }
+                    } else {
+                        for (let [str, Sec] of Object.entries(sections)) {
+                            let tempSec: any = Sec;
+                            if (tempSec[this.fieldToSearch] > this.fieldvalue) {
+                                tempResultSoFar.push(Sec);
+                            }
+                        }
+                    }
+                }
             }
-            return new Promise<any[]>((resolve) => {
-                resolve (tempResultSoFar);
-            });
+            return tempResultSoFar;
         } catch (e) {
             throw new InsightError(e);
         }
     }
+
     // checks for 4 things:
     // is the fieldvalue a number
     // is the key to search a valid key
     // is the field to search a valid field
     // is the dataset to search a valid dataset
-    protected isValid(): Promise<boolean> {
+    protected isValid(): boolean {
         if (isNaN(this.fieldvalue)) {
             throw new InsightError("Numeric Comparison using Non Numeric field");
         }
@@ -79,9 +76,7 @@ export default class MComparison extends Filter {
         if (!this.isDatasetRequestValid()) {
             throw new InsightError("Dataset requested is not in database");
         } else {
-            return new Promise<boolean>((resolve) => {
-                resolve(true);
-            });
+            return true;
         }
     }
 
@@ -93,6 +88,7 @@ export default class MComparison extends Filter {
             return true;
         }
     }
+
     // helper function to check if the field given to the constructor is valid.
     private static isSKeyValid(fv: string): boolean {
         return !((fv.indexOf("_") === -1) || (fv.indexOf("_") === 0));

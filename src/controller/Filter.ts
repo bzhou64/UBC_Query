@@ -21,12 +21,12 @@ export default abstract class Filter {
     @spec: apply the corresponding filter to the list
     @output: A processed JSON array or error thrown - with description
      */
-    public abstract applyFilter(ds: DataSet, resultSoFar: any[]): Promise<any[]>;
+    public abstract applyFilter(ds: DataSet, resultSoFar: any[]): any[];
     /*
     @param: none
     @spec: test validity of fields being used
     @output: throws related error else returns true
      */
-    protected abstract isValid(): Promise<boolean>;
+    protected abstract isValid(): boolean;
 
 }

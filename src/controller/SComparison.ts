@@ -4,6 +4,7 @@ import {InsightDataset, InsightDatasetKind, InsightError} from "./IInsightFacade
 import Section from "./Section";
 import InsightFacade from "./InsightFacade";
 import DataSet from "./DataSet";
+import Log from "../Util";
 
 export default class SComparison extends Filter {
     // "courses_bla" : value
@@ -22,64 +23,60 @@ export default class SComparison extends Filter {
     }
 
     // This should be good.
-    public applyFilter(ds: DataSet, resultSoFar: any[]): Promise<any[]> {
+    public applyFilter(ds: DataSet, resultSoFar: any[]): any[] {
         let tempResultSoFar: any[] = [];
         this.datasetGiven = ds.id;
         try {
             if (this.isFieldValid(this.field)) {
                 this.datasetToSearch = this.field.substr(0, this.field.indexOf("_"));
                 this.fieldToSearch = this.field.substr((this.field.indexOf("_") + 1));
-                this.isValid().then((result) => {
-                        if (result) {
-                            let sections: { [index: string]: Section } = ds.sections;
-                            if (this.fieldvalue.includes("*")) {
-                                if (this.fieldvalue === "*") {
-                                    for (let [str, Sec] of Object.entries(sections)) {
-                                            tempResultSoFar.push(Sec);
-                                    }
-                                }
-                                if ((this.fieldvalue.substr(0, 1) === "*") &&
-                                    (this.fieldvalue.substr(this.fieldvalue.length() - 1) === "*")) {
-                                    for (let [str, Sec] of Object.entries(sections)) {
-                                        let tempSec: any = Sec;
-                                        if (SComparison.twoAsterisksHelper(tempSec[this.fieldToSearch],
-                                           this.fieldvalue)) {
-                                            tempResultSoFar.push(Sec);
-                                        }
-                                    }
-                                }
-                                if (this.fieldvalue.substr(0, 1) === "*") {
-                                    for (let [str, Sec] of Object.entries(sections)) {
-                                        let tempSec: any = Sec;
-                                        if (SComparison.asteriskAtStartHelper(tempSec[this.fieldToSearch],
-                                            this.fieldvalue)) {
-                                            tempResultSoFar.push(Sec);
-                                        }
-                                    }
-                                }
-
-                                if (this.fieldvalue.substr(this.fieldvalue.length - 1)) {
-                                    for (let [str, Sec] of Object.entries(sections)) {
-                                        let tempSec: any = Sec;
-                                        if (SComparison.asteriskAtEndHelper(tempSec[this.fieldToSearch],
-                                            this.fieldvalue)) {
-                                            tempResultSoFar.push(Sec);
-                                        }
-                                    }
-                                }
+                if (this.isValid()) {
+                    let sections: { [index: string]: Section } = ds.sections;
+                    if (this.fieldvalue.includes("*")) {
+                        if (this.fieldvalue === "*") {
+                            for (let [str, Sec] of Object.entries(sections)) {
+                                tempResultSoFar.push(Sec);
                             }
+                        }
+                        if ((this.fieldvalue.substr(0, 1) === "*") &&
+                            (this.fieldvalue.substr(this.fieldvalue.length - 1) === "*")) {
                             for (let [str, Sec] of Object.entries(sections)) {
                                 let tempSec: any = Sec;
-                                if (tempSec[this.fieldToSearch] === this.fieldvalue) {
+                                if (SComparison.twoAsterisksHelper(tempSec[this.fieldToSearch],
+                                    this.fieldvalue)) {
                                     tempResultSoFar.push(Sec);
                                 }
                             }
                         }
-                    });
+                        if (this.fieldvalue.substr(0, 1) === "*") {
+                            for (let [str, Sec] of Object.entries(sections)) {
+                                let tempSec: any = Sec;
+                                if (SComparison.asteriskAtStartHelper(tempSec[this.fieldToSearch],
+                                    this.fieldvalue)) {
+                                    tempResultSoFar.push(Sec);
+                                }
+                            }
+                        }
+
+                        if (this.fieldvalue.substr(this.fieldvalue.length - 1)) {
+                            for (let [str, Sec] of Object.entries(sections)) {
+                                let tempSec: any = Sec;
+                                if (SComparison.asteriskAtEndHelper(tempSec[this.fieldToSearch],
+                                    this.fieldvalue)) {
+                                    tempResultSoFar.push(Sec);
+                                }
+                            }
+                        }
+                    }
+                    for (let [str, Sec] of Object.entries(sections)) {
+                        let tempSec: any = Sec;
+                        if (tempSec[this.fieldToSearch] === this.fieldvalue) {
+                            tempResultSoFar.push(Sec);
+                        }
+                    }
+                }
             }
-            return new Promise((resolve, reject) => {
-                resolve(tempResultSoFar);
-            });
+            return tempResultSoFar;
         } catch (e) {
             throw new InsightError(e);
         }
@@ -90,7 +87,7 @@ export default class SComparison extends Filter {
     // is the asterisk at the beginning or the end of the string or in the middle
     // is the key given a valid key
     // is the dataset requested in the database
-    protected isValid(): Promise<boolean> {
+    protected isValid(): boolean {
         if (!isNaN(this.fieldvalue)) {
             throw new InsightError("String Comparison using Numeric field");
         }
@@ -107,11 +104,9 @@ export default class SComparison extends Filter {
             throw new InsightError("The key given is not a valid key");
         }
         if (!this.isDatasetRequestValid()) {
-           throw new InsightError("The dataset requested is not in the database");
+            throw new InsightError("The dataset requested is not in the database");
         } else {
-            return new Promise<boolean>((resolve) => {
-                resolve(true);
-            });
+            return true;
         }
     }
 
@@ -123,6 +118,7 @@ export default class SComparison extends Filter {
             return true;
         }
     }
+
     // helper function to check if the field given to the constructor is valid.
     private static isSKeyValid(fv: string): boolean {
         return !((fv.indexOf("_") === -1) || (fv.indexOf("_") === 0));
@@ -149,7 +145,7 @@ export default class SComparison extends Filter {
     private static twoAsterisksHelper(secs: string, fieldval: string): boolean {
         let valueRequestedLength: number = fieldval.length - 2;
         if (secs.length >= valueRequestedLength) {
-            return ((secs.substr(valueRequestedLength - 1) === fieldval.substr(1, valueRequestedLength)) ||
+            return ((secs.substr(secs.length - valueRequestedLength) === fieldval.substr(1, valueRequestedLength)) ||
                 (secs.substr(0, valueRequestedLength) === fieldval.substr(1, valueRequestedLength)));
         } else {
             return false;
@@ -159,7 +155,7 @@ export default class SComparison extends Filter {
     private static asteriskAtStartHelper(secs: string, fieldval: string): boolean {
         let valueRequestedLength: number = fieldval.length - 1;
         if (secs.length >= valueRequestedLength) {
-            return secs.substr(valueRequestedLength - 1) === fieldval.substr(1);
+            return secs.substr(secs.length - valueRequestedLength) === fieldval.substr(1);
         } else {
             return false;
         }

@@ -7,20 +7,26 @@ export default class Options {
     order - the column which the query result must sort by
      */
     private columns: any[];
-    private order: any;
+    private order: string;
     private listDatasets: string[];
+    private listColumns = ["dept", "id", "avg", "instructor", "title", "pass", "fail", "audit", "uuid", "year"];
+    private datasetId: string;
 
-    constructor(options: any, listDatasets: string[]) {
+    constructor(options: any, listDatasets: string[], datesetId: string) {
         if (options.hasOwnProperty("COLUMNS")) {
-            this.columns = options.COLUMNS; } else {
+            this.columns = options.COLUMNS;
+        } else {
             throw new InsightError("No Column Field Specified");
         }
         if (options.hasOwnProperty("ORDER")) {
-            this.order = options.COLUMNS; } else {
-            throw new InsightError("No Column Field Specified");
+            this.order = options.ORDER;
+        } else {
+            throw new InsightError("No Order Field Specified");
         }
         this.listDatasets = listDatasets;
+        this.datasetId = datesetId;
     }
+
     /*
       @param: Updated data set (UDS) that has been filtered (Ask Bill what's returned in his struct)
       if JSON array don't stringify and manipulate directly by key strings, if Objects, stringify
@@ -36,12 +42,13 @@ export default class Options {
                 records.push(this.selectColumnsAsObj(record));
             }
             // now sort the set
-            records.sort((a: any, b: any) => (a[this.order.toString()] > b[this.order.toString()]) ? 1 : -1);
+            records.sort((a: any, b: any) => (a[this.order] > b[this.order]) ? 1 : -1);
         } else {
             throw new InsightError("Invalid Columns and Errors");
         }
         return records;
     }
+
     // Helper that allows us to make the record
     // outputs a JSON object syntax {"field1":value1, "field2":value2, "field3":value3, ... "fieldn":valuen}
     /*
@@ -75,13 +82,24 @@ export default class Options {
         @spec  : convert into object with only selected columns as properties
         @output: an object with select-column fields
      */
-    private selectColumnsAsObj (udr: any): any {
-        let obje: {[k: string]: any} = {};
-        for (let column in this.columns) {
-          obje[column.toString()] = udr[column.toString()];
-        }
-        return obje;
+    private selectColumnsAsObj(udr: any): any {
+        this.listColumns.forEach((col) => {
+            let colLong = this.datasetId + "_" + col;
+            if (!this.columns.includes(colLong)) {
+                delete udr[col];
+            } else {
+                let cache = udr[col];
+                delete udr[col];
+                udr[colLong] = cache;
+            }
+        });
+        // let obje: {[k: string]: any} = {};
+        // for (let column in this.columns) {
+        //   obje[column.toString()] = udr[column.toString()];
+        // }
+        return udr;
     }
+
     // Helper that tests whether columns and order provided is legal
     /*
         @param : A list of datasets in scope
@@ -95,9 +113,15 @@ export default class Options {
             valid = false;
         }
         // test two: column has to exist in list of columns
-        for (const col of  this.columns) {
-            if (!datasetsList.includes(col)) {
-                valid = false; }
+        for (const col of this.columns) {
+            try {
+                if (!this.listColumns.includes(col.split("_")[1])) {
+                    valid = false;
+                }
+            } catch (e) {
+                valid = false;
+                throw new InsightError("Invalid Column name");
+            }
         }
         // test three: all columns have to be in the same dataset
         if (!this.allTheSame()) {
@@ -107,6 +131,7 @@ export default class Options {
             return true;
         }
     }
+
     // Helper that tests whether all fields are in the same dataset
     /*
         @param : none
