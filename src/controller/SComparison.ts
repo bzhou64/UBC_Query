@@ -14,6 +14,7 @@ export default class SComparison extends Filter {
     private fieldToSearch: string; // bla
     // private SCOMPARATOR: string;
     private datasetGiven: string;
+    private tempResultSoFar: any[] = [];
 
     constructor(kkey: string, vvalue: any) {
         super(kkey, vvalue);
@@ -25,9 +26,7 @@ export default class SComparison extends Filter {
         this.fieldvalue = vvalue[this.field];
     }
 
-    // This should be good.
     public applyFilter(ds: DataSet, resultSoFar: any[]): any[] {
-        let tempResultSoFar: any[] = [];
         this.datasetGiven = ds.id;
         try {
             if (this.isFieldValid(this.field)) {
@@ -36,51 +35,19 @@ export default class SComparison extends Filter {
                 if (this.isValid()) {
                     let sections: { [index: string]: Section } = ds.sections;
                     if (this.fieldvalue.includes("*")) {
-                        if (this.fieldvalue === "*") {
-                            for (let [str, Sec] of Object.entries(sections)) {
-                                tempResultSoFar.push(Sec);
+                        this.asteriskHelper(sections);
+                    } else {
+                        for (let [str, Sec] of Object.entries(sections)) {
+                            let tempSec: any = Sec;
+                            if (tempSec[this.fieldToSearch] === this.fieldvalue) {
+                                this.tempResultSoFar.push(Sec);
                             }
                         }
-                        if ((this.fieldvalue.substr(0, 1) === "*") &&
-                            (this.fieldvalue.substr(this.fieldvalue.length - 1) === "*")) {
-                            for (let [str, Sec] of Object.entries(sections)) {
-                                let tempSec: any = Sec;
-                                if (SComparison.twoAsterisksHelper(tempSec[this.fieldToSearch],
-                                    this.fieldvalue)) {
-                                    tempResultSoFar.push(Sec);
-                                }
-                            }
-                        }
-                        if (this.fieldvalue.substr(0, 1) === "*") {
-                            for (let [str, Sec] of Object.entries(sections)) {
-                                let tempSec: any = Sec;
-                                if (SComparison.asteriskAtStartHelper(tempSec[this.fieldToSearch],
-                                    this.fieldvalue)) {
-                                    tempResultSoFar.push(Sec);
-                                }
-                            }
-                        }
-
-                        if (this.fieldvalue.substr(this.fieldvalue.length - 1)) {
-                            for (let [str, Sec] of Object.entries(sections)) {
-                                let tempSec: any = Sec;
-                                if (SComparison.asteriskAtEndHelper(tempSec[this.fieldToSearch],
-                                    this.fieldvalue)) {
-                                    tempResultSoFar.push(Sec);
-                                }
-                            }
-                        }
-                    }
-                    for (let [str, Sec] of Object.entries(sections)) {
-                        let tempSec: any = Sec;
-                        if (tempSec[this.fieldToSearch] === this.fieldvalue) {
-                            tempResultSoFar.push(Sec);
                         }
                     }
                 }
-            }
-            return tempResultSoFar;
-        } catch (e) {
+            return this.tempResultSoFar;
+            } catch (e) {
             throw new InsightError(e);
         }
     }
@@ -170,6 +137,47 @@ export default class SComparison extends Filter {
             return secs.substr(0, valueRequestedLength) === fieldval.substr(0, valueRequestedLength);
         } else {
             return false;
+        }
+    }
+
+    private static isAsteriskOnBothEnd(fieldvalue: string): boolean {
+        return ((fieldvalue.substr(0, 1) === "*") &&
+            (fieldvalue.substr(fieldvalue.length - 1) === "*"));
+    }
+
+    private asteriskHelper(sections: {[index: string]: Section}) {
+        if (this.fieldvalue === "*") {
+            for (let [str, Sec] of Object.entries(sections)) {
+                this.tempResultSoFar.push(Sec);
+            }
+        }
+        if (SComparison.isAsteriskOnBothEnd(this.fieldvalue)) {
+            for (let [str, Sec] of Object.entries(sections)) {
+                let tempSec: any = Sec;
+                if (SComparison.twoAsterisksHelper(tempSec[this.fieldToSearch],
+                    this.fieldvalue)) {
+                    this.tempResultSoFar.push(Sec);
+                }
+            }
+        }
+        if (this.fieldvalue.substr(0, 1) === "*") {
+            for (let [str, Sec] of Object.entries(sections)) {
+                let tempSec: any = Sec;
+                if (SComparison.asteriskAtStartHelper(tempSec[this.fieldToSearch],
+                    this.fieldvalue)) {
+                    this.tempResultSoFar.push(Sec);
+                }
+            }
+        }
+
+        if (this.fieldvalue.substr(this.fieldvalue.length - 1)) {
+            for (let [str, Sec] of Object.entries(sections)) {
+                let tempSec: any = Sec;
+                if (SComparison.asteriskAtEndHelper(tempSec[this.fieldToSearch],
+                    this.fieldvalue)) {
+                    this.tempResultSoFar.push(Sec);
+                }
+            }
         }
     }
 }
