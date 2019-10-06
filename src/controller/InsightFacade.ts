@@ -1,5 +1,5 @@
 import Log from "../Util";
-import {IInsightFacade, InsightDataset, InsightDatasetKind} from "./IInsightFacade";
+import {IInsightFacade, InsightDataset, InsightDatasetKind, ResultTooLargeError} from "./IInsightFacade";
 import {InsightError, NotFoundError} from "./IInsightFacade";
 import DataSets from "./DataSets";
 import * as JSZip from "jszip";
@@ -195,9 +195,16 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public performQuery(query: any): Promise<any[]> {
-        let queryObj: Query = new Query(query, this.datasets);
         return new Promise<any[]>((resolve, reject) => {
-            resolve(queryObj.result);
+            try {
+                let queryObj: Query = new Query(query, this.datasets);
+                if (queryObj.result > 5000) {
+                    reject(new ResultTooLargeError("More that 5000 results"));
+                }
+                resolve(queryObj.result);
+            } catch (e) {
+                reject(e);
+            }
         });
     }
 

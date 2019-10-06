@@ -7,7 +7,7 @@ This is the query class that will contain methods which will
 - Should be used in InsightFacade.performQuery()
  */
 
-import {InsightError} from "./IInsightFacade";
+import {InsightError, ResultTooLargeError} from "./IInsightFacade";
 import DataSets from "./DataSets";
 import Filter from "./Filter";
 import LogicComparison from "./LogicComparison";
@@ -87,10 +87,13 @@ export default class Query {
             throw new InsightError("Invalid WHERE field");
         }
         let optionsObj: Options = new Options(options, Object.keys(this.datasets.datasets), this.datasetId);
-        let filteredDataset = this.filter.applyFilter(this.dataset, Object.values(this.dataset.sections));
-        let resultsArray = optionsObj.applyColumnsAndOrder(filteredDataset);
-        // TODO: 5k + check
-        this.result = resultsArray;
+        try {
+            let filteredDataset = this.filter.applyFilter(this.dataset, Object.values(this.dataset.sections));
+            let resultsArray = optionsObj.applyColumnsAndOrder(filteredDataset);
+            this.result = resultsArray;
+        } catch (e) {
+            throw e;
+        }
     }
     private datasetIdOptions(columnsOrder: string[]): string {
         // INTUITION: size of set should be = 1 if they are all in the same dataset "courses_xxx"
@@ -106,51 +109,4 @@ export default class Query {
         });
         return colName;
     }
-    // TODO: Function that tests validity of query
-    /*
-    Preconditions: Query is syntactically valid - No errors in the JSON format
-    Specification: show whether query is valid
-    Output: returns true if it's valid, false if not
-     */
-    public isQueryValid(): boolean {
-        /*
-        Conditions for validity: each must be a function eventually
-        1. Must not draw keys from more than one dataset - moreThanOne()
-        2. Must not call fields that do not exist in the dataset - WHERE - noFieldExistsWhere
-        3. Must not call fields that do not exist in the dataset - OPTIONS - noFieldExistOptions
-        3. Must maintain type referential - text search in a num field is not allowed
-        4. Must maintain type referential - num search in a text field is not allowed
-        5. Logic Operators only deal with numeric fields and values
-         */
-       return false;
-    }
-    private moreThanOne(): boolean {
-        return false;
-    }
-    private noFieldExistsWhere(): boolean {
-        return false;
-    }
-    private noFieldExistsOptions(): boolean {
-        return false;
-    }
-    private textSearchNumField(): boolean {
-        return false;
-    }
-    private numSearchTextField(): boolean {
-        return false;
-    }
-    private logicFieldMustBeNum(): boolean {
-        return false;
-    }
-    /*Helpers to make these tasks easier
-    1. Compile list of all terms (Ignoring nesting) formats as fieldName - value BOTH WHERE AND OPTIONS
-    2. Compile list of all terms bearing in mind nesting - WHERE
-    3. Compile list of all terms bearing in mind nesting - OPTIONS
-    3. Compile Options Columns list
-    4. Compile Options Order By list
-    5. Compile Options
-    SHOULD I CREATE OBJECTS TO EASE THIS PROCESS
-    - DESIRABLE
-    BODY OBJ 1-> (8) FILTER OBJ -> WHERE -> LOGICOPERATORS|OPERATORS|
-     */
 }
