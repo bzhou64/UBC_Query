@@ -1,6 +1,7 @@
 import DataSets from "./DataSets";
 import {InsightDataset} from "./IInsightFacade";
 import InsightFacade from "./InsightFacade";
+import DataSet from "./DataSet";
 
 export default abstract class Filter {
     /* GENERAL FORMAT
@@ -20,12 +21,12 @@ export default abstract class Filter {
     @spec: apply the corresponding filter to the list
     @output: A processed JSON array or error thrown - with description
      */
-    public abstract applyFilter(ds: DataSets, resultSoFar: any[], insF: InsightFacade): Promise<any[]>;
+    public abstract applyFilter(ds: DataSet, resultSoFar: any[]): Promise<any[]>;
     /*
     @param: none
     @spec: test validity of fields being used
     @output: throws related error else returns true
      */
-    protected abstract isValid(insDs: InsightDataset[]): Promise<boolean>;
+    protected abstract isValid(): Promise<boolean>;
 
 }

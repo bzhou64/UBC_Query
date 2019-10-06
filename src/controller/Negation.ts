@@ -5,6 +5,7 @@ import SComparison from "./SComparison";
 import MComparison from "./MComparison";
 import LogicComparison from "./LogicComparison";
 import InsightFacade from "./InsightFacade";
+import DataSet from "./DataSet";
 
 export default class Negation extends Filter {
     private filter: Filter;
@@ -29,21 +30,18 @@ export default class Negation extends Filter {
             throw new InsightError("Invalid Field");
         }
     }
-    public applyFilter(ds: DataSets, resultSoFar: any[], insF: InsightFacade): Promise<any[]> {
+    public applyFilter(ds: DataSet, resultSoFar: any[]): Promise<any[]> {
         try {
             let tempResultSoFar: any[] = [];
-            insF.listDatasets().then((insD) => {
-                this.isValid(insD).then((result) => {
+            this.isValid().then((result) => {
                     if (result) {
-                        let tempArray: Promise<any[]> = this.filter.applyFilter(ds, resultSoFar, insF);
                         // this might not work since I'm comparing objects in an array rather than primitive type
                         // but it's referencing the same object so it should work. Will have to test it out
-                        tempArray.then((arr) => {
+                        this.filter.applyFilter(ds, resultSoFar).then((arr) => {
                             tempResultSoFar = resultSoFar.filter((val) => !arr.includes(val));
                             });
                         }
                     });
-                });
             return new Promise<any[]>((resolve) => {
                 resolve (tempResultSoFar);
             });
@@ -53,10 +51,14 @@ export default class Negation extends Filter {
     }
     // couldn't think of a case where negation would be invalid. The only case is where the filter given is wrong
     // but the constructor checks that already
-    protected isValid(insDs: InsightDataset[]): Promise<boolean> {
-        return new Promise<boolean>((resolve) => {
-            resolve (true);
-        });
+    protected isValid(): Promise<boolean> {
+        if (super.key !== "NOT") {
+            throw new InsightError("NOT is invalid");
+        } else {
+            return new Promise<boolean>((resolve) => {
+                resolve (true);
+            });
+        }
     }
 
 }
