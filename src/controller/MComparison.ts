@@ -30,20 +30,23 @@ export default class MComparison extends Filter {
                             let sections: { [index: string]: Section } = ds.sections;
                             if (this.key === "LT") {
                                 for (let [str, Sec] of Object.entries(sections)) {
-                                    if (Sec.mfield[this.fieldToSearch] < this.fieldvalue) {
+                                    let tempSec: any = Sec;
+                                    if (tempSec[this.fieldToSearch] < this.fieldvalue) {
                                         tempResultSoFar.push(Sec);
                                     }
                                 }
                             }
                             if (this.key === "EQ") {
                                 for (let [str, Sec] of Object.entries(sections)) {
-                                    if (Sec.mfield[this.fieldToSearch] === this.fieldvalue) {
+                                    let tempSec: any = Sec;
+                                    if (tempSec[this.fieldToSearch] === this.fieldvalue) {
                                         tempResultSoFar.push(Sec);
                                     }
                                 }
                             } else {
                                 for (let [str, Sec] of Object.entries(sections)) {
-                                    if (Sec.mfield[this.fieldToSearch] > this.fieldvalue) {
+                                    let tempSec: any = Sec;
+                                    if (tempSec[this.fieldToSearch] > this.fieldvalue) {
                                         tempResultSoFar.push(Sec);
                                     }
                                 }

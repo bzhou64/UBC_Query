@@ -41,7 +41,8 @@ export default class SComparison extends Filter {
                                 if ((this.fieldvalue.substr(0, 1) === "*") &&
                                     (this.fieldvalue.substr(this.fieldvalue.length() - 1) === "*")) {
                                     for (let [str, Sec] of Object.entries(sections)) {
-                                       if (SComparison.twoAsterisksHelper(Sec.sfield[this.fieldToSearch],
+                                        let tempSec: any = Sec;
+                                        if (SComparison.twoAsterisksHelper(tempSec[this.fieldToSearch],
                                            this.fieldvalue)) {
                                             tempResultSoFar.push(Sec);
                                         }
@@ -49,7 +50,8 @@ export default class SComparison extends Filter {
                                 }
                                 if (this.fieldvalue.substr(0, 1) === "*") {
                                     for (let [str, Sec] of Object.entries(sections)) {
-                                        if (SComparison.asteriskAtStartHelper(Sec.sfield[this.fieldToSearch],
+                                        let tempSec: any = Sec;
+                                        if (SComparison.asteriskAtStartHelper(tempSec[this.fieldToSearch],
                                             this.fieldvalue)) {
                                             tempResultSoFar.push(Sec);
                                         }
@@ -58,7 +60,8 @@ export default class SComparison extends Filter {
 
                                 if (this.fieldvalue.substr(this.fieldvalue.length - 1)) {
                                     for (let [str, Sec] of Object.entries(sections)) {
-                                        if (SComparison.asteriskAtEndHelper(Sec.sfield[this.fieldToSearch],
+                                        let tempSec: any = Sec;
+                                        if (SComparison.asteriskAtEndHelper(tempSec[this.fieldToSearch],
                                             this.fieldvalue)) {
                                             tempResultSoFar.push(Sec);
                                         }
@@ -66,7 +69,8 @@ export default class SComparison extends Filter {
                                 }
                             }
                             for (let [str, Sec] of Object.entries(sections)) {
-                                if (Sec.sfield[this.fieldToSearch] === this.fieldvalue) {
+                                let tempSec: any = Sec;
+                                if (tempSec[this.fieldToSearch] === this.fieldvalue) {
                                     tempResultSoFar.push(Sec);
                                 }
                             }

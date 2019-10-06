@@ -10,8 +10,6 @@ export default class Section {
     public audit: number;
     public uuid: string;
     public year: number;
-    public mfield: {[index: string]: number};
-    public sfield: {[index: string]: string};
 
     constructor(dept: string, id: string, avg: number, instructor: string,
                 title: string, pass: number, fail: number, audit: number, uuid: string, year: number) {
@@ -25,16 +23,5 @@ export default class Section {
         this.audit = audit;
         this.uuid = uuid;
         this.year = year;
-
-        this.sfield["dept"] = dept;
-        this.sfield["id"] = id;
-        this.sfield["instructor"] = instructor;
-        this.sfield["title"] = title;
-        this.sfield["uuid"] = uuid;
-        this.mfield["avg"] = avg;
-        this.mfield["pass"] = pass;
-        this.mfield["fail"] = fail;
-        this.mfield["audit"] = audit;
-        this.mfield["year"] = year;
     }
 }
