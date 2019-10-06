@@ -8,8 +8,9 @@ export default class Options {
      */
     private columns: any[];
     private order: any;
+    private listDatasets: string[];
 
-    constructor(options: any, ) {
+    constructor(options: any, listDatasets: string[]) {
         if (options.hasOwnProperty("COLUMNS")) {
             this.columns = options.COLUMNS; } else {
             throw new InsightError("No Column Field Specified");
@@ -18,6 +19,7 @@ export default class Options {
             this.order = options.COLUMNS; } else {
             throw new InsightError("No Column Field Specified");
         }
+        this.listDatasets = listDatasets;
     }
     /*
       @param: Updated data set (UDS) that has been filtered (Ask Bill what's returned in his struct)
@@ -27,12 +29,9 @@ export default class Options {
       @output: Expected data set as string
      */
     public applyColumnsAndOrder(uds: any[]): Promise<string> {
-        // TODO: Raghav needs to implement the datasetsList helper - will use placeholder dud for now
-        let dud: string[];
         let records: any[];
         let recordoutput: string;
-        dud.push(" ", " ", " ");
-        this.isValid(dud).then((r) => {
+        this.isValid(this.listDatasets).then((r) => {
             if (r) {
                 // Begin the function
                 for (const record of uds) {
