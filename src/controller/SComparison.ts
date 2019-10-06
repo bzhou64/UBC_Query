@@ -67,7 +67,8 @@ export default class SComparison extends Filter {
         if (this.fieldvalue === null) {
             throw new InsightError("String given for search is NULL");
         }
-        if (this.fieldvalue.includes("*") && !SComparison.isAsteriskAtRightSpot(this.fieldvalue)) {
+        if (this.fieldvalue.includes("*") && (SComparison.isAsteriskAtWrongSpot(this.fieldvalue) ||
+        !SComparison.isAsteriskAtRightSpot(this.fieldvalue))) {
             throw new InsightError("Asterisk not at the beginning or end");
         }
         if (!SComparison.isFieldToSearchValid(this.fieldToSearch)) {
@@ -98,7 +99,9 @@ export default class SComparison extends Filter {
     private static isAsteriskAtRightSpot(fieldvalue: any): boolean {
         return (fieldvalue.substr(fieldvalue.length - 1) === "*") || (fieldvalue.substr(0, 1) === "*");
     }
-
+    private static isAsteriskAtWrongSpot(fieldvalue: any): boolean {
+        return (fieldvalue.substr(1, fieldvalue.length - 2).includes("*"));
+    }
     private static isFieldToSearchValid(fts: string) {
         return ((fts === "dept") || (fts === "id") || (fts === "instructor") || (fts === "title") || (fts === "uuid"));
     }
