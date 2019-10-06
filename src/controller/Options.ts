@@ -114,13 +114,9 @@ export default class Options {
         }
         // test two: column has to exist in list of columns
         for (const col of this.columns) {
-            try {
-                if (!this.listColumns.includes(col.split("_")[1])) {
-                    valid = false;
-                }
-            } catch (e) {
+            let split = col.split("_");
+            if (split.length !== 2 || (!this.listColumns.includes(split[1]))) {
                 valid = false;
-                throw new InsightError("Invalid Column name");
             }
         }
         // test three: all columns have to be in the same dataset
