@@ -67,8 +67,8 @@ export default class MComparison extends Filter {
     // is the field to search a valid field
     // is the dataset to search a valid dataset
     protected isValid(): boolean {
-        if (isNaN(this.fieldvalue)) {
-            throw new InsightError("Numeric Comparison using Non Numeric field");
+        if (typeof(this.fieldvalue) !== "number") {
+            throw new InsightError("Numeric comparison using Non Numeric Field")
         }
         if (!MComparison.isKeyValid(this.key)) {
             throw new InsightError("MCOMPARATOR is invalid");
