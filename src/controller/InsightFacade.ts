@@ -127,8 +127,6 @@ export default class InsightFacade implements IInsightFacade {
                 parseInt(section.Fail, 10), parseInt(section.Audit, 10), section.id.toString(),
                 year);
             return sectionObject;
-        } else {
-            Log.trace(section);
         }
         return null;
     }
