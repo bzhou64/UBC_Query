@@ -1,4 +1,5 @@
 import {InsightError} from "./IInsightFacade";
+import Log from "../Util";
 
 export default class Options {
     /*
@@ -18,11 +19,7 @@ export default class Options {
         } else {
             throw new InsightError("No Column Field Specified");
         }
-        if (options.hasOwnProperty("ORDER")) {
-            this.order = options.ORDER;
-        } else {
-            throw new InsightError("No Order Field Specified");
-        }
+        this.order = options.ORDER;
         this.listDatasets = listDatasets;
         this.datasetId = datesetId;
     }
@@ -83,21 +80,17 @@ export default class Options {
         @output: an object with select-column fields
      */
     private selectColumnsAsObj(udr: any): any {
+        let newData: any = {};
         this.listColumns.forEach((col) => {
             let colLong = this.datasetId + "_" + col;
-            if (!this.columns.includes(colLong)) {
-                delete udr[col];
-            } else {
-                let cache = udr[col];
-                delete udr[col];
-                udr[colLong] = cache;
-            }
-        });
+            if (this.columns.includes(colLong)) {
+                newData[colLong] = udr[col];
+            }});
         // let obje: {[k: string]: any} = {};
         // for (let column in this.columns) {
         //   obje[column.toString()] = udr[column.toString()];
         // }
-        return udr;
+        return newData;
     }
 
     // Helper that tests whether columns and order provided is legal

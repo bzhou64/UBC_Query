@@ -44,7 +44,7 @@ export default class Query {
             throw (new InsightError("Columns missing from options or not an array"));
         }
         let order = options["ORDER"];
-        if (order === undefined) {
+        if (order !== undefined && typeof(order) !== "string") {
             throw (new InsightError("Order missing from options"));
         }
         if (columns.length === 0) {
