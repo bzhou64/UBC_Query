@@ -20,14 +20,25 @@ export default class InsightFacade implements IInsightFacade {
     constructor() {
         Log.trace("InsightFacadeImpl::init()");
         this.datasets = new DataSets();
+        this.loadDatasetDisk();
+    }
+
+    private loadDatasetDisk() {
         let filenames = fs.readdirSync(this.dataDir);
         filenames.forEach((filename) => {
-            this.loadDatasetDisk(filename);
+            try {
+                let fileContent = fs.readFileSync(this.dataDir + filename, "utf8");
+                let currDatasetRead: DataSet = JSON.parse(fileContent);
+                this.datasets.addDataset(currDatasetRead);
+            } catch (e) {
+                throw new InsightError("Cannot read file from disk");
+            }
         });
     }
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
         return new Promise<string[]>((resolve, reject) => {
+            this.loadDatasetDisk();
             if (!this.isIDValid(id)) {
                 reject(new InsightError("Invalid Id"));
             }
@@ -119,16 +130,6 @@ export default class InsightFacade implements IInsightFacade {
         }
         return null;
     }
-
-    private loadDatasetDisk(filename: string) {
-        try {
-            let fileContent = fs.readFileSync(this.dataDir + filename, "utf8");
-            let currDatasetRead: DataSet = JSON.parse(fileContent);
-            this.datasets.addDataset(currDatasetRead);
-        } catch (e) {
-            throw new InsightError("Cannot read file from disk");
-        }
-    }
     private addDatasetDisk(currDataset: DataSet) {
         this.datasets.addDataset(currDataset);
         try {
@@ -164,6 +165,7 @@ export default class InsightFacade implements IInsightFacade {
     public removeDataset(id: string): Promise<string> {
         // Check if id is valid
         return new Promise<string>((resolve, reject) =>  {
+            this.loadDatasetDisk();
             if (this.isIDValid(id)) {
                 this.isAdded(id).then((val) => {
                     if (!val) {
@@ -192,6 +194,7 @@ export default class InsightFacade implements IInsightFacade {
 
     public performQuery(query: any): Promise<any[]> {
         return new Promise<any[]>((resolve, reject) => {
+            this.loadDatasetDisk();
             try {
                 let queryObj: Query = new Query(query, this.datasets);
                 if (queryObj.result.length > 5000) {
@@ -205,6 +208,7 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public listDatasets(): Promise<InsightDataset[]> {
+        this.loadDatasetDisk();
         let insightDatasets: InsightDataset[];
         insightDatasets = [];
         for (let [datasetId, dataSet] of Object.entries(this.datasets.datasets)) {
