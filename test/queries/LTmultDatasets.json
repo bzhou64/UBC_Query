@@ -1,0 +1,19 @@
+{
+    "title": "Very invalid query",
+    "query": {
+        "WHERE": {
+            "LT": {
+                "courses_avg": 50
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "cpsc_dept",
+                "courses_avg"
+            ],
+            "ORDER": "courses_avg"
+        }
+    },
+    "isQueryValid": true,
+    "result": "InsightError"
+}
