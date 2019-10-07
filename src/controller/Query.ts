@@ -51,7 +51,9 @@ export default class Query {
             throw (new InsightError("No column specified in options"));
         }
         let columnsOrder = columns.slice();
-        columnsOrder.push(order);
+        if (order !== undefined) {
+            columnsOrder.push(order);
+        }
         this.datasetId = this.datasetIdOptions(columnsOrder);
         if (this.datasetId === null) {
             throw (new InsightError("Querying multiple datasets in OPTIONS"));

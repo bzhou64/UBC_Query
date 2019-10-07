@@ -39,7 +39,9 @@ export default class Options {
                 records.push(this.selectColumnsAsObj(record));
             }
             // now sort the set
-            records.sort((a: any, b: any) => (a[this.order] > b[this.order]) ? 1 : -1);
+            if (this.order !== undefined) {
+                records.sort((a: any, b: any) => (a[this.order] > b[this.order]) ? 1 : -1);
+            }
         } else {
             throw new InsightError("Invalid Columns and Errors");
         }
@@ -102,8 +104,10 @@ export default class Options {
     private isValid(datasetsList: string[]): boolean {
         let valid: boolean = true;
         // test one: order key needs to be in column list
-        if (!this.columns.includes(this.order)) {
-            valid = false;
+        if (this.order !== undefined) {
+            if (!this.columns.includes(this.order)) {
+                valid = false;
+            }
         }
         // test two: column has to exist in list of columns
         for (const col of this.columns) {
