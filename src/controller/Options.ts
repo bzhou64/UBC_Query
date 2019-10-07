@@ -40,7 +40,7 @@ export default class Options {
             }
             // now sort the set
             if (this.order !== undefined) {
-                records.sort((a: any, b: any) => (a[this.order] >= b[this.order]) ? 1 : -1);
+                records.sort((a: any, b: any) => (a[this.order] > b[this.order]) ? 1 : -1);
             }
         } else {
             throw new InsightError("Invalid Columns and Errors");
