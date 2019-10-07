@@ -58,8 +58,8 @@ export default class SComparison extends Filter {
     // is the key given a valid key
     // is the dataset requested in the database
     protected isValid(): boolean {
-        if (!isNaN(this.fieldvalue)) {
-            throw new InsightError("String Comparison using Numeric field");
+        if (typeof(this.fieldvalue) !== "string") {
+            throw new InsightError("String Comparsion using wrong field type");
         }
         if (!SComparison.isKeyValid(this.key)) {
             throw new InsightError("SCOMPARATOR given is invalid");
