@@ -198,7 +198,7 @@ export default class InsightFacade implements IInsightFacade {
         return new Promise<any[]>((resolve, reject) => {
             try {
                 let queryObj: Query = new Query(query, this.datasets);
-                if (queryObj.result > 5000) {
+                if (queryObj.result.length > 5000) {
                     reject(new ResultTooLargeError("More that 5000 results"));
                 }
                 resolve(queryObj.result);
