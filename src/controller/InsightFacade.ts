@@ -111,10 +111,10 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     private createValidSection(section: any) {
-        if (section.Subject != null && section.Course != null &&
-            section.Avg != null && section.Professor != null && section.Title
-            && section.Pass != null && section.Fail != null && section.Audit != null
-            && section.id != null  && section.Year != null) {
+        if (section.Subject !== undefined && section.Course !== undefined &&
+            section.Avg !== undefined && section.Professor !== undefined && section.Title !== undefined
+            && section.Pass !== undefined && section.Fail !== undefined && section.Audit !== undefined
+            && section.id !== undefined  && section.Year !== undefined) {
             let year = 1900;
             if (section.Year === "overall") {
                 year = 1900;
@@ -127,6 +127,8 @@ export default class InsightFacade implements IInsightFacade {
                 parseInt(section.Fail, 10), parseInt(section.Audit, 10), section.id.toString(),
                 year);
             return sectionObject;
+        } else {
+            Log.trace(section);
         }
         return null;
     }
@@ -194,7 +196,7 @@ export default class InsightFacade implements IInsightFacade {
 
     public performQuery(query: any): Promise<any[]> {
         return new Promise<any[]>((resolve, reject) => {
-            this.loadDatasetDisk();
+            // this.loadDatasetDisk();
             try {
                 let queryObj: Query = new Query(query, this.datasets);
                 if (queryObj.result.length > 5000) {
