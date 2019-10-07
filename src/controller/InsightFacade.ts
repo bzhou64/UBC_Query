@@ -20,63 +20,59 @@ export default class InsightFacade implements IInsightFacade {
     constructor() {
         Log.trace("InsightFacadeImpl::init()");
         this.datasets = new DataSets();
+        let filenames = fs.readdirSync(this.dataDir);
+        filenames.forEach((filename) => {
+            this.loadDatasetDisk(filename);
+        });
     }
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
         return new Promise<string[]>((resolve, reject) => {
-            fs.readdir(this.dataDir, (err, filenames) => {
-                if (err) {
-                    reject(new InsightError("Cannot read from data directory"));
-                }
-                filenames.forEach((filename) => {
-                    this.loadDatasetDisk(filename);
-                });
-                if (!this.isIDValid(id)) {
-                    reject(new InsightError("Invalid Id"));
-                }
-                this.isAdded(id).then((cond) => {
-                    if (cond) {
-                        reject(new InsightError("Dataset already exists"));
-                    } else {
-                        let currDataset: DataSet = new DataSet(id);
-                        let zipFile = new JSZip();
-                        zipFile.loadAsync(content, {base64: true}).then((data) => {
-                                let promisesFiles: any[] = this.createFileReadPromises(data);
-                                Promise.all(promisesFiles).then((filesJSON) => {
-                                    // let totalSec = 0;
-                                    // let validSec = 0;
-                                    filesJSON.forEach((fileJSON: any) => {
-                                        if (fileJSON != null) {
-                                            for (let section of fileJSON["result"]) {
-                                                // totalSec++;
-                                                let sectionObj: Section = this.createValidSection(section);
-                                                // Log.trace(sectionObj);
-                                                if (sectionObj) {
-                                                    // validSec++;
-                                                    currDataset.addSection(sectionObj);
-                                                }
+            if (!this.isIDValid(id)) {
+                reject(new InsightError("Invalid Id"));
+            }
+            this.isAdded(id).then((cond) => {
+                if (cond) {
+                    reject(new InsightError("Dataset already exists"));
+                } else {
+                    let currDataset: DataSet = new DataSet(id);
+                    let zipFile = new JSZip();
+                    zipFile.loadAsync(content, {base64: true}).then((data) => {
+                            let promisesFiles: any[] = this.createFileReadPromises(data);
+                            Promise.all(promisesFiles).then((filesJSON) => {
+                                // let totalSec = 0;
+                                // let validSec = 0;
+                                filesJSON.forEach((fileJSON: any) => {
+                                    if (fileJSON != null) {
+                                        for (let section of fileJSON["result"]) {
+                                            // totalSec++;
+                                            let sectionObj: Section = this.createValidSection(section);
+                                            // Log.trace(sectionObj);
+                                            if (sectionObj) {
+                                                // validSec++;
+                                                currDataset.addSection(sectionObj);
                                             }
                                         }
-                                    });
-                                    // Log.trace(validSec);
-                                    // Log.trace(totalSec);
-                                    if (Object.keys(currDataset.sections).length) {
-                                        this.addDatasetDisk(currDataset);
-                                        resolve(Object.keys(this.datasets.datasets));
-                                    } else {
-                                        reject(new InsightError("No valid section in Zip File"));
                                     }
-                                })
-                                    .catch((errAll: any) => {
-                                        reject(new InsightError("Invalid Promises to read zip"));
-                                        // throw new InsightError("Invalid Promises to read zip");
-                                    });
-                            }
-                        ).catch((errGlo: any) => {
-                            reject(new InsightError("Invalid Zip File"));
-                        });
-                    }
-                });
+                                });
+                                // Log.trace(validSec);
+                                // Log.trace(totalSec);
+                                if (Object.keys(currDataset.sections).length) {
+                                    this.addDatasetDisk(currDataset);
+                                    resolve(Object.keys(this.datasets.datasets));
+                                } else {
+                                    reject(new InsightError("No valid section in Zip File"));
+                                }
+                            })
+                                .catch((errAll: any) => {
+                                    reject(new InsightError("Invalid Promises to read zip"));
+                                    // throw new InsightError("Invalid Promises to read zip");
+                                });
+                        }
+                    ).catch((errGlo: any) => {
+                        reject(new InsightError("Invalid Zip File"));
+                    });
+                }
             });
         });
         // TODO: AL - Test whether string is blankspace, field is underscored or ID exists (COMPLETED)

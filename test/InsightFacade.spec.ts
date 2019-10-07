@@ -15,6 +15,16 @@ export interface ITestQuery {
     filename: string;  // This is injected when reading the file
 }
 
+describe("InsightFacade load dataset from disk", function () {
+    let insightFacade: InsightFacade;
+    const cacheDir = __dirname + "/../data";
+    before(function () {
+        // This section runs once and loads all datasets specified in the datasetsToLoad object
+        // into the datasets object
+        insightFacade = new InsightFacade();
+    });
+});
+
 describe("InsightFacade Add/Remove Dataset", function () {
     // Reference any datasets you've added to test/data here and they will
     // automatically be loaded in the 'before' hook.

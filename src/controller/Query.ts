@@ -36,7 +36,7 @@ export default class Query {
         if (options === undefined) {
             throw (new InsightError("OPTIONS clause missing in query"));
         }
-        if (Object.keys(options).length !== 2) {
+        if (Object.keys(options).length !== 1 && Object.keys(options).length !== 2) {
             throw (new InsightError("Too many or too few OPTIONS"));
         }
         let columns = options["COLUMNS"];
