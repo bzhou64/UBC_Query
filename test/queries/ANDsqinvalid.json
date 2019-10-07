@@ -2,13 +2,15 @@
     "title": "Very invalid query",
     "query": {
         "WHERE": {
-            "LT": {
-                "courses_avg": 50
-            }
+            "AND": [
+
+
+            ]
         },
         "OPTIONS": {
             "COLUMNS": [
-                "cpsc_dept",
+                "courses_dept",
+
                 "courses_avg"
             ],
             "ORDER": "courses_avg"
