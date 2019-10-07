@@ -16,13 +16,39 @@ export interface ITestQuery {
 }
 
 describe("InsightFacade load dataset from disk", function () {
-    let insightFacade: InsightFacade;
+    let insightFacade1: InsightFacade;
+    let insightFacade2: InsightFacade;
+    let content: any;
+    let addPromise: any;
     const cacheDir = __dirname + "/../data";
-    before(function () {
-        // This section runs once and loads all datasets specified in the datasetsToLoad object
-        // into the datasets object
-        insightFacade = new InsightFacade();
+    beforeEach(function () {
+        // This section resets the data directory (removing any cached data) and resets the InsightFacade instance
+        // This runs before each test, which should make each test independent from the previous one
+        Log.test(`BeforeTest: ${this.currentTest.title}`);
+        try {
+            fs.removeSync(cacheDir);
+            fs.mkdirSync(cacheDir);
+        } catch (err) {
+            Log.error(err);
+        }
     });
+    it("Reject duplicate addition for disk", function () {
+        insightFacade1 = new InsightFacade();
+        content = fs.readFileSync("./test/data/courses.zip").toString("base64");
+        addPromise = insightFacade1.addDataset("courses", content, InsightDatasetKind.Courses).
+        then((result: string[]) => {
+            insightFacade2 = new InsightFacade();
+            const id: string = "courses";
+            const expected: string[] = [id];
+            return insightFacade2.addDataset("courses", content, InsightDatasetKind.Courses).
+            then((result1: string[]) => {
+                // expect(result).to.deep.equal(expected);
+                expect.fail(result1, expected, "Should be rejected");
+            }).catch((err: any) => {
+                expect(err).to.be.instanceOf(InsightError);
+            });
+        });
+        });
 });
 
 describe("InsightFacade Add/Remove Dataset", function () {
