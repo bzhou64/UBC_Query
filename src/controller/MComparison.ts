@@ -62,7 +62,7 @@ export default class MComparison extends Filter {
     }
 
     // checks for 4 things:
-    // is the fieldvalue a number
+    // is the fieldvalue a Number
     // is the key to search a valid key
     // is the field to search a valid field
     // is the dataset to search a valid dataset
