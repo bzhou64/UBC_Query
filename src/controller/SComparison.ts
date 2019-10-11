@@ -12,13 +12,11 @@ export default class SComparison extends Filter {
     private fieldvalue: any; // value
     private datasetToSearch: string; // courses
     private fieldToSearch: string; // bla
-    // private SCOMPARATOR: string;
     private datasetGiven: string;
     private tempResultSoFar: any[] = [];
 
     constructor(kkey: string, vvalue: any) {
         super(kkey, vvalue);
-        // this.SCOMPARATOR = kkey;
         if (typeof(vvalue) !== "object" || Object.keys(vvalue).length !== 1) {
             throw new InsightError("Invalid format for M comp");
         }
@@ -118,8 +116,9 @@ export default class SComparison extends Filter {
     private static twoAsterisksHelper(secs: string, fieldval: string): boolean {
         let valueRequestedLength: number = fieldval.length - 2;
         if (secs.length >= valueRequestedLength) {
-            return ((secs.substr(secs.length - valueRequestedLength) === fieldval.substr(1, valueRequestedLength)) ||
-                (secs.substr(0, valueRequestedLength) === fieldval.substr(1, valueRequestedLength)));
+            return secs.includes(fieldval.substr(1, valueRequestedLength));
+            /*((secs.substr(secs.length - valueRequestedLength) === fieldval.substr(1, valueRequestedLength)) ||
+                (secs.substr(0, valueRequestedLength) === fieldval.substr(1, valueRequestedLength)));*/
         } else {
             return false;
         }
@@ -172,7 +171,6 @@ export default class SComparison extends Filter {
                 }
             }
         }
-
         if (this.fieldvalue.substr(this.fieldvalue.length - 1)) {
             for (let [str, Sec] of Object.entries(sections)) {
                 let tempSec: any = Sec;
