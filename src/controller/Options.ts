@@ -7,6 +7,9 @@ export default class Options {
     This is the entity which handles the OPTIONS operations in the QUERY
     columns - the columns of the dataset that will be shown in the query results
     order - the column which the query result must sort by
+    TODO:
+        Build The COLUMNS and SORT OBJECTS, DEPRECATE THIS USE
+        Ideally, Options should be an API using Columns and Sorting to return a sorted dataset
      */
     private columns: any[];
     private order: string;
@@ -118,7 +121,7 @@ export default class Options {
                 valid = false;
             }
         }
-        // test three: all columns have to be in the same dataset
+        // test three: all columns have to be in the same dataset+
         if (!this.allTheSame()) {
             valid = false;
         }

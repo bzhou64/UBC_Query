@@ -6,6 +6,16 @@ This is the query class that will contain methods which will
 4. error handling (nice to have)
 - Should be used in InsightFacade.performQuery()
  */
+/*
+Todo: Al's Notes For D2: This needs to be refactored.
+    1. Let Filter Handle 'Where' Implementation, Query Only Passes the arguments
+    2. Pass on Result of Filter to Transformations (if present)
+    3. Pass on Result of Transformations, or Filter if Transformations isn't present to Options
+    4. Pass out Result
+    Ideally this: In Query, Get the Dataset, Filter it, Transform it (if required) and Truncate it.
+    Each sector will have its own error checking from now on. This will be thrown up and handled by Query.
+    No specific error checking should be done by Query. ESLint will not behave otherwise
+ */
 
 import {InsightError, ResultTooLargeError} from "./IInsightFacade";
 import DataSets from "./DataSets";
