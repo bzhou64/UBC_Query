@@ -1,6 +1,12 @@
 import Log from "../Util";
-import {IInsightFacade, InsightDataset, InsightDatasetKind, ResultTooLargeError} from "./IInsightFacade";
-import {InsightError, NotFoundError} from "./IInsightFacade";
+import {
+    IInsightFacade,
+    InsightDataset,
+    InsightDatasetKind,
+    InsightError,
+    NotFoundError,
+    ResultTooLargeError
+} from "./IInsightFacade";
 import DataSets from "./DataSets";
 import * as JSZip from "jszip";
 import * as fs from "fs";
@@ -46,7 +52,7 @@ export default class InsightFacade implements IInsightFacade {
                 if (cond) {
                     reject(new InsightError("Dataset already exists"));
                 } else {
-                    let currDataset: DataSet = new DataSet(id);
+                    let currDataset: DataSet = new DataSet(id, InsightDatasetKind.Courses);
                     let zipFile = new JSZip();
                     zipFile.loadAsync(content, {base64: true}).then((data) => {
                             let promisesFiles: any[] = this.createFileReadPromises(data);
@@ -61,14 +67,14 @@ export default class InsightFacade implements IInsightFacade {
                                             // Log.trace(sectionObj);
                                             if (sectionObj) {
                                                 // validSec++;
-                                                currDataset.addSection(sectionObj);
+                                                currDataset.addRecord(sectionObj);
                                             }
                                         }
                                     }
                                 });
                                 // Log.trace(validSec);
                                 // Log.trace(totalSec);
-                                if (Object.keys(currDataset.sections).length) {
+                                if (Object.keys(currDataset.records).length) {
                                     this.addDatasetDisk(currDataset);
                                     resolve(Object.keys(this.datasets.datasets));
                                 } else {
@@ -218,7 +224,7 @@ export default class InsightFacade implements IInsightFacade {
             let insightDataset: InsightDataset = {
                 id: datasetId,
                 kind: InsightDatasetKind.Courses,
-                numRows: Object.keys(dataSet.sections).length
+                numRows: Object.keys(dataSet.records).length
             };
             insightDatasets.push(insightDataset);
         }

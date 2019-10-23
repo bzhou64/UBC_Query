@@ -340,7 +340,6 @@ describe("InsightFacade PerformQuery", () => {
     // Load all the test queries, and call addDataset on the insightFacade instance for all the datasets
     before(function () {
         Log.test(`Before: ${this.test.parent.title}`);
-
         // Load the query JSON files under test/queries.
         // Fail if there is a problem reading ANY query.
         try {

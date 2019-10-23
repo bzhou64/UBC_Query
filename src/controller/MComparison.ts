@@ -33,7 +33,7 @@ export default class MComparison extends Filter {
         this.datasetGiven = ds.id;
         try {
                 if (this.isValid()) {
-                    let sections: { [index: string]: Section } = ds.sections;
+                    let sections: { [index: string]: Section } = ds.records;
                     if (this.key === "LT") {
                         this.lessThanHelper(sections);
                     } else if (this.key === "EQ") {
