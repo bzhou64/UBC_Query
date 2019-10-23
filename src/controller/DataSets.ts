@@ -6,6 +6,7 @@ export default class DataSets {
         Log.trace("DataSets::init()");
         this.datasets = {};
     }
+
     public addDataset(dataset: Dataset) {
         this.datasets[dataset.id] = dataset;
     }

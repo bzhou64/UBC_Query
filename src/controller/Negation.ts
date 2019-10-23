@@ -36,6 +36,7 @@ export default class Negation extends Filter {
             throw new InsightError("Invalid Field");
         }
     }
+
     public applyFilter(ds: DataSet, resultSoFar: any[]): any[] {
         try {
                     if (this.isValid()) {
@@ -47,6 +48,7 @@ export default class Negation extends Filter {
             throw new InsightError(e);
         }
     }
+
     // couldn't think of a case where negation would be invalid. The only case is where the filter given is wrong
     // but the constructor checks that already
     protected isValid(): boolean {

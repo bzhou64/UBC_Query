@@ -62,6 +62,7 @@ export default class LogicComparison extends Filter {
             }
         }*/
     }
+
     // if key is "AND", get the arrays of all the filters within this logic comparison or catch any errors
     // throw by the filter methods. If all filter returns an array, update tempResultSoFar by first setting it to the
     // first filter array, and then comparing tempResultSoFar and all the other filter results and keeping only the
@@ -71,29 +72,19 @@ export default class LogicComparison extends Filter {
         try {
             // let tempResultSoFar: any[];
                 if (this.isValid()) {
+                    let tempFilterResults: any[] = [];
+                    this.listoffilters.forEach((filter) => {
+                        tempFilterResults.push(filter.applyFilter(ds, resultSoFar));
+                    });
                     if (this.key === "AND") {
-                        let tempFilterResults: any[] = [];
-                        this.listoffilters.forEach((filter) => {
-                                tempFilterResults.push(filter.applyFilter(ds, resultSoFar));
-                        });
                         // tempResultSoFar = tempFilterResults[0];
                         for (let res of tempFilterResults) {
                             resultSoFar = resultSoFar.filter((val) => res.includes(val));
                         }
                     }
                     if (this.key === "OR") {
-                        let tempFilterResults: any[] = [];
-                        this.listoffilters.forEach((filter) => {
-                                tempFilterResults.push(filter.applyFilter(ds, resultSoFar));
-                        });
                         resultSoFar = [];
-                        for (let res of tempFilterResults) {
-                            for (let val of res) {
-                                if (!resultSoFar.includes(val)) {
-                                    resultSoFar.push(val);
-                                }
-                            }
-                        }
+                        resultSoFar = LogicComparison.filterHelper(resultSoFar, tempFilterResults);
                     }
                 }
                 return resultSoFar;
@@ -108,5 +99,16 @@ export default class LogicComparison extends Filter {
         } else {
             return true;
         }
+    }
+
+    private static filterHelper(resultSoFar: any[], filterResult: any[]): any[] {
+        for (let res of filterResult) {
+            for (let val of res) {
+                if (!resultSoFar.includes(val)) {
+                    resultSoFar.push(val);
+                }
+            }
+        }
+        return resultSoFar;
     }
 }

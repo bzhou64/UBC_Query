@@ -12,6 +12,7 @@ export default class MComparison extends Filter {
     private datasetToSearch: string; // courses
     private fieldToSearch: string; // bla
     private datasetGiven: string;
+    private tempResultSoFar: any[] = [];
 
     constructor(kkey: string, vvalue: any) {
         super(kkey, vvalue);
@@ -20,42 +21,28 @@ export default class MComparison extends Filter {
         }
         this.field = Object.keys(vvalue)[0]; // Will return the main key "LT | GT | EQ"
         this.fieldvalue = vvalue[this.field];
+        if (((this.field.indexOf("_") === -1) || (this.field.indexOf("_") === 0))) {
+            throw new InsightError("skey given is not valid");
+        } else {
+            this.datasetToSearch = this.field.substr(0, this.field.indexOf("_"));
+            this.fieldToSearch = this.field.substr((this.field.indexOf("_") + 1));
+        }
     }
 
     public applyFilter(ds: DataSet, resultSoFar: any[]): any[] {
-        let tempResultSoFar: any[] = [];
         this.datasetGiven = ds.id;
         try {
-            if (this.isFieldValid(this.field)) {
-                this.datasetToSearch = this.field.substr(0, this.field.indexOf("_"));
-                this.fieldToSearch = this.field.substr((this.field.indexOf("_") + 1));
                 if (this.isValid()) {
                     let sections: { [index: string]: Section } = ds.sections;
                     if (this.key === "LT") {
-                        for (let [str, Sec] of Object.entries(sections)) {
-                            let tempSec: any = Sec;
-                            if (tempSec[this.fieldToSearch] < this.fieldvalue) {
-                                tempResultSoFar.push(Sec);
-                            }
-                        }
+                        this.lessThanHelper(sections);
                     } else if (this.key === "EQ") {
-                        for (let [str, Sec] of Object.entries(sections)) {
-                            let tempSec: any = Sec;
-                            if (tempSec[this.fieldToSearch] === this.fieldvalue) {
-                                tempResultSoFar.push(Sec);
-                            }
-                        }
+                        this.equalHelper(sections);
                     } else {
-                        for (let [str, Sec] of Object.entries(sections)) {
-                            let tempSec: any = Sec;
-                            if (tempSec[this.fieldToSearch] > this.fieldvalue) {
-                                tempResultSoFar.push(Sec);
-                            }
-                        }
+                        this.greaterThanHelper(sections);
                     }
                 }
-            }
-            return tempResultSoFar;
+                return this.tempResultSoFar;
         } catch (e) {
             throw new InsightError(e);
         }
@@ -108,6 +95,33 @@ export default class MComparison extends Filter {
 
     private static isKeyValid(mcomp: string): boolean {
         return ((mcomp === "LT") || (mcomp === "GT") || (mcomp === "EQ"));
+    }
+
+    private lessThanHelper(sections: { [index: string]: Section }) {
+        for (let [str, Sec] of Object.entries(sections)) {
+            let tempSec: any = Sec;
+            if (tempSec[this.fieldToSearch] < this.fieldvalue) {
+                this.tempResultSoFar.push(Sec);
+            }
+        }
+    }
+
+    private equalHelper(sections: { [index: string]: Section }) {
+        for (let [str, Sec] of Object.entries(sections)) {
+            let tempSec: any = Sec;
+            if (tempSec[this.fieldToSearch] === this.fieldvalue) {
+                this.tempResultSoFar.push(Sec);
+            }
+        }
+    }
+
+    private greaterThanHelper(sections: { [index: string]: Section }) {
+        for (let [str, Sec] of Object.entries(sections)) {
+            let tempSec: any = Sec;
+            if (tempSec[this.fieldToSearch] > this.fieldvalue) {
+                this.tempResultSoFar.push(Sec);
+            }
+        }
     }
 
 }

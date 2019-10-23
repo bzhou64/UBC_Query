@@ -97,6 +97,7 @@ export default class Query {
             throw e;
         }
     }
+
     private datasetIdOptions(columnsOrder: string[]): string {
         // INTUITION: size of set should be = 1 if they are all in the same dataset "courses_xxx"
         let colName = "";

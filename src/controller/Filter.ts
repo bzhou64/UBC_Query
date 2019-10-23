@@ -15,6 +15,7 @@ export default abstract class Filter {
         this.key = kkey;
         this.value = vvalue;
     }
+
     // TODO: Add a data struct to return values will leave as any[] for now
     /*
     @param: Datasets collection (WILL NEED ANOTHER PARAM)

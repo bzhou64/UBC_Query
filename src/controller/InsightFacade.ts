@@ -89,6 +89,7 @@ export default class InsightFacade implements IInsightFacade {
         // TODO: AL - Test whether string is blankspace, field is underscored or ID exists (COMPLETED)
         // return Promise.reject("Not implemented.");
     }
+
     private createFileReadPromises(data: any): any[] {
         let promisesFiles: any[] = [];
         for (let file in data.files) {
@@ -130,6 +131,7 @@ export default class InsightFacade implements IInsightFacade {
         }
         return null;
     }
+
     private addDatasetDisk(currDataset: DataSet) {
         this.datasets.addDataset(currDataset);
         try {
@@ -142,6 +144,7 @@ export default class InsightFacade implements IInsightFacade {
             throw new InsightError("Cannot write to disk");
         }
     }
+
     private isIDValid(id: string): boolean {
         return !(id === undefined ||  id === null ||
             id.includes("_") || id === "" || !id.replace(/\s/g, "").length);

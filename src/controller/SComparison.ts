@@ -22,29 +22,26 @@ export default class SComparison extends Filter {
         }
         this.field = Object.keys(vvalue)[0];
         this.fieldvalue = vvalue[this.field];
+        if (this.field.indexOf("_") <= 0) {
+            throw new InsightError("skey is not valid");
+        } else {
+            this.datasetToSearch = this.field.substr(0, this.field.indexOf("_"));
+            this.fieldToSearch = this.field.substr((this.field.indexOf("_") + 1));
+        }
     }
 
     public applyFilter(ds: DataSet, resultSoFar: any[]): any[] {
         this.datasetGiven = ds.id;
         try {
-            if (this.isFieldValid(this.field)) {
-                this.datasetToSearch = this.field.substr(0, this.field.indexOf("_"));
-                this.fieldToSearch = this.field.substr((this.field.indexOf("_") + 1));
                 if (this.isValid()) {
                     let sections: { [index: string]: Section } = ds.sections;
                     if (this.fieldvalue.includes("*")) {
                         this.asteriskHelper(sections);
                     } else {
-                        for (let [str, Sec] of Object.entries(sections)) {
-                            let tempSec: any = Sec;
-                            if (tempSec[this.fieldToSearch] === this.fieldvalue) {
-                                this.tempResultSoFar.push(Sec);
-                            }
-                        }
+                        this.filterHelper(sections);
                         }
                     }
-                }
-            return this.tempResultSoFar;
+                return this.tempResultSoFar;
             } catch (e) {
             throw new InsightError(e);
         }
@@ -65,8 +62,8 @@ export default class SComparison extends Filter {
         if (this.fieldvalue === null) {
             throw new InsightError("String given for search is NULL");
         }
-        if (this.fieldvalue.includes("*") && (SComparison.isAsteriskAtWrongSpot(this.fieldvalue) ||
-        !SComparison.isAsteriskAtRightSpot(this.fieldvalue))) {
+        // !SComparison.isAsteriskAtRightSpot(this.fieldvalue)
+        if (this.fieldvalue.includes("*") && (SComparison.isAsteriskAtWrongSpot(this.fieldvalue))) {
             throw new InsightError("Asterisk not at the beginning or end");
         }
         if (!SComparison.isFieldToSearchValid(this.fieldToSearch)) {
@@ -79,27 +76,14 @@ export default class SComparison extends Filter {
         }
     }
 
-    // checks if the given field has the correct syntax: id_key
-    protected isFieldValid(field: string): boolean {
-        if (!SComparison.isSKeyValid(field)) {
-            throw new InsightError("skey is not valid");
-        } else {
-            return true;
-        }
-    }
-
-    // helper function to check if the field given to the constructor is valid.
-    private static isSKeyValid(fv: string): boolean {
-        return !((fv.indexOf("_") === -1) || (fv.indexOf("_") === 0));
-    }
-
     // helper function to check if an asterisk is not at the front or end of a string
-    private static isAsteriskAtRightSpot(fieldvalue: any): boolean {
+    /*private static isAsteriskAtRightSpot(fieldvalue: any): boolean {
         return (fieldvalue.substr(fieldvalue.length - 1) === "*") || (fieldvalue.substr(0, 1) === "*");
-    }
+    }*/
     private static isAsteriskAtWrongSpot(fieldvalue: any): boolean {
         return (fieldvalue.substr(1, fieldvalue.length - 2).includes("*"));
     }
+
     private static isFieldToSearchValid(fts: string) {
         return ((fts === "dept") || (fts === "id") || (fts === "instructor") || (fts === "title") || (fts === "uuid"));
     }
@@ -117,8 +101,6 @@ export default class SComparison extends Filter {
         let valueRequestedLength: number = fieldval.length - 2;
         if (secs.length >= valueRequestedLength) {
             return secs.includes(fieldval.substr(1, valueRequestedLength));
-            /*((secs.substr(secs.length - valueRequestedLength) === fieldval.substr(1, valueRequestedLength)) ||
-                (secs.substr(0, valueRequestedLength) === fieldval.substr(1, valueRequestedLength)));*/
         } else {
             return false;
         }
@@ -178,6 +160,15 @@ export default class SComparison extends Filter {
                     this.fieldvalue)) {
                     this.tempResultSoFar.push(Sec);
                 }
+            }
+        }
+    }
+
+    private filterHelper(sections: { [index: string]: Section }) {
+        for (let [str, Sec] of Object.entries(sections)) {
+            let tempSec: any = Sec;
+            if (tempSec[this.fieldToSearch] === this.fieldvalue) {
+                this.tempResultSoFar.push(Sec);
             }
         }
     }

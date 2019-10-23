@@ -8,6 +8,7 @@ export default class DataSet {
         this.id = id;
         this.sections = {};
     }
+
     public addSection(section: Section) {
         this.sections[section.uuid] = section;
     }

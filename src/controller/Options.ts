@@ -1,3 +1,4 @@
+
 import {InsightError} from "./IInsightFacade";
 import Log from "../Util";
 
@@ -87,7 +88,8 @@ export default class Options {
             let colLong = this.datasetId + "_" + col;
             if (this.columns.includes(colLong)) {
                 newData[colLong] = udr[col];
-            }});
+            }
+});
         // let obje: {[k: string]: any} = {};
         // for (let column in this.columns) {
         //   obje[column.toString()] = udr[column.toString()];
