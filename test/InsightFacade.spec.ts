@@ -63,6 +63,7 @@ describe("InsightFacade Add/Remove Dataset", function () {
         garbageInCourses: "./test/data/garbageInCourses.zip",
         validWithGarbage: "./test/data/validWithGarbage.zip",
         corrupt: "./test/data/corrupt.zip",
+        rooms: "./test/data/rooms.zip",
 
     };
     let datasets: { [id: string]: string } = {};
@@ -115,7 +116,21 @@ describe("InsightFacade Add/Remove Dataset", function () {
         });
 
     });
-    // This is a unit test. You should create more like this!
+    it("Should add a valid rooms dataset", function () {
+        const id: string = "rooms";
+        const expected: string[] = [id];
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms).then((result: string[]) => {
+            expect(result).to.deep.equal(expected);
+            return insightFacade.listDatasets().then((returnedData: InsightDataset[]) => {
+                expect(returnedData).to.have.length(1);
+            }).catch((err: any) => {
+                expect.fail(err, expected, "Should not have rejected");
+            });
+        }).catch((err: any) => {
+            expect.fail(err, expected, "Should not have rejected");
+        });
+
+    });
     it("Should add a valid dataset with garbage", function () {
         const id: string = "validWithGarbage";
         const expected: string[] = [id];

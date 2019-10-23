@@ -52,28 +52,15 @@ export default class InsightFacade implements IInsightFacade {
                 if (cond) {
                     reject(new InsightError("Dataset already exists"));
                 } else {
-                    let currDataset: DataSet = new DataSet(id, InsightDatasetKind.Courses);
                     let zipFile = new JSZip();
-                    zipFile.loadAsync(content, {base64: true}).then((data) => {
+                    let currDataset: DataSet = new DataSet(id, kind);
+                    if (kind === InsightDatasetKind.Courses) {
+                        zipFile.loadAsync(content, {base64: true}).then((data) => {
                             let promisesFiles: any[] = this.createFileReadPromises(data);
                             Promise.all(promisesFiles).then((filesJSON) => {
                                 // let totalSec = 0;
                                 // let validSec = 0;
-                                filesJSON.forEach((fileJSON: any) => {
-                                    if (fileJSON != null) {
-                                        for (let section of fileJSON["result"]) {
-                                            // totalSec++;
-                                            let sectionObj: Section = this.createValidSection(section);
-                                            // Log.trace(sectionObj);
-                                            if (sectionObj) {
-                                                // validSec++;
-                                                currDataset.addRecord(sectionObj);
-                                            }
-                                        }
-                                    }
-                                });
-                                // Log.trace(validSec);
-                                // Log.trace(totalSec);
+                                this.addSectionsDataset(filesJSON, currDataset);
                                 if (Object.keys(currDataset.records).length) {
                                     this.addDatasetDisk(currDataset);
                                     resolve(Object.keys(this.datasets.datasets));
@@ -85,15 +72,69 @@ export default class InsightFacade implements IInsightFacade {
                                     reject(new InsightError("Invalid Promises to read zip"));
                                     // throw new InsightError("Invalid Promises to read zip");
                                 });
-                        }
-                    ).catch((errGlo: any) => {
-                        reject(new InsightError("Invalid Zip File"));
-                    });
+                            }
+                        ).catch((errGlo: any) => {
+                            reject(new InsightError("Invalid Zip File"));
+                        });
+                    } else if (kind === InsightDatasetKind.Rooms) {
+                        zipFile.loadAsync(content, {base64: true}).then((data) => {
+                            this.readRoomsHTML(data);
+                            resolve(["Yo"]);
+                                // let promisesFiles: any[] = this.createFileReadPromises(data);
+                                // Promise.all(promisesFiles).then((filesJSON) => {
+                                //     // let totalSec = 0;
+                                //     // let validSec = 0;
+                                //     this.addSectionsDataset(filesJSON, currDataset);
+                                //     if (Object.keys(currDataset.records).length) {
+                                //         this.addDatasetDisk(currDataset);
+                                //         resolve(Object.keys(this.datasets.datasets));
+                                //     } else {
+                                //         reject(new InsightError("No valid section in Zip File"));
+                                //     }
+                                // })
+                                //     .catch((errAll: any) => {
+                                //         reject(new InsightError("Invalid Promises to read zip"));
+                                //         // throw new InsightError("Invalid Promises to read zip");
+                                //     });
+                            }
+                        ).catch((errGlo: any) => {
+                            reject(new InsightError("Invalid Zip File"));
+                        });
+                    }
                 }
             });
         });
-        // TODO: AL - Test whether string is blankspace, field is underscored or ID exists (COMPLETED)
-        // return Promise.reject("Not implemented.");
+    }
+
+    private async readRoomsHTML(data: any) {
+        const parse5 = require("parse5");
+        let index = "rooms/index.htm";
+        if (data.files.hasOwnProperty(index)) {
+            const htmlReadPromise = data.files[index].async("text");
+            const htmlData = await htmlReadPromise.catch((err: any) => {
+                throw new InsightError(err);
+            });
+            let htmlDoc = parse5.parse(htmlData);
+            Log.trace(htmlDoc);
+        } else {
+            throw new InsightError("rooms/index.html not found");
+        }
+    }
+
+    private addSectionsDataset(filesJSON: any, currDataset: DataSet) {
+        filesJSON.forEach((fileJSON: any) => {
+            if (fileJSON != null) {
+                for (let section of fileJSON["result"]) {
+                    // totalSec++;
+                    let sectionObj: Section = this.createValidSection(section);
+                    // Log.trace(sectionObj);
+                    if (sectionObj) {
+                        // validSec++;
+                        currDataset.addRecord(sectionObj);
+                    }
+                }
+            }
+        });
     }
 
     private createFileReadPromises(data: any): any[] {
