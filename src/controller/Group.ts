@@ -1,10 +1,11 @@
 import Grouping from "./Grouping";
+import {InsightError} from "./IInsightFacade";
 
 export default class Group {
     private groups: string[];
     private grouping: Grouping;
     private dataset: any;
-    private obj: any;
+    private obj: any; // Whatever comes after GROUP:
 
     /*
     EBNF Rules GROUP: [' (key ',')* key ']
@@ -14,6 +15,15 @@ export default class Group {
      */
     constructor(groupobj: any, rsfdataset: any) {
         // Throw any Errors in Grammar
+        this.obj = groupobj;
+        this.dataset = rsfdataset;
+        // Test for An Array
+        if (!Array.isArray(this.obj)) {
+            throw new InsightError("Group Object Is Not An Array");
+        }
+        if (this.obj.length < 1) {
+            throw new InsightError("Group Array Has No Items");
+        }
     }
 
     /*
@@ -32,14 +42,23 @@ export default class Group {
     For the sake of optimization at runtime, we will end up ignoring criteria combos with 0 items
      */
     public applygrouping(): any[] {
-        let groupe: any[];
-        return groupe;
+        // Local Variables Improve Testability
+        let first = this.obj.shift(); // Should Remove the First Element and Return That Element
+        let rest = this.obj; // Should Now Only Contain The Rest of The Elements
+        this.grouping = new Grouping(this.dataset, first, rest, { });
+        return this.grouping.showGroups();
     }
 
     /*
     As in Transformations this tests the semantic validity, NOT the grammar
      */
     public isGroupValid?(existingColumnNames: string[]): boolean {
-        return false;
+        // Test if Group Provided Is A Column
+        for (const group in this.groups) {
+            if (!existingColumnNames.includes(group)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

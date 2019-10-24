@@ -1,3 +1,5 @@
+import GroupHelper from "./GroupHelper";
+
 export default class Grouping {
     private rsfData: any[];
     private criteria: string;
@@ -47,25 +49,62 @@ export default class Grouping {
             2. The resulting collection will be easily parsed in output
             3. Empty combo sets will be ignored reducing the workload from brute force to simple combinations
          */
+        let groupHelper: GroupHelper = new GroupHelper();
+        this.criteria = criteria;
+        this.rsfData = rsf;
+        this.criteriaRemaining = criteriaRemaining;
+        this.mutableObject = mutableObj;
+        let setofUnique = new Set<any>();
+        if (this.criteria !== null) {
+            setofUnique = groupHelper.unique(this.criteria, this.rsfData);
+        }
+        if (this.criteria === null) {
+            this.mutableObject = groupHelper.newMutableObject(this.mutableObject, "result", this.rsfData);
+        } else if (this.criteriaRemaining.length === 0) {
+                for (let value of setofUnique) {
+                    let newObj = groupHelper.newMutableObject(this.mutableObject, this.criteria, value);
+                    let newRSF = groupHelper.relatedRSF(this.criteria, value, this.rsfData);
+                    let newCR = groupHelper.newRemainingCriteria(this.criteriaRemaining);
+                    this.groups.push(new Grouping(newRSF, null, newCR, newObj));
+                }
+        } else {
+            for (let value of setofUnique) {
+                let newObj = groupHelper.newMutableObject(this.mutableObject, this.criteria, value);
+                let newRSF = groupHelper.relatedRSF(this.criteria, value, this.rsfData);
+                let newCR = groupHelper.newRemainingCriteria(this.criteriaRemaining);
+                this.groups.push(new Grouping(newRSF, groupHelper.nextCriteria(this.criteriaRemaining), newCR, newObj));
+            }
+        }
+
     }
 
     /*
     Once the hierarchy is set, showGroups will output the mutable objects of each base case
     This would be the final groupings with all criteria if done correctly
-    Requires: nothing
+    Requires: A recursive call
     Effects: returns the grouped list of records
      */
 
     public showGroups(): any[] {
-        if (this.criteria === undefined) {
-            return this.mutableObject;
+        let group: any[] = [];
+        if (this.criteria === null) {
+            group.push(this.mutableObject);
         } else {
-            let record: any;
-            return record;
+            for (let groupes of this.groups) {
+              group.push(groupes.showGroups()[0]);
+            }
         }
-        let records: any;
-        return records;
+        return group;
     }
+    /*
+    Fundamental Logic behind ShowGroups
+        - This is a recursive function at heart
+        - If the base case (where criteria is null) is met, return a [mutable obj]
+        - Else
+            - Build an array from its children (Group either has a null criteria or has groupings)
+            - We Unpack Any Array That Might Be Thrown To Us using index 0
+            - We merge any results
+     */
 
 
 }
