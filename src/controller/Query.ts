@@ -98,11 +98,11 @@ export default class Query {
         } else {
             throw new InsightError("Invalid WHERE field");
         }
-        let optionsObj: Options = new Options(options, Object.keys(this.datasets.datasets), this.datasetId);
+        // let optionsObj: Options = new Options(options, Object.keys(this.datasets.datasets), this.datasetId);
         try {
             let filteredDataset = this.filter.applyFilter(this.dataset, Object.values(this.dataset.records));
-            let resultsArray = optionsObj.applyColumnsAndOrder(filteredDataset);
-            this.result = resultsArray;
+           // let resultsArray = optionsObj.applyColumnsAndOrder(filteredDataset);
+           // this.result = resultsArray;
         } catch (e) {
             throw e;
         }

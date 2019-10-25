@@ -1,6 +1,8 @@
 
 import {InsightError} from "./IInsightFacade";
 import Log from "../Util";
+import Columns from "./Columns";
+import Sorting from "./Sorting";
 
 export default class Options {
     /*
@@ -8,26 +10,51 @@ export default class Options {
     columns - the columns of the dataset that will be shown in the query results
     order - the column which the query result must sort by
     TODO:
-        Build The COLUMNS and SORT OBJECTS, DEPRECATE THIS USE
+        Build The COLUMNS and SORT OBJECTS, DEPRECATE THIS USE INTO AN INTERFACE (Details below)
         Ideally, Options should be an API using Columns and Sorting to return a sorted dataset
+        A (Grouped/Filtered Dataset),(Options Clause) -> [OPTIONS]
+        B [OPTIONS] -> (Desired Columns),(Grouped/Filtered Dataset) -> [COLUMNS] -> (Dataset with Only Selected Columns)
+        C (Dataset with Only Selected Columns),(Desired Order Key(s))-> [SORTING] -> (Dataset Sorted)
      */
-    private columns: any[];
-    private order: string;
+    // private columns: any[];
+    private columns: Columns; // New object that will perform Procedure B
+    private uds: any[];
+    private order: Sorting;
+    /*
     private listDatasets: string[];
     private listColumns = ["dept", "id", "avg", "instructor", "title", "pass", "fail", "audit", "uuid", "year"];
     private datasetId: string;
-
-    constructor(options: any, listDatasets: string[], datesetId: string) {
+    */
+    constructor(options: any, uds: any[]) {
+        // TODO: Query Should Test If There's Both 0 or 5000 throw an error for both
+        // Test for syntactical correctness here. Throw an error only then.
+        this.uds = uds;
+        try {
+            if (options.hasOwnProperty("COLUMNS")) {
+                this.columns = new Columns(uds, options.COLUMNS);
+            } else {
+                throw new InsightError("No Column Field Specified");
+            }
+        } catch (er) {
+           throw new InsightError("No Column Object Created: " + er.message());
+        }
+        /*
         if (options.hasOwnProperty("COLUMNS")) {
-            this.columns = options.COLUMNS;
+            this.columns = new Columns(uds, options.COLUMNS);
         } else {
             throw new InsightError("No Column Field Specified");
-        }
-        this.order = options.ORDER;
+        } */
+        // TODO: ADD ORDER
+        // this.order = options.ORDER;
+        /*
         this.listDatasets = listDatasets;
         this.datasetId = datesetId;
+         */
     }
 
+    /* Test for Validity
+
+     */
     /*
       @param: Updated data set (UDS) that has been filtered (Ask Bill what's returned in his struct)
       if JSON array don't stringify and manipulate directly by key strings, if Objects, stringify
@@ -35,20 +62,14 @@ export default class Options {
       @specs: Apply both the columnar and order sorting
       @output: Expected data set as string
      */
-    public applyColumnsAndOrder(uds: any[]): any[] {
+    public applyColumnsAndOrder(): any[] {
         let records: any[] = [];
-        if (this.isValid(this.listDatasets)) {
-            // Begin the function
-            for (const record of uds) {
-                records.push(this.selectColumnsAsObj(record));
-            }
-            // now sort the set
-            if (this.order !== undefined) {
-                records.sort((a: any, b: any) => (a[this.order] > b[this.order]) ? 1 : -1);
-            }
+        if (this.columns.isColumnarValid(Object.keys(this.uds[0]))) {
+            records = this.columns.applyColumns();
         } else {
-            throw new InsightError("Invalid Columns and Errors");
+            throw new InsightError("Invalid Column Request");
         }
+        // TODO: ADD SORT FUNCTIONALITY
         return records;
     }
 
@@ -85,6 +106,7 @@ export default class Options {
         @spec  : convert into object with only selected columns as properties
         @output: an object with select-column fields
      */
+    /*
     private selectColumnsAsObj(udr: any): any {
         let newData: any = {};
         this.listColumns.forEach((col) => {
@@ -93,6 +115,7 @@ export default class Options {
                 newData[colLong] = udr[col];
             }
 });
+     *//*
         // let obje: {[k: string]: any} = {};
         // for (let column in this.columns) {
         //   obje[column.toString()] = udr[column.toString()];
@@ -106,6 +129,7 @@ export default class Options {
         @spec  : test if COLUMNS and ORDER are valid for the query
         @output: true if valid, error if not valid (with description)
      */
+    /*
     private isValid(datasetsList: string[]): boolean {
         let valid: boolean = true;
         // test one: order key needs to be in column list
@@ -135,7 +159,7 @@ export default class Options {
         @param : none
         @spec  : test if all columns in column selected are of the same dataset
         @output: true if valid, false if not
-     */
+     *//*
     private allTheSame(): boolean {
         // INTUITION: size of set should be = 1 if they are all in the same dataset "courses_xxx"
         let queryFieldSet = new Set();
@@ -148,4 +172,5 @@ export default class Options {
         }
         return false;
     }
+    */
 }
