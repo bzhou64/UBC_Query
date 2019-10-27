@@ -14,6 +14,7 @@ import DataSet from "./DataSet";
 import Section from "./Section";
 import Query from "./Query";
 import * as dh from "./DataHelpers";
+import Building from "./Building";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -81,22 +82,6 @@ export default class InsightFacade implements IInsightFacade {
                         zipFile.loadAsync(content, {base64: true}).then((data) => {
                             this.readRoomsHTML(data);
                             resolve(["Yo"]);
-                                // let promisesFiles: any[] = this.createFileReadPromises(data);
-                                // Promise.all(promisesFiles).then((filesJSON) => {
-                                //     // let totalSec = 0;
-                                //     // let validSec = 0;
-                                //     dh.addSectionsDataset(filesJSON, currDataset);
-                                //     if (Object.keys(currDataset.records).length) {
-                                //         this.addDatasetDisk(currDataset);
-                                //         resolve(Object.keys(this.datasets.datasets));
-                                //     } else {
-                                //         reject(new InsightError("No valid section in Zip File"));
-                                //     }
-                                // })
-                                //     .catch((errAll: any) => {
-                                //         reject(new InsightError("Invalid Promises to read zip"));
-                                //         // throw new InsightError("Invalid Promises to read zip");
-                                //     });
                             }
                         ).catch((errGlo: any) => {
                             reject(new InsightError("Invalid Zip File"));
@@ -123,14 +108,15 @@ export default class InsightFacade implements IInsightFacade {
                 return elem.nodeName === "body";
             });
             let tables = this.findTableBody(htmlBody);
-            let setLinks: any = new Set();
+            let buildings: Building[];
+            // TODO: expand for multiple tables
             tables.forEach((table: any) => {
-                this.exploreTable(table, setLinks);
+                buildings = this.exploreTable(table);
             });
-            let promiseBuildings = this.createBuildingReadPromises(data, setLinks);
-            await Promise.all(promiseBuildings).then((buildingDataFiles) => {
-                buildingDataFiles.forEach((buildingData: any) => {
-                    let htmlBuilding: any = parse5.parse(buildingData);
+            let promiseBuildings = this.createBuildingReadPromises(data, buildings);
+            await Promise.all(promiseBuildings).then(() => {
+                buildings.forEach((building: Building) => {
+                    let buildingHtml: any = parse5.parse(building.data);
                     Log.trace("yo");
                 });
             }).catch((errAll: any) => {
@@ -141,30 +127,49 @@ export default class InsightFacade implements IInsightFacade {
         }
     }
 
-    private createBuildingReadPromises(data: any, setLinks: Set<string>): any[] {
+    private createBuildingReadPromises(data: any, buildings: Building[]): any[] {
         let promisesFiles: any[] = [];
-        setLinks.forEach((buildingPath: string) => {
-            let currPath = "rooms" + buildingPath.substr(1);
+        buildings.forEach((building: Building) => {
+            let currPath = "rooms" + building.link.substr(1);
             if (data.files.hasOwnProperty(currPath)) {
-                let currFilePromise = data.files[currPath].async("text");
+                let currFilePromise = data.files[currPath].async("text").then((buildingData: any) => {
+                    building.data = buildingData;
+                }).catch((err: any) => {
+                    throw new InsightError(err);
+                });
                 promisesFiles.push(currFilePromise);
             }
         });
         return promisesFiles;
     }
 
-    private exploreTable(table: any, setLinks: Set<string>) {
+    private exploreTable(table: any): Building[] {
         let tableBody: any = table.childNodes.find((elem: any) => {
             return elem.nodeName === "tbody";
         });
-        let arrayLinks: any[] = [];
-        dh.findTag(tableBody, arrayLinks, "a");
-        arrayLinks.forEach((a: any) => {
-            let link = a.attrs.find((attr: any) => {
-                return attr.name === "href";
+        let arrayRows: any[] = [];
+        dh.findTag(tableBody, arrayRows, "tr");
+        let buildings: Building[] = [];
+        arrayRows.forEach((row: any) => {
+            let building: Building;
+            building = new Building();
+            let arraytds: any[] = [];
+            dh.findTag(row, arraytds, "td");
+            arraytds.forEach( (td: any) => {
+                if (td.attrs[0].value === "views-field views-field-field-building-code") {
+                    building.shortname = td.childNodes[0].value;
+                } else if (td.attrs[0].value === "views-field views-field-field-building-address") {
+                    building.address = td.childNodes[0].value;
+                } else if (td.attrs[0].value === "views-field views-field-title") {
+                    building.fullname = td.childNodes[1].attrs[1].value;
+                    building.link = td.childNodes[1].attrs[0].value;
+                }
             });
-            setLinks.add(link.value);
+            if (building.checkAllDefined()) {
+                buildings.push(building);
+            }
         });
+        return buildings;
     }
 
     private findTableBody(body: any) {
