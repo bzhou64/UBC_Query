@@ -178,7 +178,7 @@ export default class Query {
         return datasetIdSet;
     }
 
-    private findDatasetOptions(tfs: any): string {
+    private findDatasetOptions(tfs: any): Set<string> {
         return undefined;
     }
 
