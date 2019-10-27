@@ -23,7 +23,11 @@ export default class DataObject {
     private selectColumnsAsObj(udr: any, type: string): any {
         let newData: any = {};
         Object.keys(udr).forEach((col) => {
-            let colLong = type + "_" + col;
+            let rawcol: string = col;
+            if (col === "numberRename") {
+                rawcol = "number";
+            }
+            let colLong = type + "_" + rawcol;
             newData[colLong] = udr[col];
         });
         return newData;
