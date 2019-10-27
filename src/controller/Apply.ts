@@ -58,16 +58,14 @@ export default class Apply {
     public setApply(): any[] {
         let records: any[];
         for (let group of this.groupDS) {
-                    if (this.ruleNames.length === 0) {
-                        group[Object.keys(group).length - 1] = [];
-                    }
-                    let tempArrRecords: any[] = group[Object.keys(group).length - 1];
-                    for (let i = 0; i < this.ruleNames.length; i++) {
-                        let field: string = this.rules[i][Object.keys(this.rules[i])[0]];
-                        let splitted: string[] = field.split("_", 1);
-                        let tempKey: string = splitted[1];
-                        group[this.ruleNames[i]] = Apply.setApplyHelper(this.ruleNames[i], tempArrRecords, tempKey);
-                    }
+            delete group[Object.keys(group).length - 1];
+            let tempArrRecords: any[] = group[Object.keys(group).length - 1];
+            for (let i = 0; i < this.ruleNames.length; i++) {
+                let field: string = this.rules[i][Object.keys(this.rules[i])[0]];
+                let splitted: string[] = field.split("_", 1);
+                let tempKey: string = splitted[1];
+                group[this.ruleNames[i]] = Apply.setApplyHelper(this.ruleNames[i], tempArrRecords, tempKey);
+            }
         }
         records = this.groupDS;
         return records;
