@@ -13,6 +13,7 @@ import * as fs from "fs";
 import DataSet from "./DataSet";
 import Section from "./Section";
 import Query from "./Query";
+import * as dh from "./DataHelpers";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -45,7 +46,7 @@ export default class InsightFacade implements IInsightFacade {
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
         return new Promise<string[]>((resolve, reject) => {
             this.loadDatasetDisk();
-            if (!this.isIDValid(id)) {
+            if (!dh.isIDValid(id)) {
                 reject(new InsightError("Invalid Id"));
             }
             this.isAdded(id).then((cond) => {
@@ -60,7 +61,7 @@ export default class InsightFacade implements IInsightFacade {
                             Promise.all(promisesFiles).then((filesJSON) => {
                                 // let totalSec = 0;
                                 // let validSec = 0;
-                                this.addSectionsDataset(filesJSON, currDataset);
+                                dh.addSectionsDataset(filesJSON, currDataset);
                                 if (Object.keys(currDataset.records).length) {
                                     this.addDatasetDisk(currDataset);
                                     resolve(Object.keys(this.datasets.datasets));
@@ -84,7 +85,7 @@ export default class InsightFacade implements IInsightFacade {
                                 // Promise.all(promisesFiles).then((filesJSON) => {
                                 //     // let totalSec = 0;
                                 //     // let validSec = 0;
-                                //     this.addSectionsDataset(filesJSON, currDataset);
+                                //     dh.addSectionsDataset(filesJSON, currDataset);
                                 //     if (Object.keys(currDataset.records).length) {
                                 //         this.addDatasetDisk(currDataset);
                                 //         resolve(Object.keys(this.datasets.datasets));
@@ -115,26 +116,62 @@ export default class InsightFacade implements IInsightFacade {
                 throw new InsightError(err);
             });
             let htmlDoc = parse5.parse(htmlData);
-            Log.trace(htmlDoc);
+            let htmlHtml = htmlDoc.childNodes.find((elem: any) => {
+                return elem.nodeName === "html";
+            });
+            let htmlBody = htmlHtml.childNodes.find((elem: any) => {
+                return elem.nodeName === "body";
+            });
+            let tables = this.findTableBody(htmlBody);
+            let setLinks: any = new Set();
+            tables.forEach((table: any) => {
+                this.exploreTable(table, setLinks);
+            });
+            let promiseBuildings = this.createBuildingReadPromises(data, setLinks);
+            await Promise.all(promiseBuildings).then((buildingDataFiles) => {
+                buildingDataFiles.forEach((buildingData: any) => {
+                    let htmlBuilding: any = parse5.parse(buildingData);
+                    Log.trace("yo");
+                });
+            }).catch((errAll: any) => {
+                throw new InsightError(errAll);
+            });
         } else {
             throw new InsightError("rooms/index.html not found");
         }
     }
 
-    private addSectionsDataset(filesJSON: any, currDataset: DataSet) {
-        filesJSON.forEach((fileJSON: any) => {
-            if (fileJSON != null) {
-                for (let section of fileJSON["result"]) {
-                    // totalSec++;
-                    let sectionObj: Section = this.createValidSection(section);
-                    // Log.trace(sectionObj);
-                    if (sectionObj) {
-                        // validSec++;
-                        currDataset.addRecord(sectionObj);
-                    }
-                }
+    private createBuildingReadPromises(data: any, setLinks: Set<string>): any[] {
+        let promisesFiles: any[] = [];
+        setLinks.forEach((buildingPath: string) => {
+            let currPath = "rooms" + buildingPath.substr(1);
+            if (data.files.hasOwnProperty(currPath)) {
+                let currFilePromise = data.files[currPath].async("text");
+                promisesFiles.push(currFilePromise);
             }
         });
+        return promisesFiles;
+    }
+
+    private exploreTable(table: any, setLinks: Set<string>) {
+        let tableBody: any = table.childNodes.find((elem: any) => {
+            return elem.nodeName === "tbody";
+        });
+        let arrayLinks: any[] = [];
+        dh.findTag(tableBody, arrayLinks, "a");
+        arrayLinks.forEach((a: any) => {
+            let link = a.attrs.find((attr: any) => {
+                return attr.name === "href";
+            });
+            setLinks.add(link.value);
+        });
+    }
+
+    private findTableBody(body: any) {
+        let arrayTables: any[] = [];
+        dh.findTag(body, arrayTables, "table");
+        Log.trace("found tables");
+        return arrayTables;
     }
 
     private createFileReadPromises(data: any): any[] {
@@ -158,27 +195,6 @@ export default class InsightFacade implements IInsightFacade {
         return promisesFiles;
     }
 
-    private createValidSection(section: any) {
-        if (section.Subject !== undefined && section.Course !== undefined &&
-            section.Avg !== undefined && section.Professor !== undefined && section.Title !== undefined
-            && section.Pass !== undefined && section.Fail !== undefined && section.Audit !== undefined
-            && section.id !== undefined  && section.Year !== undefined) {
-            let year = 1900;
-            if (section.Year === "overall") {
-                year = 1900;
-            } else {
-                year = parseInt(section.Year, 10);
-            }
-            let sectionObject: Section = new Section(section.Subject.toString(),
-                section.Course.toString(), parseFloat(section.Avg),
-                section.Professor.toString(), section.Title.toString(), parseInt(section.Pass, 10),
-                parseInt(section.Fail, 10), parseInt(section.Audit, 10), section.id.toString(),
-                year);
-            return sectionObject;
-        }
-        return null;
-    }
-
     private addDatasetDisk(currDataset: DataSet) {
         this.datasets.addDataset(currDataset);
         try {
@@ -192,10 +208,6 @@ export default class InsightFacade implements IInsightFacade {
         }
     }
 
-    private isIDValid(id: string): boolean {
-        return !(id === undefined ||  id === null ||
-            id.includes("_") || id === "" || !id.replace(/\s/g, "").length);
-    }
 
     private isAdded(id: string): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
@@ -216,7 +228,7 @@ export default class InsightFacade implements IInsightFacade {
         // Check if id is valid
         return new Promise<string>((resolve, reject) =>  {
             this.loadDatasetDisk();
-            if (this.isIDValid(id)) {
+            if (dh.isIDValid(id)) {
                 this.isAdded(id).then((val) => {
                     if (!val) {
                         reject(new NotFoundError("Dataset to remove is not added"));
