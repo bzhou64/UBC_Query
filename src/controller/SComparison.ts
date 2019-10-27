@@ -13,7 +13,7 @@ export default class SComparison extends Filter {
     private datasetGiven: string;
     private tempResultSoFar: any[] = [];
     private datasetType: InsightDatasetKind;
-    private sfieldSections: {[index: string]: string[]};
+    private sfieldSections: {[index: string]: string[]} = {};
 
     constructor(kkey: string, vvalue: any) {
         super(kkey, vvalue);
@@ -127,7 +127,7 @@ export default class SComparison extends Filter {
             (fieldvalue.substr(fieldvalue.length - 1) === "*"));
     }
 
-    private asteriskHelper(sections: {[index: string]: Section}) {
+    private asteriskHelper(sections: any) {
         if (this.fieldvalue === "*") {
             for (let [str, Sec] of Object.entries(sections)) {
                 this.tempResultSoFar.push(Sec);
@@ -162,7 +162,7 @@ export default class SComparison extends Filter {
         }
     }
 
-    private filterHelper(sections: { [index: string]: Section }) {
+    private filterHelper(sections: any) {
         for (let [str, Sec] of Object.entries(sections)) {
             let tempSec: any = Sec;
             if (tempSec[this.fieldToSearch] === this.fieldvalue) {

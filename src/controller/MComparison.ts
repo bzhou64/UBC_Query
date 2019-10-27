@@ -12,7 +12,7 @@ export default class MComparison extends Filter {
     private datasetGiven: string;
     private tempResultSoFar: any[] = [];
     private datasetType: InsightDatasetKind;
-    private mfieldSections: {[index: string]: string[]};
+    private mfieldSections: {[index: string]: string[]} = {};
 
     constructor(kkey: string, vvalue: any) {
         super(kkey, vvalue);
@@ -85,7 +85,7 @@ export default class MComparison extends Filter {
         return ((mcomp === "LT") || (mcomp === "GT") || (mcomp === "EQ"));
     }
 
-    private lessThanHelper(sections: { [index: string]: Section }) {
+    private lessThanHelper(sections: any) {
         for (let [str, Sec] of Object.entries(sections)) {
             let tempSec: any = Sec;
             if (tempSec[this.fieldToSearch] < this.fieldvalue) {
@@ -94,7 +94,7 @@ export default class MComparison extends Filter {
         }
     }
 
-    private equalHelper(sections: { [index: string]: Section }) {
+    private equalHelper(sections: any) {
         for (let [str, Sec] of Object.entries(sections)) {
             let tempSec: any = Sec;
             if (tempSec[this.fieldToSearch] === this.fieldvalue) {
@@ -103,7 +103,7 @@ export default class MComparison extends Filter {
         }
     }
 
-    private greaterThanHelper(sections: { [index: string]: Section }) {
+    private greaterThanHelper(sections: any) {
         for (let [str, Sec] of Object.entries(sections)) {
             let tempSec: any = Sec;
             if (tempSec[this.fieldToSearch] > this.fieldvalue) {
