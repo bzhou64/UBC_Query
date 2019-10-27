@@ -36,7 +36,7 @@ export default class SComparison extends Filter {
         this.datasetGiven = ds.id;
         try {
                 if (this.isValid()) {
-                    let sections: { [index: string]: Section } = ds.records;
+                    let sections: any = ds.records;
                     if (this.fieldvalue.includes("*")) {
                         this.asteriskHelper(sections);
                     } else {

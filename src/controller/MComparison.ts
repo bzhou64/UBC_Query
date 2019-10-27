@@ -1,8 +1,6 @@
 import Filter from "./Filter";
-import DataSets from "./DataSets";
-import {InsightDataset, InsightDatasetKind, InsightError} from "./IInsightFacade";
+import {InsightDatasetKind, InsightError} from "./IInsightFacade";
 import Section from "./Section";
-import InsightFacade from "./InsightFacade";
 import DataSet from "./DataSet";
 
 export default class MComparison extends Filter {
@@ -37,7 +35,7 @@ export default class MComparison extends Filter {
         this.datasetType = ds.type;
         try {
                 if (this.isValid()) {
-                    let sections: { [index: string]: Section } = ds.records;
+                    let sections: any = ds.records;
                     if (this.key === "LT") {
                         this.lessThanHelper(sections);
                     } else if (this.key === "EQ") {
