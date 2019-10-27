@@ -113,13 +113,21 @@ export default class Query {
         try {
             let filteredDataset = this.filter.applyFilter(this.dataset, Object.values(this.dataset.records));
             let dataobj: DataObject = new DataObject();
-            let processedDataset = dataobj.convertToJSON(filteredDataset);
             let resultsArray: any[] = [];
+            let processedDataset: any[] = [];
+            if (filteredDataset.length === 0) {
+                processedDataset = [];
+            } else {
+                processedDataset = dataobj.convertToJSON(filteredDataset);
+            }
             if (this.queryObj.hasOwnProperty("TRANSFORMATIONS")) {
                 let transform: Transformation = new Transformation(this.queryObj["TRANSFORMATIONS"], processedDataset);
                 resultsArray = transform.applyTransformations();
             } else {
                 resultsArray = processedDataset; // Proceed with Filtered JSON if Transformations doesn't exist;
+            }
+            if (resultsArray.length > 5000) {
+                throw new ResultTooLargeError("Too many");
             }
             let optionsObj: Options = new Options(options, resultsArray);
             let resultingArray = optionsObj.applyColumnsAndOrder();
