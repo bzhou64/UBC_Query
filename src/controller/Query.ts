@@ -68,7 +68,14 @@ export default class Query {
         // }
 
         // this.datasetId = this.datasetIdOptions(columnsOrder);
-        if (this.datasetId === null) {
+        let optionsValues = this.findDatasetOptions(options);
+        let tfsValues = this.findDatasetTransformations(this.queryObj["TRANSFORMATIONS"]);
+        let datasetIds = Query.union(optionsValues, tfsValues);
+        if (datasetIds.size !== 1) {
+            throw (new InsightError("Invalid query dataset combination"));
+        }
+        this.datasetId = datasetIds.values().next().value;
+        if (this.datasetId === "") {
             throw (new InsightError("Querying multiple datasets in OPTIONS"));
         }
         if (!this.datasets.datasets.hasOwnProperty(this.datasetId)) {
@@ -161,25 +168,35 @@ export default class Query {
     // else throw Insight error
     private findDatasetTransformations(tfs: any): Set<string> {
         let datasetIdSet: Set<string> = new Set<string>();
-        if (tfs.hasOwnProperty("GROUP") && tfs.hasOwnProperty("APPLY")) {
-            if (tfs["GROUP"].length >= 1 && tfs["APPLY"].length >= 1) {
-                tfs["GROUP"].forEach((key: string) => {
-                    datasetIdSet.add(key.split("_")[0]);
-                });
-                tfs["APPLY"].forEach((key: any) => {
-                    datasetIdSet.add(Object.values(Object.values(key)[0])[0].split("_")[0]);
-                });
+        if (tfs !== undefined) {
+            if (tfs.hasOwnProperty("GROUP") && tfs.hasOwnProperty("APPLY")) {
+                if (tfs["GROUP"].length >= 1 && tfs["APPLY"].length >= 1) {
+                    tfs["GROUP"].forEach((key: string) => {
+                        datasetIdSet.add(key.split("_")[0]);
+                    });
+                    tfs["APPLY"].forEach((key: any) => {
+                        datasetIdSet.add(Object.values(Object.values(key)[0])[0].split("_")[0]);
+                    });
+                } else {
+                    throw new InsightError("Wrong length group/ apply");
+                }
             } else {
-                throw new InsightError("Wrong length group/ apply");
+                throw new InsightError("Wrong Transformation");
             }
-        } else {
-            throw new InsightError("Wrong Transformation");
         }
         return datasetIdSet;
     }
 
     private findDatasetOptions(tfs: any): Set<string> {
         return undefined;
+    }
+
+    private static union(setA: Set<string>, setB: Set<string>): Set<string> {
+        let unionSet = new Set(setA);
+        for (let elem of setB) {
+            unionSet.add(elem);
+        }
+        return unionSet;
     }
 
 }
