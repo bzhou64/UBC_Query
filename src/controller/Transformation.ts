@@ -67,7 +67,7 @@ export default class Transformation {
             }
             this.apply = new Apply(records, this.object["APPLY"]);
             if (this.apply.isApplyValid(Object.keys(records[0]))) {
-                records = this.group.applygrouping();
+                records = this.apply.setApply();
             } else {
                 throw new InsightError("Invalid Apply Used Here");
             }
