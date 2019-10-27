@@ -280,7 +280,7 @@ export default class InsightFacade implements IInsightFacade {
         for (let [datasetId, dataSet] of Object.entries(this.datasets.datasets)) {
             let insightDataset: InsightDataset = {
                 id: datasetId,
-                kind: InsightDatasetKind.Courses,
+                kind: dataSet.type,
                 numRows: Object.keys(dataSet.records).length
             };
             insightDatasets.push(insightDataset);

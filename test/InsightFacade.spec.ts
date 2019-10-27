@@ -132,6 +132,22 @@ describe("InsightFacade Add/Remove Dataset", function () {
         });
 
     });
+    it("Check nrows in rooms.zip", function () {
+        const id: string = "rooms";
+        const expected: string[] = [id];
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms).then((result: string[]) => {
+            expect(result).to.deep.equal(expected);
+            return insightFacade.listDatasets().then((returnedData: InsightDataset[]) => {
+                expect(returnedData).to.have.length(1);
+                expect(returnedData[0].numRows).equal(364);
+            }).catch((err: any) => {
+                expect.fail(err, expected, "Should not have rejected");
+            });
+        }).catch((err: any) => {
+            expect.fail(err, expected, "Should not have rejected");
+        });
+
+    });
     it("Should add a valid dataset with garbage", function () {
         const id: string = "validWithGarbage";
         const expected: string[] = [id];
