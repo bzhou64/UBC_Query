@@ -1,6 +1,7 @@
 import {InsightDatasetKind, InsightError} from "./IInsightFacade";
 import DataSet from "./DataSet";
 import {Decimal} from "decimal.js";
+import {split} from "ts-node";
 
 export default class Apply {
     /*
@@ -16,6 +17,8 @@ export default class Apply {
     private applyTOKEN: string[] = ["MAX", "MIN", "AVG", "COUNT", "SUM"];
     private mfieldSections: {[index: string]: string[]};
     private sfieldSections: {[index: string]: string[]};
+    private dataSetID: string;
+    private dataSetType: string;
 
     constructor(groupeddataset: any[], apply: any[]) {
         /*
@@ -52,11 +55,9 @@ export default class Apply {
     Feel free to add helpers to this
      */
 
-    public setApply(listofdata: string[], ds: DataSet): any[] {
+    public setApply(): any[] {
         let records: any[];
-        try {
-            if (this.isApplyValid(listofdata, ds)) {
-                for (let group of this.groupDS) {
+        for (let group of this.groupDS) {
                     if (this.ruleNames.length === 0) {
                         group[Object.keys(group).length - 1] = [];
                     }
@@ -67,20 +68,16 @@ export default class Apply {
                         let tempKey: string = splitted[1];
                         group[this.ruleNames[i]] = Apply.setApplyHelper(this.ruleNames[i], tempArrRecords, tempKey);
                     }
-                }
-                records = this.groupDS;
-                return records;
-            }
-        } catch (e) {
-            throw new InsightError(e);
         }
-    }
+        records = this.groupDS;
+        return records;
+        }
 
     /*
     returns true IFF Apply semantics are all valid
     will accept a list of columns - feel free to add more params at this stage
      */
-    public isApplyValid(listofdata: string[], ds: DataSet): boolean {
+    public isApplyValid(listofdata: string[]): boolean {
         for (let applyBody of this.rules) {
             let tempLength: number = Object.keys(applyBody).length;
             // check for if the body has any tokens and keys.
@@ -113,14 +110,21 @@ export default class Apply {
             let splitted: string[] = field.split("_", 1);
             let tempID: string = splitted[0];
             let tempKey: string = splitted[1];
+            splitted = listofdata[0].split("_", 1);
+            this.dataSetID = splitted[0];
+            for (let [str, arr] of Object.entries(this.mfieldSections)) {
+                if (arr.includes(splitted[1]) || this.sfieldSections[str].includes(splitted[1])) {
+                    this.dataSetType = str;
+                }
+            }
             // check if the apply body is attempting to query more than 1 dataset.
-            if (tempID !== ds.id) {
+            if (tempID !== this.dataSetID) {
                 throw new InsightError("Querying over multiple datasets.");
             }
             // check if the key is correct based on token.
-            if (!this.mfieldSections[ds.type].includes(tempKey)) {
+            if (!this.mfieldSections[this.dataSetType].includes(tempKey)) {
                 if (Object.keys(applyBody)[tempLength - 1] === "COUNT"
-                    && !this.sfieldSections[ds.type].includes(tempKey)) {
+                    && !this.sfieldSections[this.dataSetType].includes(tempKey)) {
                     throw new InsightError("Invalid key in COUNT");
                 } else {
                     throw new InsightError("Invalid key in " + Object.keys(applyBody)[tempLength - 1]);
