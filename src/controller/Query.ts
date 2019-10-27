@@ -118,7 +118,7 @@ export default class Query {
             if (filteredDataset.length === 0) {
                 processedDataset = [];
             } else {
-                processedDataset = dataobj.convertToJSON(filteredDataset);
+                processedDataset = dataobj.convertToJSON(filteredDataset, this.datasetId);
             }
             if (this.queryObj.hasOwnProperty("TRANSFORMATIONS")) {
                 let transform: Transformation = new Transformation(this.queryObj["TRANSFORMATIONS"], processedDataset);
