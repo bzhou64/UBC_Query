@@ -27,6 +27,8 @@ import Negation from "./Negation";
 import DataSet from "./DataSet";
 import Options from "./Options";
 import Log from "../Util";
+import DataObject from "./DataObject";
+import Transformation from "./Transformation";
 
 export default class Query {
     private queryObj: any;
@@ -110,8 +112,18 @@ export default class Query {
         // let optionsObj: Options = new Options(options, Object.keys(this.datasets.datasets), this.datasetId);
         try {
             let filteredDataset = this.filter.applyFilter(this.dataset, Object.values(this.dataset.records));
-           // let resultsArray = optionsObj.applyColumnsAndOrder(filteredDataset);
-           // this.result = resultsArray;
+            let dataobj: DataObject = new DataObject();
+            let processedDataset = dataobj.convertToJSON(filteredDataset);
+            let resultsArray: any[] = [];
+            if (this.queryObj.hasOwnProperty("TRANSFORMATIONS")) {
+                let transform: Transformation = new Transformation(this.queryObj["TRANSFORMATIONS"], processedDataset);
+                resultsArray = transform.applyTransformations();
+            } else {
+                resultsArray = processedDataset; // Proceed with Filtered JSON if Transformations doesn't exist;
+            }
+            let optionsObj: Options = new Options(options, resultsArray);
+            let resultingArray = optionsObj.applyColumnsAndOrder();
+            this.result = resultingArray;
         } catch (e) {
             throw e;
         }

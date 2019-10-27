@@ -1,5 +1,6 @@
 import Group from "./Group";
 import Apply from "./Apply";
+import {InsightError} from "./IInsightFacade";
 
 export default class Transformation {
 
@@ -27,6 +28,22 @@ export default class Transformation {
      */
     constructor(query: any, dataset: any) {
        // handle this implementation based only on grammar rules
+        this.object = query;
+        this.dataset = dataset;
+        try {
+            if (query.hasOwnProperty("GROUP")) {
+                this.group = new Group(query["GROUP"], dataset);
+            } else {
+                throw new InsightError("GROUP not specified");
+            }
+            if (query.hasOwnProperty("APPLY")) {
+                this.apply = new Apply (dataset, query["APPLY"]);
+            } else {
+                throw new InsightError("APPLY not specified");
+            }
+        } catch (er) {
+            throw new InsightError("Poor Transformation Spec Found" + er.message());
+        }
     }
 
     /*
@@ -42,6 +59,21 @@ export default class Transformation {
      */
     public applyTransformations(): any [] {
         let records: any[];
+        try {
+            if (this.group.isGroupValid(Object.keys(this.dataset[0]))) {
+                records = this.group.applygrouping();
+            } else {
+                throw new InsightError("Invalid Grouping Used Here");
+            }
+            this.apply = new Apply(records, this.object["APPLY"]);
+            if (this.apply.isApplyValid(Object.keys(records[0]))) {
+                records = this.group.applygrouping();
+            } else {
+                throw new InsightError("Invalid Apply Used Here");
+            }
+        } catch (er) {
+            throw new InsightError("Transformation Invalid: " + er.message());
+        }
         return records;
     }
 
@@ -55,9 +87,11 @@ export default class Transformation {
          Returns True iff the Transformation Clause is Valid
          Accepts Columns of dataset specified
      */
+    /*
     public isTransformationValid? (existingColumnNames: string[]): boolean {
         return false;
     }
+    */
 
 
 }
