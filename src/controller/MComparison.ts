@@ -102,6 +102,7 @@ export default class MComparison extends Filter {
             }
         }
     }
+    // helper
 
     private greaterThanHelper(sections: any) {
         for (let [str, Sec] of Object.entries(sections)) {
