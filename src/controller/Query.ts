@@ -51,22 +51,23 @@ export default class Query {
         if (Object.keys(options).length !== 1 && Object.keys(options).length !== 2) {
             throw (new InsightError("Too many or too few OPTIONS"));
         }
-        let columns = options["COLUMNS"];
-        if (columns === undefined || !Array.isArray(columns) || columns.length === 0) {
-            throw (new InsightError("Columns missing from options or not an array"));
-        }
-        let order = options["ORDER"];
+        // let columns = options["COLUMNS"];
+        // if (columns === undefined || !Array.isArray(columns) || columns.length === 0) {
+        //     throw (new InsightError("Columns missing from options or not an array"));
+        // }
+        // let order = options["ORDER"];
         // if (order !== undefined && typeof(order) !== "string") {
         //     throw (new InsightError("Order missing from options"));
         // }
-        if (columns.length === 0) {
-            throw (new InsightError("No column specified in options"));
-        }
-        let columnsOrder = columns.slice();
-        if (order !== undefined) {
-            columnsOrder.push(order);
-        }
-        this.datasetId = this.datasetIdOptions(columnsOrder);
+        // if (columns.length === 0) {
+        //     throw (new InsightError("No column specified in options"));
+        // }
+        // let columnsOrder = columns.slice();
+        // if (order !== undefined) {
+        //     columnsOrder.push(order);
+        // }
+
+        // this.datasetId = this.datasetIdOptions(columnsOrder);
         if (this.datasetId === null) {
             throw (new InsightError("Querying multiple datasets in OPTIONS"));
         }
@@ -140,25 +141,25 @@ export default class Query {
         }
     }
 
-    private datasetIdOptions(columnsOrder: string[]): string {
-        // INTUITION: size of set should be = 1 if they are all in the same dataset "courses_xxx"
-        let colName = "";
-        columnsOrder.forEach((col) => {
-            let currName = col.split("_")[0];
-            if (colName === "") {
-                colName = currName;
-            }
-            if (colName !== "" && currName !== colName) {
-                return null;
-            }
-        });
-        return colName;
-    }
+    // private datasetIdOptions(columnsOrder: string[]): string {
+    //     // INTUITION: size of set should be = 1 if they are all in the same dataset "courses_xxx"
+    //     let colName = "";
+    //     columnsOrder.forEach((col) => {
+    //         let currName = col.split("_")[0];
+    //         if (colName === "") {
+    //             colName = currName;
+    //         }
+    //         if (colName !== "" && currName !== colName) {
+    //             return null;
+    //         }
+    //     });
+    //     return colName;
+    // }
 
     // return dataset name if found and consistent
     // return undefined if not found
     // else throw Insight error
-    private findDatasetTransformations(tfs: any): string {
+    private findDatasetTransformations(tfs: any): Set<string> {
         let datasetIdSet: Set<string> = new Set<string>();
         if (tfs.hasOwnProperty("GROUP") && tfs.hasOwnProperty("APPLY")) {
             if (tfs["GROUP"].length >= 1 && tfs["APPLY"].length >= 1) {
@@ -174,14 +175,7 @@ export default class Query {
         } else {
             throw new InsightError("Wrong Transformation");
         }
-        if (datasetIdSet.size === 1) {
-            let setIter = datasetIdSet.values();
-            return setIter.next().value;
-        } else if (datasetIdSet.size === 0) {
-            return undefined;
-        } else {
-            throw new InsightError("Multiple datasets access in Transformations");
-        }
+        return datasetIdSet;
     }
 
     private findDatasetOptions(tfs: any): string {
