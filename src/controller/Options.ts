@@ -17,17 +17,28 @@ export default class Options {
         C (Dataset with Only Selected Columns),(Desired Order Key(s))-> [SORTING] -> (Dataset Sorted)
      */
     // private columns: any[];
+    private options: any; // The value of OPTIONS key
     private columns: Columns; // New object that will perform Procedure B
     private uds: any[];
-    private order: Sorting;
+    private order: Sorting; // New object that will perform Procedure C
     /*
     private listDatasets: string[];
     private listColumns = ["dept", "id", "avg", "instructor", "title", "pass", "fail", "audit", "uuid", "year"];
     private datasetId: string;
     */
+    // PHASE TWO: Options made General By Objects
+    // Pass to the constructor
+    // a) the value corresponding to options
+    // b) the updated dataset so far
+    // Be prepared to catch and handle a problematic Options in Query
+    // If no error is thrown by the constructor, future errors will occur by
+    // semantics "invalid keys used" not the structure
+    // semantics are tested in applyColumnsAndOrder. Any errors caught from this is purely semantics
+    // If no errors are thrown by applyColumnsAndOrder, the result will be an array of objects [records]
     constructor(options: any, uds: any[]) {
         // TODO: Query Should Test If There's Both 0 or 5000 throw an error for both
         // Test for syntactical correctness here. Throw an error only then.
+        this.options = options;
         this.uds = uds;
         try {
             if (options.hasOwnProperty("COLUMNS")) {
@@ -35,8 +46,13 @@ export default class Options {
             } else {
                 throw new InsightError("No Column Field Specified");
             }
+            if (options.hasOwnProperty("ORDER")) {
+                this.order = new Sorting(uds, options.ORDER);
+            } else {
+                throw new InsightError("No Order Field Specified");
+            }
         } catch (er) {
-           throw new InsightError("No Column Object Created: " + er.message());
+           throw new InsightError("Error in Columns, Order specification : " + er.message());
         }
         /*
         if (options.hasOwnProperty("COLUMNS")) {
@@ -44,7 +60,6 @@ export default class Options {
         } else {
             throw new InsightError("No Column Field Specified");
         } */
-        // TODO: ADD ORDER
         // this.order = options.ORDER;
         /*
         this.listDatasets = listDatasets;
@@ -62,6 +77,12 @@ export default class Options {
       @specs: Apply both the columnar and order sorting
       @output: Expected data set as string
      */
+    /*
+    In Phase Two: To keep things general
+    This will accept any dataset passed.
+    For each Columns and Order
+    There's a check for semantics (errors in key provided, invalid keys etc) BEFORE they perform their actions
+     */
     public applyColumnsAndOrder(): any[] {
         let records: any[] = [];
         if (this.columns.isColumnarValid(Object.keys(this.uds[0]))) {
@@ -69,8 +90,21 @@ export default class Options {
         } else {
             throw new InsightError("Invalid Column Request");
         }
-        // TODO: ADD SORT FUNCTIONALITY
-        return records;
+        try {
+            this.order = new Sorting(records, this.options.ORDER);
+            // notice this is reinitialized (from line 50)?
+            // This is to use the updated dataset with limited columns in Order.
+            // The first initialization was required only to test validity before creating.
+            // No new syntactical errors will be thrown but its still throwing by convention so we must catch
+            if (this.order.isSortValid(Object.keys(records[0]))) {
+                return this.order.applySort();
+            } else {
+                throw new InsightError("Sorting Criteria Not Valid");
+            }
+        } catch (er) {
+            throw new InsightError("Error initializing the sort variable: " + er.message());
+        }
+        return records; // Should never get to this point but will output the right answer
     }
 
     // Helper that allows us to make the record

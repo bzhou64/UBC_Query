@@ -98,6 +98,15 @@ export default class Query {
         } else {
             throw new InsightError("Invalid WHERE field");
         }
+        /*
+         TODO: Incorporate new functionality here
+            Where (FILTER): Accepts a key, and value of that key - returns a filtered dataset
+            Transformations (TRANSFORMATIONS): Accepts a transformation query, and a filtered dataset
+            - returns a grouped and applied dataset (same structure as filtered dataset, just potentially
+            different columns)
+            Options (OPTIONS): Accepts an options value and a group/applied/filtered dataset, returns a fully processed
+            dataset
+         */
         // let optionsObj: Options = new Options(options, Object.keys(this.datasets.datasets), this.datasetId);
         try {
             let filteredDataset = this.filter.applyFilter(this.dataset, Object.values(this.dataset.records));
