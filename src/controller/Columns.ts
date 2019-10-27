@@ -65,7 +65,7 @@ export default class Columns {
         let queryFieldSet = new Set();
         let cols: string[] = this.columndesired.slice();
         for (let col of cols) {
-            if (!col.includes("_")) {
+            if (col.includes("_")) {
                 let temp = col.split("_");
                 queryFieldSet.add(temp[0]);
             }
