@@ -1,8 +1,6 @@
 import Filter from "./Filter";
-import DataSets from "./DataSets";
 import {InsightDataset, InsightDatasetKind, InsightError} from "./IInsightFacade";
 import Section from "./Section";
-import InsightFacade from "./InsightFacade";
 import DataSet from "./DataSet";
 import Log from "../Util";
 
@@ -14,6 +12,8 @@ export default class SComparison extends Filter {
     private fieldToSearch: string; // bla
     private datasetGiven: string;
     private tempResultSoFar: any[] = [];
+    private datasetType: InsightDatasetKind;
+    private sfieldSections: {[index: string]: string[]};
 
     constructor(kkey: string, vvalue: any) {
         super(kkey, vvalue);
@@ -24,10 +24,12 @@ export default class SComparison extends Filter {
         this.fieldvalue = vvalue[this.field];
         if (this.field.indexOf("_") <= 0) {
             throw new InsightError("skey is not valid");
-        } else {
-            this.datasetToSearch = this.field.substr(0, this.field.indexOf("_"));
-            this.fieldToSearch = this.field.substr((this.field.indexOf("_") + 1));
         }
+        this.datasetToSearch = this.field.substr(0, this.field.indexOf("_"));
+        this.fieldToSearch = this.field.substr((this.field.indexOf("_") + 1));
+        this.sfieldSections[InsightDatasetKind.Courses] = ["dept", "id", "instructor", "title", "uuid"];
+        this.sfieldSections[InsightDatasetKind.Rooms] =
+            ["fullname", "shortname", "number", "name", "address", "type", "furniture", "href"];
     }
 
     public applyFilter(ds: DataSet, resultSoFar: any[]): any[] {
@@ -62,11 +64,10 @@ export default class SComparison extends Filter {
         if (this.fieldvalue === null) {
             throw new InsightError("String given for search is NULL");
         }
-        // !SComparison.isAsteriskAtRightSpot(this.fieldvalue)
         if (this.fieldvalue.includes("*") && (SComparison.isAsteriskAtWrongSpot(this.fieldvalue))) {
             throw new InsightError("Asterisk not at the beginning or end");
         }
-        if (!SComparison.isFieldToSearchValid(this.fieldToSearch)) {
+        if (!this.isFieldToSearchValid(this.fieldToSearch)) {
             throw new InsightError("The key given is not a valid key");
         }
         if (!this.isDatasetRequestValid()) {
@@ -77,15 +78,12 @@ export default class SComparison extends Filter {
     }
 
     // helper function to check if an asterisk is not at the front or end of a string
-    /*private static isAsteriskAtRightSpot(fieldvalue: any): boolean {
-        return (fieldvalue.substr(fieldvalue.length - 1) === "*") || (fieldvalue.substr(0, 1) === "*");
-    }*/
     private static isAsteriskAtWrongSpot(fieldvalue: any): boolean {
         return (fieldvalue.substr(1, fieldvalue.length - 2).includes("*"));
     }
 
-    private static isFieldToSearchValid(fts: string) {
-        return ((fts === "dept") || (fts === "id") || (fts === "instructor") || (fts === "title") || (fts === "uuid"));
+    private isFieldToSearchValid(fts: string) {
+        return this.sfieldSections[this.datasetType].includes(fts);
     }
 
     // helper function to check if dataset requested is in database

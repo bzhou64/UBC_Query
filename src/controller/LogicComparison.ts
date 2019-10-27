@@ -25,42 +25,23 @@ export default class LogicComparison extends Filter {
                 throw new InsightError("Multiple keys in Logic Operator");
             }
             if (property.hasOwnProperty("AND")) {
-                this.listoffilters.push(new LogicComparison ("AND", property.AND));
+                this.listoffilters.push(new LogicComparison("AND", property.AND));
             } else if (property.hasOwnProperty("OR")) {
-                this.listoffilters.push(new LogicComparison ("OR", property.OR));
+                this.listoffilters.push(new LogicComparison("OR", property.OR));
             } else if (property.hasOwnProperty("IS")) {
-                this.listoffilters.push(new SComparison ("IS", property.IS));
+                this.listoffilters.push(new SComparison("IS", property.IS));
             } else if (property.hasOwnProperty("LT")) {
-                this.listoffilters.push(new MComparison ("LT", property.LT));
+                this.listoffilters.push(new MComparison("LT", property.LT));
             } else if (property.hasOwnProperty("GT")) {
-                this.listoffilters.push(new MComparison ("GT", property.GT));
+                this.listoffilters.push(new MComparison("GT", property.GT));
             } else if (property.hasOwnProperty("EQ")) {
-                this.listoffilters.push(new MComparison ("EQ", property.EQ));
+                this.listoffilters.push(new MComparison("EQ", property.EQ));
             } else if (property.hasOwnProperty("NOT")) {
-                this.listoffilters.push(new Negation ("NOT", property.NOT));
+                this.listoffilters.push(new Negation("NOT", property.NOT));
             } else {
                 throw new InsightError("Invalid Field");
             }
         }
-        /*for (let i = 0; i < vvalue.length; i++) {
-            if (vvalue[i].hasOwnProperty("AND")) {
-                this.listoffilters.push(new LogicComparison ("AND", vvalue[i].AND));
-            } else if (vvalue[i].hasOwnProperty("OR")) {
-                this.listoffilters.push(new LogicComparison ("OR", vvalue[i].OR));
-            } else if (vvalue[i].hasOwnProperty("IS")) {
-                this.listoffilters.push(new SComparison ("IS", vvalue[i].IS));
-            } else if (vvalue[i].hasOwnProperty("LT")) {
-                this.listoffilters.push(new MComparison ("LT", vvalue[i].LT));
-            } else if (vvalue[i].hasOwnProperty("GT")) {
-                this.listoffilters.push(new MComparison ("GT", vvalue[i].GT));
-            } else if (vvalue[i].hasOwnProperty("EQ")) {
-                this.listoffilters.push(new MComparison ("EQ", vvalue[i].EQ));
-            } else if (vvalue[i].hasOwnProperty("NOT")) {
-                this.listoffilters.push(new Negation ("NOT", vvalue[i].NOT));
-            } else {
-                throw new InsightError("Invalid Field");
-            }
-        }*/
     }
 
     // if key is "AND", get the arrays of all the filters within this logic comparison or catch any errors
@@ -70,14 +51,12 @@ export default class LogicComparison extends Filter {
     // if key is "OR", do the same as "AND" but update tempResultSoFar so that
     public applyFilter(ds: DataSet, resultSoFar: any[]): any[] {
         try {
-            // let tempResultSoFar: any[];
                 if (this.isValid()) {
                     let tempFilterResults: any[] = [];
                     this.listoffilters.forEach((filter) => {
                         tempFilterResults.push(filter.applyFilter(ds, resultSoFar));
                     });
                     if (this.key === "AND") {
-                        // tempResultSoFar = tempFilterResults[0];
                         for (let res of tempFilterResults) {
                             resultSoFar = resultSoFar.filter((val) => res.includes(val));
                         }

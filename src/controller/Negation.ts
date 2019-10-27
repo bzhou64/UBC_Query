@@ -39,18 +39,16 @@ export default class Negation extends Filter {
 
     public applyFilter(ds: DataSet, resultSoFar: any[]): any[] {
         try {
-                    if (this.isValid()) {
-                            let tempArr: any[] = this.filter.applyFilter(ds, resultSoFar);
-                            resultSoFar = resultSoFar.filter((val) => !tempArr.includes(val));
-                        }
-                    return resultSoFar;
+            if (this.isValid()) {
+                let tempArr: any[] = this.filter.applyFilter(ds, resultSoFar);
+                resultSoFar = resultSoFar.filter((val) => !tempArr.includes(val));
+            }
+            return resultSoFar;
             } catch (e) {
             throw new InsightError(e);
         }
     }
 
-    // couldn't think of a case where negation would be invalid. The only case is where the filter given is wrong
-    // but the constructor checks that already
     protected isValid(): boolean {
         if (this.key !== "NOT") {
             throw new InsightError("NOT is invalid");
