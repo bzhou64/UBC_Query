@@ -129,8 +129,11 @@ export default class Query {
             if (resultsArray.length > 5000) {
                 throw new ResultTooLargeError("Too many");
             }
-            let optionsObj: Options = new Options(options, resultsArray);
-            let resultingArray = optionsObj.applyColumnsAndOrder();
+            let resultingArray: any[] = [];
+            if (resultsArray.length > 0) {
+                let optionsObj: Options = new Options(options, resultsArray);
+                resultingArray = optionsObj.applyColumnsAndOrder();
+            }
             this.result = resultingArray;
         } catch (e) {
             throw e;
