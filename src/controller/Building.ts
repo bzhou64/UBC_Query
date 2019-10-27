@@ -15,7 +15,7 @@ export default class Building {
     //     this.lon = lon;
     // }
 
-    public checkAllDefined(): boolean {
+    public checkTableDefined(): boolean {
         return this.fullname !== undefined && this.shortname !== undefined &&
             this.address !== undefined && this.link !== undefined;
     }
