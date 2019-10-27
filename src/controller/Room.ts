@@ -11,19 +11,19 @@ export default class Room {
     public type: string;
     public furniture: string;
     public href: string;
-    constructor(fullname: string, shortname: string, numberRename: string, name: string,
-                address: string, lat: number, lon: number, seats: number,
-                type: string, furniture: string, href: string) {
-        this.fullname = fullname;
-        this.shortname = shortname;
-        this.numberRename = numberRename;
-        this.name = name;
-        this.address = address;
-        this.lat = lat;
-        this.lon = lon;
-        this.seats = seats;
-        this.type = type;
-        this.furniture = furniture;
-        this.href = href;
-    }
+    // constructor(fullname: string, shortname: string, numberRename: string, name: string,
+    //             address: string, lat: number, lon: number, seats: number,
+    //             type: string, furniture: string, href: string) {
+    //     this.fullname = fullname;
+    //     this.shortname = shortname;
+    //     this.numberRename = numberRename;
+    //     this.name = name;
+    //     this.address = address;
+    //     this.lat = lat;
+    //     this.lon = lon;
+    //     this.seats = seats;
+    //     this.type = type;
+    //     this.furniture = furniture;
+    //     this.href = href;
+    // }
 }

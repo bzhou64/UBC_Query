@@ -5,6 +5,7 @@ import InsightFacade from "../src/controller/InsightFacade";
 import Log from "../src/Util";
 import TestUtil from "./TestUtil";
 
+
 // This should match the schema given to TestUtil.validate(..) in TestUtil.readTestQueries(..)
 // except 'filename' which is injected when the file is read.
 export interface ITestQuery {
@@ -123,6 +124,22 @@ describe("InsightFacade Add/Remove Dataset", function () {
             expect(result).to.deep.equal(expected);
             return insightFacade.listDatasets().then((returnedData: InsightDataset[]) => {
                 expect(returnedData).to.have.length(1);
+            }).catch((err: any) => {
+                expect.fail(err, expected, "Should not have rejected");
+            });
+        }).catch((err: any) => {
+            expect.fail(err, expected, "Should not have rejected");
+        });
+
+    });
+    it("Check nrows in rooms.zip", function () {
+        const id: string = "rooms";
+        const expected: string[] = [id];
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms).then((result: string[]) => {
+            expect(result).to.deep.equal(expected);
+            return insightFacade.listDatasets().then((returnedData: InsightDataset[]) => {
+                expect(returnedData).to.have.length(1);
+                expect(returnedData[0].numRows).equal(364);
             }).catch((err: any) => {
                 expect.fail(err, expected, "Should not have rejected");
             });

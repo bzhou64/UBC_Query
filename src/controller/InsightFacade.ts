@@ -13,6 +13,10 @@ import * as fs from "fs";
 import DataSet from "./DataSet";
 import Section from "./Section";
 import Query from "./Query";
+import * as dh from "./DataHelpers";
+import Building from "./Building";
+import Room from "./Room";
+import {assignBuildingDataRoom} from "./DataHelpers";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -45,10 +49,10 @@ export default class InsightFacade implements IInsightFacade {
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
         return new Promise<string[]>((resolve, reject) => {
             this.loadDatasetDisk();
-            if (!this.isIDValid(id)) {
+            if (!dh.isIDValid(id)) {
                 reject(new InsightError("Invalid Id"));
             }
-            this.isAdded(id).then((cond) => {
+            this.isAdded(id).then(async (cond) => {
                 if (cond) {
                     reject(new InsightError("Dataset already exists"));
                 } else {
@@ -56,20 +60,17 @@ export default class InsightFacade implements IInsightFacade {
                     let currDataset: DataSet = new DataSet(id, kind);
                     if (kind === InsightDatasetKind.Courses) {
                         zipFile.loadAsync(content, {base64: true}).then((data) => {
-                            let promisesFiles: any[] = this.createFileReadPromises(data);
+                            let promisesFiles: any[] = dh.createFileReadPromises(data);
                             Promise.all(promisesFiles).then((filesJSON) => {
-                                // let totalSec = 0;
-                                // let validSec = 0;
-                                this.addSectionsDataset(filesJSON, currDataset);
-                                if (Object.keys(currDataset.records).length) {
-                                    this.addDatasetDisk(currDataset);
-                                    resolve(Object.keys(this.datasets.datasets));
-                                } else {
-                                    reject(new InsightError("No valid section in Zip File"));
+                                dh.addSectionsDataset(filesJSON, currDataset);
+                                try {
+                                    resolve(this.checkEmptyDatasetAndAdd(currDataset));
+                                } catch (e) {
+                                  reject(e);
                                 }
                             })
                                 .catch((errAll: any) => {
-                                    reject(new InsightError("Invalid Promises to read zip"));
+                                    reject(new InsightError(errAll));
                                     // throw new InsightError("Invalid Promises to read zip");
                                 });
                             }
@@ -78,105 +79,124 @@ export default class InsightFacade implements IInsightFacade {
                         });
                     } else if (kind === InsightDatasetKind.Rooms) {
                         zipFile.loadAsync(content, {base64: true}).then((data) => {
-                            this.readRoomsHTML(data);
-                            resolve(["Yo"]);
-                                // let promisesFiles: any[] = this.createFileReadPromises(data);
-                                // Promise.all(promisesFiles).then((filesJSON) => {
-                                //     // let totalSec = 0;
-                                //     // let validSec = 0;
-                                //     this.addSectionsDataset(filesJSON, currDataset);
-                                //     if (Object.keys(currDataset.records).length) {
-                                //         this.addDatasetDisk(currDataset);
-                                //         resolve(Object.keys(this.datasets.datasets));
-                                //     } else {
-                                //         reject(new InsightError("No valid section in Zip File"));
-                                //     }
-                                // })
-                                //     .catch((errAll: any) => {
-                                //         reject(new InsightError("Invalid Promises to read zip"));
-                                //         // throw new InsightError("Invalid Promises to read zip");
-                                //     });
-                            }
+                            this.readRoomsHTML(data, currDataset).then(() => {
+                                if (Object.keys(currDataset.records).length) {
+                                    this.addDatasetDisk(currDataset);
+                                    resolve(Object.keys(this.datasets.datasets));
+                                } else {
+                                    reject(new InsightError("No valid section in Zip File"));
+                                }
+                            });
+                            //     .catch((err: any) => {
+                            //     reject(err);
+                            // });
+                        }
                         ).catch((errGlo: any) => {
                             reject(new InsightError("Invalid Zip File"));
                         });
                     }
+                    // if (Object.keys(currDataset.records).length) {
+                    //     this.addDatasetDisk(currDataset);
+                    //     resolve(Object.keys(this.datasets.datasets));
+                    // } else {
+                    //     reject(new InsightError("No valid section in Zip File"));
+                    // }
                 }
             });
         });
     }
 
-    private async readRoomsHTML(data: any) {
+    private checkEmptyDatasetAndAdd(dataset: DataSet): string[] {
+        if (Object.keys(dataset.records).length) {
+            this.addDatasetDisk(dataset);
+            return Object.keys(this.datasets.datasets);
+        } else {
+            throw new InsightError("No valid section in Zip File");
+        }
+    }
+
+    private readRoomsHTML(data: any, currDataset: DataSet) {
         const parse5 = require("parse5");
         let index = "rooms/index.htm";
-        if (data.files.hasOwnProperty(index)) {
-            const htmlReadPromise = data.files[index].async("text");
-            const htmlData = await htmlReadPromise.catch((err: any) => {
-                throw new InsightError(err);
-            });
-            let htmlDoc = parse5.parse(htmlData);
-            Log.trace(htmlDoc);
-        } else {
-            throw new InsightError("rooms/index.html not found");
-        }
-    }
-
-    private addSectionsDataset(filesJSON: any, currDataset: DataSet) {
-        filesJSON.forEach((fileJSON: any) => {
-            if (fileJSON != null) {
-                for (let section of fileJSON["result"]) {
-                    // totalSec++;
-                    let sectionObj: Section = this.createValidSection(section);
-                    // Log.trace(sectionObj);
-                    if (sectionObj) {
-                        // validSec++;
-                        currDataset.addRecord(sectionObj);
-                    }
-                }
+        return new Promise((resolve, reject) => {
+            if (data.files.hasOwnProperty(index)) {
+                data.files[index].async("text").then((htmlData: any) => {
+                    let htmlDoc = parse5.parse(htmlData);
+                    let htmlHtml = htmlDoc.childNodes.find((elem: any) => {
+                        return elem.nodeName === "html";
+                    });
+                    let htmlBody = htmlHtml.childNodes.find((elem: any) => {
+                        return elem.nodeName === "body";
+                    });
+                    let tables = dh.findTableBody(htmlBody);
+                    let buildings: Building[] = [];
+                    // TODO: expand for multiple tables
+                    tables.forEach((table: any) => {
+                        buildings = dh.exploreTable(table);
+                    });
+                    let promiseBuildings = dh.createBuildingReadPromises(data, buildings);
+                    let latLonPromises: Array<Promise<any>> = [];
+                    Promise.all(promiseBuildings).then(() => {
+                        buildings.forEach((building: Building) => {
+                            latLonPromises.push(dh.getLatLon(building.address).then((latLonJson: any) => {
+                                if (latLonJson.hasOwnProperty("lat") && latLonJson.hasOwnProperty("lon")) {
+                                    building.lat = latLonJson.lat;
+                                    building.lon = latLonJson.lon;
+                                }
+                                let buildingHtml: any = parse5.parse(building.data);
+                                this.readRooms(buildingHtml, building, currDataset);
+                            }).catch((err: any) => {
+                                reject(new InsightError(err));
+                            }));
+                        });
+                        Promise.all(latLonPromises).then(() => {
+                            resolve();
+                        }).catch((err: any) => {
+                            reject(new InsightError(err));
+                        });
+                    }).catch((errAll: any) => {
+                        reject(new InsightError(errAll));
+                    });
+                });
+            } else {
+                reject(new InsightError("rooms/index.html not found"));
             }
         });
     }
 
-    private createFileReadPromises(data: any): any[] {
-        let promisesFiles: any[] = [];
-        for (let file in data.files) {
-            if (file.length > "courses/".length && file.substring(0, 8) === "courses/") {
-                let currFilePromise = data.files[file].async("text")
-                    .then((courseData: any) => {
-                        try {
-                            return JSON.parse(courseData);
-                        } catch (e) {
-                            return null;
-                        }
-                    })
-                    .catch((errZip: any) => {
-                        Log.trace(errZip);
-                    });
-                promisesFiles.push(currFilePromise);
-            }
-        }
-        return promisesFiles;
-    }
-
-    private createValidSection(section: any) {
-        if (section.Subject !== undefined && section.Course !== undefined &&
-            section.Avg !== undefined && section.Professor !== undefined && section.Title !== undefined
-            && section.Pass !== undefined && section.Fail !== undefined && section.Audit !== undefined
-            && section.id !== undefined  && section.Year !== undefined) {
-            let year = 1900;
-            if (section.Year === "overall") {
-                year = 1900;
-            } else {
-                year = parseInt(section.Year, 10);
-            }
-            let sectionObject: Section = new Section(section.Subject.toString(),
-                section.Course.toString(), parseFloat(section.Avg),
-                section.Professor.toString(), section.Title.toString(), parseInt(section.Pass, 10),
-                parseInt(section.Fail, 10), parseInt(section.Audit, 10), section.id.toString(),
-                year);
-            return sectionObject;
-        }
-        return null;
+    private readRooms(buildingHtml: any, building: Building, currDataset: DataSet) {
+        let arrayTables: any = [];
+        dh.findTag(buildingHtml, arrayTables, "table");
+        arrayTables.forEach((table: any) => {
+            let tableBody: any = table.childNodes.find((elem: any) => {
+                return elem.nodeName === "tbody";
+            });
+            let tableRows: any = [];
+            dh.findTag(tableBody, tableRows, "tr");
+            tableRows.forEach((row: any) => {
+                let room: Room = new Room();
+                assignBuildingDataRoom(room, building);
+                let arraytds: any = [];
+                dh.findTag(row, arraytds, "td");
+                arraytds.forEach((td: any) => {
+                    if (td.attrs[0].value === "views-field views-field-field-room-capacity") {
+                        room.seats = parseInt(td.childNodes[0].value.trim(), 10);
+                    } else if (td.attrs[0].value === "views-field views-field-field-room-furniture") {
+                        room.furniture = td.childNodes[0].value.trim();
+                    } else if (td.attrs[0].value === "views-field views-field-field-room-type") {
+                        room.type = td.childNodes[0].value.trim();
+                    } else if (td.attrs[0].value === "views-field views-field-field-room-number") {
+                        room.numberRename = td.childNodes[1].childNodes[0].value.trim();
+                    } else if (td.attrs[0].value === "views-field views-field-nothing") {
+                        room.href = td.childNodes[1].attrs[0].value.trim();
+                    }
+                });
+                room.name = room.shortname + "_" + room.numberRename;
+                if (dh.roomDefined(room)) {
+                    currDataset.addRecord(room);
+                }
+            });
+        });
     }
 
     private addDatasetDisk(currDataset: DataSet) {
@@ -192,10 +212,6 @@ export default class InsightFacade implements IInsightFacade {
         }
     }
 
-    private isIDValid(id: string): boolean {
-        return !(id === undefined ||  id === null ||
-            id.includes("_") || id === "" || !id.replace(/\s/g, "").length);
-    }
 
     private isAdded(id: string): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
@@ -216,7 +232,7 @@ export default class InsightFacade implements IInsightFacade {
         // Check if id is valid
         return new Promise<string>((resolve, reject) =>  {
             this.loadDatasetDisk();
-            if (this.isIDValid(id)) {
+            if (dh.isIDValid(id)) {
                 this.isAdded(id).then((val) => {
                     if (!val) {
                         reject(new NotFoundError("Dataset to remove is not added"));
@@ -264,7 +280,7 @@ export default class InsightFacade implements IInsightFacade {
         for (let [datasetId, dataSet] of Object.entries(this.datasets.datasets)) {
             let insightDataset: InsightDataset = {
                 id: datasetId,
-                kind: InsightDatasetKind.Courses,
+                kind: dataSet.type,
                 numRows: Object.keys(dataSet.records).length
             };
             insightDatasets.push(insightDataset);
