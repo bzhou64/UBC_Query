@@ -27,8 +27,8 @@
                     }
                 }
             ]
-        },
+        }},
         "isQueryValid": false,
         "result": "InsightError"
-    }
+
 }

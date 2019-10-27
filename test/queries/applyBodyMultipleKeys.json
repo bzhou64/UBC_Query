@@ -30,8 +30,8 @@
                     }
                 }
             ]
-        },
+        }},
         "isQueryValid": false,
         "result": "InsightError"
-    }
+
 }

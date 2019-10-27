@@ -29,7 +29,7 @@
                     }
                 }
             ]
-        },
+        }},
         "isQueryValid": true,
         "result": [
             {
@@ -213,5 +213,5 @@
                 "goodbye": 95.2
             }
         ]
-    }
+
 }

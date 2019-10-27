@@ -25,8 +25,7 @@
                     }
                 }
             ]
-        },
+        }},
         "isQueryValid": false,
         "result": "InsightError"
-    }
 }

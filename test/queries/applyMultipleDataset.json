@@ -28,8 +28,7 @@
                     }
                 }
             ]
-        },
+        }},
         "isQueryValid": false,
         "result": "InsightError"
-    }
 }

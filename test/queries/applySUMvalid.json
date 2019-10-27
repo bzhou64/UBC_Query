@@ -29,8 +29,7 @@
                     }
                 }
             ]
-        },
+        }},
         "isQueryValid": true,
         "result":[{"courses_dept":"adhe","hello":27,"goodbye":96.11},{"courses_dept":"apsc","hello":77,"goodbye":95.05},{"courses_dept":"arst","hello":32,"goodbye":96.94},{"courses_dept":"audi","hello":20,"goodbye":96.9},{"courses_dept":"bmeg","hello":26,"goodbye":95.15},{"courses_dept":"chbe","hello":58,"goodbye":95.31},{"courses_dept":"civl","hello":30,"goodbye":96.27},{"courses_dept":"cnps","hello":177,"goodbye":95.36},{"courses_dept":"crwr","hello":29,"goodbye":95.7},{"courses_dept":"edcp","hello":38,"goodbye":95.58},{"courses_dept":"edst","hello":44,"goodbye":95.78},{"courses_dept":"educ","hello":45,"goodbye":95.16},{"courses_dept":"eece","hello":24,"goodbye":98.75},{"courses_dept":"epse","hello":1235,"goodbye":95.11},{"courses_dept":"etec","hello":258,"goodbye":95.1},{"courses_dept":"fipr","hello":40,"goodbye":96.4},{"courses_dept":"frst","hello":22,"goodbye":96.36},{"courses_dept":"hgse","hello":80,"goodbye":95.26},{"courses_dept":"kin","hello":62,"goodbye":95.36},{"courses_dept":"libr","hello":20,"goodbye":96.1},{"courses_dept":"math","hello":155,"goodbye":95.56},{"courses_dept":"midw","hello":28,"goodbye":96.5},{"courses_dept":"mine","hello":100,"goodbye":95.18},{"courses_dept":"mtrl","hello":8,"goodbye":96.25},{"courses_dept":"musc","hello":25,"goodbye":95.38},{"courses_dept":"nurs","hello":316,"goodbye":95.13},{"courses_dept":"pcth","hello":1,"goodbye":96},{"courses_dept":"phar","hello":121,"goodbye":95.07},{"courses_dept":"phil","hello":1,"goodbye":96},{"courses_dept":"phth","hello":162,"goodbye":95.37},{"courses_dept":"phys","hello":14,"goodbye":95.43},{"courses_dept":"plan","hello":38,"goodbye":96.47},{"courses_dept":"psyc","hello":26,"goodbye":95.25},{"courses_dept":"sowk","hello":95,"goodbye":95.93},{"courses_dept":"spph","hello":361,"goodbye":95.09},{"courses_dept":"thtr","hello":30,"goodbye":95.2}]
-    }
 }

@@ -30,7 +30,7 @@
                     }
                 }
             ]
-        },
+        }},
         "isQueryValid": false,
-        "result": "InsightError"    }
+        "result": "InsightError"
 }

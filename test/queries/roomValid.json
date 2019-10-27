@@ -29,7 +29,7 @@
                     }
                 }
             ]
-        },
+        }},
         "isQueryValid": true,
         "result": [
             {
@@ -53,5 +53,5 @@
                 "goodbye": 1
             }
         ]
-    }
+
 }
