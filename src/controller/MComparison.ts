@@ -73,7 +73,7 @@ export default class MComparison extends Filter {
     }
 
     private isFieldToSearchValid(fts: string) {
-        return this.mfieldSections[this.datasetType].includes("fts");
+        return this.mfieldSections[this.datasetType].includes(fts);
     }
 
     // helper function to check if dataset requested is in database
