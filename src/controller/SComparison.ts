@@ -34,6 +34,7 @@ export default class SComparison extends Filter {
 
     public applyFilter(ds: DataSet, resultSoFar: any[]): any[] {
         this.datasetGiven = ds.id;
+        this.datasetType = ds.type;
         try {
                 if (this.isValid()) {
                     let sections: any = ds.records;
