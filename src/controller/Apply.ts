@@ -74,6 +74,7 @@ export default class Apply {
     /*
     returns true IFF Apply semantics are all valid
     will accept a list of columns - feel free to add more params at this stage
+    bruh
      */
     public isApplyValid(listofdata: string[]): boolean {
         for (let applyBody of this.rules) {
