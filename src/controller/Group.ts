@@ -20,6 +20,8 @@ export default class Group {
         // Test for An Array
         if (!Array.isArray(this.obj)) {
             throw new InsightError("Group Object Is Not An Array");
+        } else {
+            this.groups = this.obj;
         }
         if (this.obj.length < 1) {
             throw new InsightError("Group Array Has No Items");
@@ -46,7 +48,7 @@ export default class Group {
         let first = this.obj.shift(); // Should Remove the First Element and Return That Element
         let rest = this.obj; // Should Now Only Contain The Rest of The Elements
         this.grouping = new Grouping(this.dataset, first, rest, { });
-        return this.grouping.showGroups();
+        return this.grouping.showGroups([]);
     }
 
     /*

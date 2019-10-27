@@ -102,7 +102,7 @@ export default class Options {
                 throw new InsightError("Sorting Criteria Not Valid");
             }
         } catch (er) {
-            throw new InsightError("Error initializing the sort variable: " + er.message());
+            throw new InsightError("Error initializing the sort variable: " + er.message);
         }
         return records; // Should never get to this point but will output the right answer
     }

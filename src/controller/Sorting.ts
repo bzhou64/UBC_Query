@@ -14,6 +14,7 @@ export default class Sorting {
     private rds: any[]; // the dataset after filtering/transformation
 
     constructor(rd: any [], sort: any) {
+        this.criteria = [];
         this.rds = rd; // rd would come from the output of COLUMNS
         try {
             this.sorting = sort;
@@ -39,9 +40,10 @@ export default class Sorting {
                 }
             } else { // If not an object - it would be a string, we add the string to the sort criteria list
                 this.criteria.push(this.sorting);
+                this.direc = "UP";
             }
         } catch (er) {
-                throw new InsightError("Order Error" + er.message());
+                throw new InsightError("Order Error" + er.message);
         }
 
     }
@@ -68,10 +70,10 @@ export default class Sorting {
             let criteria = this.criteria.slice();
             if (this.compare(leftar[0], rightar[0], criteria)) {
                 sortedar.push(leftar[0]);
-                leftar.slice(1);
+                leftar.shift();
             } else {
                 sortedar.push(rightar[0]);
-                rightar.slice(1);
+                rightar.shift();
             }
         }
         while (leftar.length) {

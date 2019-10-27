@@ -54,18 +54,20 @@ export default class Grouping {
         this.rsfData = rsf;
         this.criteriaRemaining = criteriaRemaining;
         this.mutableObject = mutableObj;
+        this.groups = [];
         let setofUnique = new Set<any>();
         if (this.criteria !== null) {
             setofUnique = groupHelper.unique(this.criteria, this.rsfData);
         }
-        if (this.criteria === null) {
+        if (this.criteria  === null) {
             this.mutableObject = groupHelper.newMutableObject(this.mutableObject, "result", this.rsfData);
         } else if (this.criteriaRemaining.length === 0) {
                 for (let value of setofUnique) {
                     let newObj = groupHelper.newMutableObject(this.mutableObject, this.criteria, value);
                     let newRSF = groupHelper.relatedRSF(this.criteria, value, this.rsfData);
                     let newCR = groupHelper.newRemainingCriteria(this.criteriaRemaining);
-                    this.groups.push(new Grouping(newRSF, null, newCR, newObj));
+                    let groupe: Grouping = new Grouping(newRSF, null, newCR , newObj);
+                    this.groups.push(groupe);
                 }
         } else {
             for (let value of setofUnique) {
@@ -85,16 +87,16 @@ export default class Grouping {
     Effects: returns the grouped list of records
      */
 
-    public showGroups(): any[] {
-        let group: any[] = [];
+    public showGroups(grouping: any[]): any[] {
         if (this.criteria === null) {
-            group.push(this.mutableObject);
+            grouping.push(this.mutableObject);
         } else {
+            let group: any[] = [];
             for (let groupes of this.groups) {
-              group.push(groupes.showGroups()[0]);
+              group.push(groupes.showGroups(grouping));
             }
         }
-        return group;
+        return grouping;
     }
     /*
     Fundamental Logic behind ShowGroups

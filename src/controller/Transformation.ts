@@ -72,7 +72,7 @@ export default class Transformation {
                 throw new InsightError("Invalid Apply Used Here");
             }
         } catch (er) {
-            throw new InsightError("Transformation Invalid: " + er.message());
+            throw new InsightError("Transformation Invalid: " + er.message);
         }
         return records;
     }

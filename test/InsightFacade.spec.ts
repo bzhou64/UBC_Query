@@ -4,6 +4,10 @@ import {InsightDataset, InsightDatasetKind, InsightError, NotFoundError} from ".
 import InsightFacade from "../src/controller/InsightFacade";
 import Log from "../src/Util";
 import TestUtil from "./TestUtil";
+import Group from "../src/controller/Group";
+import Grouping from "../src/controller/Grouping";
+import GroupHelper from "../src/controller/GroupHelper";
+import Sorting from "../src/controller/Sorting";
 
 
 // This should match the schema given to TestUtil.validate(..) in TestUtil.readTestQueries(..)
@@ -357,6 +361,136 @@ describe("InsightFacade Add/Remove Dataset", function () {
     });
 });
 
+describe("Testing Group Functions", function () {
+    it("Group - Should Group By Criteria Provided", function () {
+        let testobj = [{ apple : 4 , turn : "me", over : 5},
+            { apple : 3 , turn : "ma", over : 5}, { apple : 4 , turn : "mi", over : 5},
+            { apple : 5 , turn : "mo", over : 5}, { apple : 3, turn : "my", over : 5},
+            { apple : 5 , turn : "mu", over : 5}];
+        let criteria = ["apple"];
+        let expected = [
+            { apple: 4, result: [{ apple : 4 , turn : "me", over : 5}, { apple : 4 , turn : "mi", over : 5}]},
+            { apple: 3, result: [{ apple : 3 , turn : "ma", over : 5}, { apple : 3, turn : "my", over : 5}]},
+            { apple: 5, result: [{ apple : 5 , turn : "mo", over : 5}, { apple : 5 , turn : "mu", over : 5}]}];
+        let group = new Grouping(testobj, "apple", [ ], { });
+        let actual = group.showGroups([]);
+        expect(expected).to.deep.equal(actual);
+    });
+    it("GroupHelper - Test to Return RSF", function () {
+        let testobj = [{ apple : 4 , turn : "me", over : 5},
+            { apple : 3 , turn : "ma", over : 5}, { apple : 4 , turn : "mi", over : 5},
+            { apple : 5 , turn : "mo", over : 5}, { apple : 3, turn : "my", over : 5},
+            { apple : 5 , turn : "mu", over : 5}];
+        let criteria = "apple";
+        let expected =  [{ apple : 4 , turn : "me", over : 5}, { apple : 4 , turn : "mi", over : 5}];
+        let group = new GroupHelper();
+        let actual = group.relatedRSF(criteria, 4, testobj);
+        expect(expected).to.deep.equal(actual);
+    });
+    it("GroupHelper - Test to Append New Criteria", function () {
+        let testobj = {apple: 4};
+        let group = new GroupHelper();
+        let expected = {apple: 4, man: 5};
+        let actual = group.newMutableObject(testobj, "man", 5);
+        expect(expected).to.deep.equal(actual);
+    });
+    it("GroupHelper - Test For Next Criteria", function () {
+        let testobj = ["apple", "boy", "girl"];
+        let group = new GroupHelper();
+        let expected = "apple";
+        let actual = group.nextCriteria(testobj);
+        expect(expected).to.deep.equal(actual);
+        let nexpected = ["boy", "girl"];
+        let nactual = group.newRemainingCriteria(testobj);
+        expect(nexpected).to.deep.equal(nactual);
+    });
+    it("GroupHelper - Get Unique Values", function () {
+        let testobj = [{ apple : 4 , turn : "me", over : 5},
+            { apple : 3 , turn : "ma", over : 5}, { apple : 4 , turn : "mi", over : 5},
+            { apple : 5 , turn : "mo", over : 5}, { apple : 3, turn : "my", over : 5},
+            { apple : 5 , turn : "mu", over : 5}];
+        let criteria = "apple";
+        let expected: Set<any> = new Set<any>();
+        expected.add(4);
+        expected.add(3);
+        expected.add(5);
+        let group = new GroupHelper();
+        let actual = group.unique(criteria, testobj);
+        expect(expected).to.deep.equal(actual);
+    });
+    it("Group - Should Return The Group Criteria 2 Fields", function () {
+        let testobj = [{ apple : 4 , turn : "me", over : 5},
+            { apple : 3 , turn : "ma", over : 5}, { apple : 4 , turn : "mi", over : 6},
+            { apple : 5 , turn : "mo", over : 6}, { apple : 3, turn : "my", over : 6},
+            { apple : 5 , turn : "mu", over : 5}];
+        let criteria = ["apple", "over"];
+        let expected = [
+            { apple: 4, over: 5, result: [{ apple : 4 , turn : "me", over : 5}]},
+            { apple: 4, over: 6, result: [{ apple : 4 , turn : "mi", over : 6}]},
+            { apple: 3, over: 5, result: [{ apple : 3 , turn : "ma", over : 5}]},
+            { apple: 3, over: 6, result: [{ apple : 3 , turn : "my", over : 6}]},
+            { apple: 5, over: 6, result: [{ apple : 5 , turn : "mo", over : 6}]},
+            { apple: 5, over: 5, result: [{ apple : 5 , turn : "mu", over : 5}]}];
+        let group = new Grouping(testobj, "apple", ["over"], { });
+        let actual = group.showGroups([]);
+        expect(expected).to.deep.equal(actual);
+    });
+    it("Group - Should Return The GROUPINGS from GROUP", function () {
+        let testobj = [{ apple : 4 , turn : "me", over : 5},
+            { apple : 3 , turn : "ma", over : 5}, { apple : 4 , turn : "mi", over : 6},
+            { apple : 5 , turn : "mo", over : 6}, { apple : 3, turn : "my", over : 6},
+            { apple : 5 , turn : "mu", over : 5}];
+        let criteria = ["apple", "over"];
+        let expected = [
+            { apple: 4, over: 5, result: [{ apple : 4 , turn : "me", over : 5}]},
+            { apple: 4, over: 6, result: [{ apple : 4 , turn : "mi", over : 6}]},
+            { apple: 3, over: 5, result: [{ apple : 3 , turn : "ma", over : 5}]},
+            { apple: 3, over: 6, result: [{ apple : 3 , turn : "my", over : 6}]},
+            { apple: 5, over: 6, result: [{ apple : 5 , turn : "mo", over : 6}]},
+            { apple: 5, over: 5, result: [{ apple : 5 , turn : "mu", over : 5}]}];
+        let group = new Group(criteria, testobj);
+        let actual = group.applygrouping();
+        expect(expected).to.deep.equal(actual);
+    });
+});
+
+describe("Testing Sort Functions", function () {
+    it("Sort Fields", function () {
+        let testobj = [{ apple : 4 , turn : "me", over : 5},
+            { apple : 3 , turn : "ma", over : 5}, { apple : 4 , turn : "mi", over : 6},
+            { apple : 5 , turn : "mo", over : 6}, { apple : 3, turn : "my", over : 6},
+            { apple : 5 , turn : "mu", over : 5}];
+        let criteria = ["apple", "over"];
+        let order = {dir: "UP", keys: criteria};
+        let expected = [{ apple : 3 , turn : "ma", over : 5}, { apple : 3, turn : "my", over : 6},
+            { apple : 4 , turn : "me", over : 5}, { apple : 4 , turn : "mi", over : 6},
+            { apple : 5 , turn : "mu", over : 5}, { apple : 5 , turn : "mo", over : 6}];
+        let sort = new Sorting(testobj, order);
+        let actual = sort.applySort();
+        expect(expected).to.deep.equal(actual);
+    });
+    it("Sort Fields - No DIR", function () {
+        let testobj = [{ apple : 4 , turn : "me", over : 5},
+            { apple : 3 , turn : "ma", over : 5}, { apple : 4 , turn : "mi", over : 6},
+            { apple : 5 , turn : "mo", over : 6}, { apple : 3, turn : "my", over : 6},
+            { apple : 5 , turn : "mu", over : 5}];
+        let criteria = ["apple", "over"];
+        let order = {keys: criteria};
+        let expected = [{ apple : 3 , turn : "ma", over : 5}, { apple : 3, turn : "my", over : 6},
+            { apple : 4 , turn : "me", over : 5}, { apple : 4 , turn : "mi", over : 6},
+            { apple : 5 , turn : "mu", over : 5}, { apple : 5 , turn : "mo", over : 6}];
+        try {
+            let sort = new Sorting(testobj, order);
+            expect.fail("NO ERROR CAUGHT");
+        } catch (er) {
+            if (er instanceof InsightError) {
+                // do nothing
+            } else {
+                expect.fail("WRONG ERROR CAUGHT");
+            }
+        }
+    });
+});
 /*
  * This test suite dynamically generates tests from the JSON files in test/queries.
  * You should not need to modify it; instead, add additional files to the queries directory.
