@@ -42,7 +42,7 @@ export default class Transformation {
                 throw new InsightError("APPLY not specified");
             }
         } catch (er) {
-            throw new InsightError("Poor Transformation Spec Found" + er.message());
+            throw new InsightError("Poor Transformation Spec Found" + er);
         }
     }
 

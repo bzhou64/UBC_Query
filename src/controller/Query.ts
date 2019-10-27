@@ -56,9 +56,9 @@ export default class Query {
             throw (new InsightError("Columns missing from options or not an array"));
         }
         let order = options["ORDER"];
-        if (order !== undefined && typeof(order) !== "string") {
-            throw (new InsightError("Order missing from options"));
-        }
+        // if (order !== undefined && typeof(order) !== "string") {
+        //     throw (new InsightError("Order missing from options"));
+        // }
         if (columns.length === 0) {
             throw (new InsightError("No column specified in options"));
         }
@@ -154,4 +154,38 @@ export default class Query {
         });
         return colName;
     }
+
+    // return dataset name if found and consistent
+    // return undefined if not found
+    // else throw Insight error
+    private findDatasetTransformations(tfs: any): string {
+        let datasetIdSet: Set<string> = new Set<string>();
+        if (tfs.hasOwnProperty("GROUP") && tfs.hasOwnProperty("APPLY")) {
+            if (tfs["GROUP"].length >= 1 && tfs["APPLY"].length >= 1) {
+                tfs["GROUP"].forEach((key: string) => {
+                    datasetIdSet.add(key.split("_")[0]);
+                });
+                tfs["APPLY"].forEach((key: any) => {
+                    datasetIdSet.add(Object.values(Object.values(key)[0])[0].split("_")[0]);
+                });
+            } else {
+                throw new InsightError("Wrong length group/ apply");
+            }
+        } else {
+            throw new InsightError("Wrong Transformation");
+        }
+        if (datasetIdSet.size === 1) {
+            let setIter = datasetIdSet.values();
+            return setIter.next().value;
+        } else if (datasetIdSet.size === 0) {
+            return undefined;
+        } else {
+            throw new InsightError("Multiple datasets access in Transformations");
+        }
+    }
+
+    private findDatasetOptions(tfs: any): string {
+        return undefined;
+    }
+
 }
