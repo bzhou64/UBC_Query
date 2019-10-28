@@ -25,7 +25,8 @@ export default class Columns {
     public applyColumns(): any[] {
         let records: any[] = [];
         for (let udr of this.rds) {
-            records.push(this.selectColumnsAsObj(udr));
+            let record = this.selectColumnsAsObj(udr);
+            records.push(record);
         }
         return records;
     }
