@@ -205,9 +205,9 @@ export default class Query {
                     datasetIdSet.add(s);
                 }
             }
-        } else {
+        } /*else {
             throw new InsightError("No Options Field Specified");
-        }
+        }*/
         return datasetIdSet;
     }
 

@@ -2,6 +2,7 @@ import {InsightDatasetKind, InsightError} from "./IInsightFacade";
 import DataSet from "./DataSet";
 import {Decimal} from "decimal.js";
 import {split} from "ts-node";
+import apply = Reflect.apply;
 
 export default class Apply {
     /*
@@ -20,16 +21,16 @@ export default class Apply {
     private dataSetID: string;
     private dataSetType: string;
 
-    constructor(groupeddataset: any[], apply: any[]) {
+    constructor(groupeddataset: any[], anies: any[]) {
         /*
         Goal:
         Store the grouped dataset from 'Group'
-        Store apply rules and names as is
+        Store rules and names as is
          */
-        if (!Array.isArray(apply)) {
+        if (!Array.isArray(anies)) {
             throw new InsightError("APPLY is invalid.");
         }
-        for (let applyRule of apply) {
+        for (let applyRule of anies) {
             // check if there is only 1 key in applyrule.
             if (Object.keys(applyRule).length !== 1) {
                 throw new InsightError("APPLYRULE is invalid.");
@@ -112,35 +113,14 @@ export default class Apply {
                 throw new InsightError("Invalid key in APPLYBODY");
             }
             // check if the key is correct based on token.
-            if (!this.mfieldSections.includes(tempKey)) {
-                if (Object.keys(applyBody)[tempLength - 1] === "COUNT"
-                    && !this.sfieldSections.includes(tempKey)) {
-                    throw new InsightError("Invalid key in COUNT");
-                } else {
+            if (Object.keys(applyBody)[tempLength - 1] !== "COUNT") {
+                if (!this.mfieldSections.includes(tempKey)) {
                     throw new InsightError("Invalid key in " + Object.keys(applyBody)[tempLength - 1]);
                 }
             }
         }
-        // this.updateRuleNamesArray(listofdata);
         return true;
     }
-
-    // updates the list of apply rules needed to be applied.
-    // If any applyKey in apply isn't in columns, we can remove it from our list of applyKeys.
-    /*private updateRuleNamesArray(lod: string[]) {
-        let placeToSpliceArr: number[] = [];
-        let counter: number = 0;
-        for (let applyKey of this.ruleNames) {
-            if (!lod.includes(applyKey)) {
-                placeToSpliceArr.push(counter);
-            }
-            counter++;
-        }
-        while (placeToSpliceArr.length !== 0) {
-            this.ruleNames.splice(placeToSpliceArr.pop(), 1);
-            this.rules.splice(placeToSpliceArr.pop(), 1);
-        }
-    }*/
 
     // does the actual applyToken applying.
     private static setApplyHelper(ruleName: any, recordsArr: any[], key: string): any {
