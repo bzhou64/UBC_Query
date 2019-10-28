@@ -27,7 +27,7 @@ export default class MComparison extends Filter {
         this.datasetToSearch = this.field.substr(0, this.field.indexOf("_"));
         this.fieldToSearch = this.field.substr((this.field.indexOf("_") + 1));
         this.mfieldSections[InsightDatasetKind.Courses] = ["avg", "pass", "fail", "audit", "year"];
-        this.mfieldSections[InsightDatasetKind.Rooms] = ["lat", "long", "seats"];
+        this.mfieldSections[InsightDatasetKind.Rooms] = ["lat", "lon", "seats"];
     }
 
     public applyFilter(ds: DataSet, resultSoFar: any[]): any[] {

@@ -44,7 +44,7 @@ export default class Apply {
             }
         }
         this.groupDS = groupeddataset;
-        this.mfieldSections = ["avg", "pass", "fail", "audit", "year", "lat", "long", "seats"];
+        this.mfieldSections = ["avg", "pass", "fail", "audit", "year", "lat", "lon", "seats"];
         this.sfieldSections = ["dept", "id", "instructor", "title", "uuid",
             "fullname", "shortname", "number", "name", "address", "type", "furniture", "href"];
     }
@@ -152,6 +152,7 @@ export default class Apply {
             for (let section of recordsArr) {
                 tempResult = tempResult + section[key];
             }
+            tempResult = Number(tempResult.toFixed(2));
         } else {
             tempResult = 0;
             let tempArr: any[] = [];

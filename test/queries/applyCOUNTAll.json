@@ -1,0 +1,103 @@
+{
+    "title": "Very invalid query",
+    "query": {
+        "WHERE": {
+            "GT": {
+                "rooms_seats": 50
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "rooms_seats",
+                "lat",
+                "lon",
+                "seats",
+                "fullname",
+                "shortname",
+                "number",
+                "name",
+                "address",
+                "type",
+                "furniture",
+                "href"
+            ],
+            "ORDER": {
+                "dir": "DOWN",
+                "keys": ["rooms_seats",
+                    "lat",
+                    "lon",
+                    "seats",
+                    "fullname",
+                    "shortname",
+                    "number",
+                    "name",
+                    "address",
+                    "type",
+                    "furniture",
+                    "href"]
+            }
+        },
+        "TRANSFORMATIONS": {
+            "GROUP": [
+                "rooms_seats"
+            ],
+            "APPLY": [
+                {
+                    "lat": {
+                        "COUNT": "rooms_lat"
+                    }
+                },
+                {
+                    "lon": {
+                        "COUNT": "rooms_lon"
+                    }
+                },
+                {
+                    "seats": {
+                        "COUNT": "rooms_seats"
+                    }
+                },
+                {
+                    "fullname": {
+                        "COUNT": "rooms_fullname"
+                    }
+                },
+                {
+                    "shortname": {
+                        "COUNT": "rooms_shortname"
+                    }
+                },
+                {
+                    "number": {
+                        "COUNT": "rooms_number"
+                    }
+                },
+                {
+                    "name": {
+                        "COUNT": "rooms_name"
+                    }
+                },
+                {
+                    "address": {
+                        "COUNT": "rooms_address"
+                    }
+                },
+                {
+                    "type": {
+                        "COUNT": "rooms_type"
+                    }
+                },
+                {
+                    "furniture": {
+                        "COUNT": "rooms_furniture"
+                    }
+                },
+                {
+                    "href": {
+                        "COUNT": "rooms_href"
+                    }
+                }
+            ]
+        }},
+        "isQueryValid": true,
+        "result":[{"rooms_seats":503,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":442,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":426,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":375,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":350,"lat":2,"lon":2,"seats":1,"fullname":2,"shortname":2,"number":3,"name":3,"address":2,"type":1,"furniture":2,"href":3},{"rooms_seats":325,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":299,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":3,"name":3,"address":1,"type":1,"furniture":1,"href":3},{"rooms_seats":280,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":275,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":265,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":260,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":257,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":250,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":240,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":236,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":228,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":225,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":224,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":205,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":200,"lat":2,"lon":2,"seats":1,"fullname":2,"shortname":2,"number":2,"name":2,"address":2,"type":1,"furniture":2,"href":2},{"rooms_seats":190,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":2,"name":2,"address":1,"type":1,"furniture":1,"href":2},{"rooms_seats":188,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":187,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":183,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":181,"lat":2,"lon":2,"seats":1,"fullname":2,"shortname":2,"number":2,"name":2,"address":2,"type":1,"furniture":1,"href":2},{"rooms_seats":167,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":160,"lat":2,"lon":2,"seats":1,"fullname":2,"shortname":2,"number":2,"name":2,"address":2,"type":1,"furniture":1,"href":2},{"rooms_seats":155,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":154,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":150,"lat":3,"lon":3,"seats":1,"fullname":3,"shortname":3,"number":4,"name":4,"address":3,"type":1,"furniture":2,"href":4},{"rooms_seats":144,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":136,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":131,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":125,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":123,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":120,"lat":2,"lon":2,"seats":1,"fullname":2,"shortname":2,"number":4,"name":4,"address":2,"type":1,"furniture":1,"href":4},{"rooms_seats":114,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":2,"name":2,"address":1,"type":1,"furniture":1,"href":2},{"rooms_seats":112,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":108,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":2,"name":2,"address":1,"type":1,"furniture":1,"href":2},{"rooms_seats":106,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":102,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":100,"lat":3,"lon":3,"seats":1,"fullname":3,"shortname":3,"number":3,"name":3,"address":3,"type":3,"furniture":3,"href":3},{"rooms_seats":99,"lat":2,"lon":2,"seats":1,"fullname":2,"shortname":2,"number":2,"name":2,"address":2,"type":1,"furniture":1,"href":2},{"rooms_seats":94,"lat":3,"lon":3,"seats":1,"fullname":3,"shortname":3,"number":3,"name":3,"address":3,"type":2,"furniture":2,"href":3},{"rooms_seats":90,"lat":2,"lon":2,"seats":1,"fullname":2,"shortname":2,"number":3,"name":3,"address":2,"type":2,"furniture":2,"href":3},{"rooms_seats":88,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":84,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":80,"lat":4,"lon":4,"seats":1,"fullname":4,"shortname":4,"number":4,"name":4,"address":4,"type":2,"furniture":3,"href":4},{"rooms_seats":78,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":4,"name":4,"address":1,"type":2,"furniture":2,"href":4},{"rooms_seats":76,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":75,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":74,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":72,"lat":4,"lon":4,"seats":1,"fullname":4,"shortname":4,"number":6,"name":6,"address":4,"type":4,"furniture":4,"href":6},{"rooms_seats":70,"lat":2,"lon":2,"seats":1,"fullname":2,"shortname":2,"number":3,"name":3,"address":2,"type":1,"furniture":1,"href":3},{"rooms_seats":68,"lat":2,"lon":2,"seats":1,"fullname":2,"shortname":2,"number":4,"name":4,"address":2,"type":2,"furniture":2,"href":4},{"rooms_seats":66,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":65,"lat":2,"lon":2,"seats":1,"fullname":2,"shortname":2,"number":6,"name":6,"address":2,"type":2,"furniture":1,"href":6},{"rooms_seats":63,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":62,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":60,"lat":7,"lon":7,"seats":1,"fullname":7,"shortname":7,"number":10,"name":10,"address":7,"type":4,"furniture":3,"href":10},{"rooms_seats":58,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":56,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":55,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":54,"lat":3,"lon":3,"seats":1,"fullname":3,"shortname":3,"number":8,"name":8,"address":3,"type":2,"furniture":3,"href":8},{"rooms_seats":53,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1},{"rooms_seats":51,"lat":1,"lon":1,"seats":1,"fullname":1,"shortname":1,"number":1,"name":1,"address":1,"type":1,"furniture":1,"href":1}]}
