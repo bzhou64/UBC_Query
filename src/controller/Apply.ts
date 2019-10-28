@@ -11,12 +11,12 @@ export default class Apply {
         Test for ApplyRule fields
     WILL ACCEPT A GROUPING DATASET, THE APPLY RULE(S) and custom names
      */
-    private ruleNames: any[]; // "overallAVG"
-    private rules: any[]; // "AVG" : "courses_avg"
+    private ruleNames: any[] = []; // "overallAVG"
+    private rules: any[] = []; // "AVG" : "courses_avg"
     private groupDS: any[];
     private applyTOKEN: string[] = ["MAX", "MIN", "AVG", "COUNT", "SUM"];
-    private mfieldSections: {[index: string]: string[]};
-    private sfieldSections: {[index: string]: string[]};
+    private mfieldSections: string[];
+    private sfieldSections: string[];
     private dataSetID: string;
     private dataSetType: string;
 
@@ -43,11 +43,9 @@ export default class Apply {
             }
         }
         this.groupDS = groupeddataset;
-        this.mfieldSections[InsightDatasetKind.Courses] = ["avg", "pass", "fail", "audit", "year"];
-        this.mfieldSections[InsightDatasetKind.Rooms] = ["lat", "long", "seats"];
-        this.sfieldSections[InsightDatasetKind.Courses] = ["dept", "id", "instructor", "title", "uuid"];
-        this.sfieldSections[InsightDatasetKind.Rooms] =
-            ["fullname", "shortname", "number", "name", "address", "type", "furniture", "href"];
+        this.mfieldSections = ["avg", "pass", "fail", "audit", "year", "lat", "long", "seats"];
+        this.sfieldSections = ["dept", "id", "instructor", "title", "uuid",
+            "fullname", "shortname", "number", "name", "address", "type", "furniture", "href"];
     }
     /*
     Assuming that the Apply Rules are legitimate
@@ -59,10 +57,10 @@ export default class Apply {
         let records: any[];
         for (let group of this.groupDS) {
             delete group[Object.keys(group).length - 1];
-            let tempArrRecords: any[] = group[Object.keys(group).length - 1];
+            let tempArrRecords: any[] = group["result"];
             for (let i = 0; i < this.ruleNames.length; i++) {
                 let field: string = this.rules[i][Object.keys(this.rules[i])[0]];
-                let splitted: string[] = field.split("_", 1);
+                let splitted: string[] = field.split("_");
                 let tempKey: string = splitted[1];
                 group[this.ruleNames[i]] = Apply.setApplyHelper(this.ruleNames[i], tempArrRecords, tempKey);
             }
@@ -106,37 +104,32 @@ export default class Apply {
             if (field.indexOf("_") <= 0) {
                 throw new InsightError("key is not valid");
             }
-            let splitted: string[] = field.split("_", 1);
-            let tempID: string = splitted[0];
+            let splitted: string[] = field.split("_");
             let tempKey: string = splitted[1];
-            splitted = listofdata[0].split("_", 1);
-            this.dataSetID = splitted[0];
-            for (let [str, arr] of Object.entries(this.mfieldSections)) {
-                if (arr.includes(splitted[1]) || this.sfieldSections[str].includes(splitted[1])) {
-                    this.dataSetType = str;
-                }
-            }
             // check if the apply body is attempting to query more than 1 dataset.
-            if (tempID !== this.dataSetID) {
-                throw new InsightError("Querying over multiple datasets.");
+            let bla: any = this.groupDS[0];
+            let bla1: any = bla["result"];
+            let bla2: any = Object.keys(bla1[0]);
+            if (!bla2.includes(field)) {
+                throw new InsightError("Invalid key in APPLYBODY");
             }
             // check if the key is correct based on token.
-            if (!this.mfieldSections[this.dataSetType].includes(tempKey)) {
+            if (!this.mfieldSections.includes(tempKey)) {
                 if (Object.keys(applyBody)[tempLength - 1] === "COUNT"
-                    && !this.sfieldSections[this.dataSetType].includes(tempKey)) {
+                    && !this.sfieldSections.includes(tempKey)) {
                     throw new InsightError("Invalid key in COUNT");
                 } else {
                     throw new InsightError("Invalid key in " + Object.keys(applyBody)[tempLength - 1]);
                 }
             }
         }
-        this.updateRuleNamesArray(listofdata);
+        // this.updateRuleNamesArray(listofdata);
         return true;
     }
 
     // updates the list of apply rules needed to be applied.
     // If any applyKey in apply isn't in columns, we can remove it from our list of applyKeys.
-    private updateRuleNamesArray(lod: string[]) {
+    /*private updateRuleNamesArray(lod: string[]) {
         let placeToSpliceArr: number[] = [];
         let counter: number = 0;
         for (let applyKey of this.ruleNames) {
@@ -149,7 +142,7 @@ export default class Apply {
             this.ruleNames.splice(placeToSpliceArr.pop(), 1);
             this.rules.splice(placeToSpliceArr.pop(), 1);
         }
-    }
+    }*/
 
     // does the actual applyToken applying.
     private static setApplyHelper(ruleName: any, recordsArr: any[], key: string): any {

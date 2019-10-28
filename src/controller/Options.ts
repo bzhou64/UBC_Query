@@ -48,11 +48,11 @@ export default class Options {
             }
             if (options.hasOwnProperty("ORDER")) {
                 this.order = new Sorting(uds, options.ORDER);
-            } else {
+            } /*else {
                 throw new InsightError("No Order Field Specified");
-            }
+            }*/
         } catch (er) {
-           throw new InsightError("Error in Columns, Order specification : " + er.message());
+           throw new InsightError("Error in Columns, Order specification : " + er);
         }
         /*
         if (options.hasOwnProperty("COLUMNS")) {
@@ -102,7 +102,7 @@ export default class Options {
                 throw new InsightError("Sorting Criteria Not Valid");
             }
         } catch (er) {
-            throw new InsightError("Error initializing the sort variable: " + er.message);
+            throw new InsightError("Error initializing the sort variable: " + er);
         }
         return records; // Should never get to this point but will output the right answer
     }

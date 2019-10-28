@@ -56,7 +56,7 @@ export default class Group {
      */
     public isGroupValid?(existingColumnNames: string[]): boolean {
         // Test if Group Provided Is A Column
-        for (const group in this.groups) {
+        for (const group of this.groups) {
             if (!existingColumnNames.includes(group)) {
                 return false;
             }
