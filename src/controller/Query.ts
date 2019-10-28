@@ -68,7 +68,7 @@ export default class Query {
         // }
 
         // this.datasetId = this.datasetIdOptions(columnsOrder);
-        let optionsValues = this.findDatasetOptions(options);
+        let optionsValues = this.findDatasetOptions(this.queryObj);
         let tfsValues = this.findDatasetTransformations(this.queryObj["TRANSFORMATIONS"]);
         let datasetIds = Query.union(optionsValues, tfsValues);
         if (datasetIds.size !== 1) {
@@ -204,8 +204,6 @@ export default class Query {
                 for (let s of seta) {
                     datasetIdSet.add(s);
                 }
-            } else {
-                throw new InsightError ("No Columns Field");
             }
         } else {
             throw new InsightError("No Options Field Specified");
@@ -230,8 +228,6 @@ export default class Query {
                 } else {
                     throw new InsightError("Keys Wrong Format Specified");
                 }
-            } else {
-                throw new InsightError("Order has no Keys Specified");
             }
         } else {
             str.push(clause);
@@ -243,7 +239,7 @@ export default class Query {
         let str: string[] = [];
         if (Array.isArray(clause)) {
             for (let clau of clause) {
-                if (clau.include("_")) {
+                if (clau.includes("_")) {
                     let temp = clau.split("_");
                     str.push(temp[0]);
                 }
