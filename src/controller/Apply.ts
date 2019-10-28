@@ -36,6 +36,9 @@ export default class Apply {
                 throw new InsightError("APPLYRULE is invalid.");
             }
             let tempStr: string = Object.keys(applyRule)[0];
+            if (tempStr.indexOf("_") !== -1) {
+                throw new InsightError("applyKey has underscore");
+            }
             if (this.ruleNames.includes(tempStr)) {
                 throw new InsightError("Duplicate APPLY key: " + tempStr);
             } else {
