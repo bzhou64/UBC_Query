@@ -11,7 +11,6 @@ import DataSets from "./DataSets";
 import * as JSZip from "jszip";
 import * as fs from "fs";
 import DataSet from "./DataSet";
-import Section from "./Section";
 import Query from "./Query";
 import * as dh from "./DataHelpers";
 import Building from "./Building";
@@ -87,20 +86,11 @@ export default class InsightFacade implements IInsightFacade {
                                     reject(new InsightError("No valid section in Zip File"));
                                 }
                             });
-                            //     .catch((err: any) => {
-                            //     reject(err);
-                            // });
                         }
                         ).catch((errGlo: any) => {
                             reject(new InsightError("Invalid Zip File"));
                         });
                     }
-                    // if (Object.keys(currDataset.records).length) {
-                    //     this.addDatasetDisk(currDataset);
-                    //     resolve(Object.keys(this.datasets.datasets));
-                    // } else {
-                    //     reject(new InsightError("No valid section in Zip File"));
-                    // }
                 }
             });
         });
@@ -128,12 +118,14 @@ export default class InsightFacade implements IInsightFacade {
                     let htmlBody = htmlHtml.childNodes.find((elem: any) => {
                         return elem.nodeName === "body";
                     });
-                    let tables = dh.findTableBody(htmlBody);
-                    let buildings: Building[] = [];
-                    // TODO: expand for multiple tables
-                    tables.forEach((table: any) => {
-                        buildings = buildings.concat(dh.exploreTable(table));
-                    });
+                    let tables = dh.findTableBody(htmlBody), buildings: Building[] = [];
+                    try {
+                        tables.forEach((table: any) => {
+                            buildings = buildings.concat(dh.exploreTable(table));
+                        });
+                    } catch (e) {
+                        throw new InsightError(e);
+                    }
                     let promiseBuildings = dh.createBuildingReadPromises(data, buildings);
                     let latLonPromises: Array<Promise<any>> = [];
                     Promise.all(promiseBuildings).then(() => {
@@ -178,22 +170,32 @@ export default class InsightFacade implements IInsightFacade {
                 assignBuildingDataRoom(room, building);
                 let arraytds: any = [];
                 dh.findTag(row, arraytds, "td");
-                arraytds.forEach((td: any) => {
-                    if (td.attrs[0].value === "views-field views-field-field-room-capacity") {
-                        room.seats = parseInt(td.childNodes[0].value.trim(), 10);
-                    } else if (td.attrs[0].value === "views-field views-field-field-room-furniture") {
-                        room.furniture = td.childNodes[0].value.trim();
-                    } else if (td.attrs[0].value === "views-field views-field-field-room-type") {
-                        room.type = td.childNodes[0].value.trim();
-                    } else if (td.attrs[0].value === "views-field views-field-field-room-number") {
-                        room.number = td.childNodes[1].childNodes[0].value.trim();
-                    } else if (td.attrs[0].value === "views-field views-field-nothing") {
-                        room.href = td.childNodes[1].attrs[0].value.trim();
+                try {
+                    arraytds.forEach((td: any) => {
+                        if (td.attrs[0].value === "views-field views-field-field-room-capacity") {
+                            room.seats = parseInt(td.childNodes[0].value.trim(), 10);
+                        } else if (td.attrs[0].value === "views-field views-field-field-room-furniture") {
+                            room.furniture = td.childNodes[0].value.trim();
+                        } else if (td.attrs[0].value === "views-field views-field-field-room-type") {
+                            room.type = td.childNodes[0].value.trim();
+                        } else if (td.attrs[0].value === "views-field views-field-field-room-number") {
+                            let a = td.childNodes.find((elem: any) => {
+                                return elem.nodeName === "a";
+                            });
+                            room.number = a.childNodes[0].value.trim();
+                        } else if (td.attrs[0].value === "views-field views-field-nothing") {
+                            let a = td.childNodes.find((elem: any) => {
+                                return elem.nodeName === "a";
+                            });
+                            room.href = a.attrs[0].value.trim();
+                        }
+                    });
+                    room.name = room.shortname + "_" + room.number;
+                    if (dh.roomDefined(room)) {
+                        currDataset.addRecord(room);
                     }
-                });
-                room.name = room.shortname + "_" + room.number;
-                if (dh.roomDefined(room)) {
-                    currDataset.addRecord(room);
+                } catch (e) {
+                    throw new InsightError("error in fields in room");
                 }
             });
         });

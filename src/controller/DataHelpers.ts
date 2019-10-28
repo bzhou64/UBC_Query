@@ -106,25 +106,35 @@ export function exploreTable(table: any): Building[] {
     let arrayRows: any[] = [];
     findTag(tableBody, arrayRows, "tr");
     let buildings: Building[] = [];
-    arrayRows.forEach((row: any) => {
-        let building: Building;
-        building = new Building();
-        let arraytds: any[] = [];
-        findTag(row, arraytds, "td");
-        arraytds.forEach( (td: any) => {
-            if (td.attrs[0].value === "views-field views-field-field-building-code") {
-                building.shortname = td.childNodes[0].value.trim();
-            } else if (td.attrs[0].value === "views-field views-field-field-building-address") {
-                building.address = td.childNodes[0].value.trim();
-            } else if (td.attrs[0].value === "views-field views-field-title") {
-                building.fullname = td.childNodes[1].childNodes[0].value.trim();
-                building.link = td.childNodes[1].attrs[0].value.trim();
+    try {
+        arrayRows.forEach((row: any) => {
+            let building: Building;
+            building = new Building();
+            let arraytds: any[] = [];
+            findTag(row, arraytds, "td");
+            arraytds.forEach( (td: any) => {
+                if (td.attrs[0].value === "views-field views-field-field-building-code") {
+                    building.shortname = td.childNodes[0].value.trim();
+                } else if (td.attrs[0].value === "views-field views-field-field-building-address") {
+                    building.address = td.childNodes[0].value.trim();
+                } else if (td.attrs[0].value === "views-field views-field-title") {
+                    let a = td.childNodes.find((elem: any) => {
+                        return elem.nodeName === "a";
+                    });
+                    building.fullname = a.childNodes[0].value.trim();
+                    let href = a.attrs.find((elem: any) => {
+                        return elem.name === "href";
+                    });
+                    building.link = href.value.trim();
+                }
+            });
+            if (building.checkTableDefined()) {
+                buildings.push(building);
             }
         });
-        if (building.checkTableDefined()) {
-            buildings.push(building);
-        }
-    });
+    } catch (e) {
+        throw new InsightError(e);
+    }
     return buildings;
 }
 
