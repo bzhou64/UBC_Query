@@ -68,13 +68,17 @@ export default class Query {
         // }
 
         // this.datasetId = this.datasetIdOptions(columnsOrder);
-        let optionsValues = this.findDatasetOptions(this.queryObj);
-        let tfsValues = this.findDatasetTransformations(this.queryObj["TRANSFORMATIONS"]);
-        let datasetIds = Query.union(optionsValues, tfsValues);
-        if (datasetIds.size !== 1) {
-            throw (new InsightError("Invalid query dataset combination"));
+        try {
+            let optionsValues = this.findDatasetOptions(this.queryObj);
+            let tfsValues = this.findDatasetTransformations(this.queryObj["TRANSFORMATIONS"]);
+            let datasetIds = Query.union(optionsValues, tfsValues);
+            if (datasetIds.size !== 1) {
+                throw (new InsightError("Invalid query dataset combination"));
+            }
+            this.datasetId = datasetIds.values().next().value;
+        } catch (e) {
+            throw new InsightError(e);
         }
-        this.datasetId = datasetIds.values().next().value;
         if (this.datasetId === "") {
             throw (new InsightError("Querying multiple datasets in OPTIONS"));
         }
@@ -170,7 +174,7 @@ export default class Query {
         let datasetIdSet: Set<string> = new Set<string>();
         if (tfs !== undefined) {
             if (tfs.hasOwnProperty("GROUP") && tfs.hasOwnProperty("APPLY")) {
-                if (tfs["GROUP"].length >= 1 && tfs["APPLY"].length >= 1) {
+                if (tfs["GROUP"].length >= 1) {
                     tfs["GROUP"].forEach((key: string) => {
                         datasetIdSet.add(key.split("_")[0]);
                     });
