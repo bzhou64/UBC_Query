@@ -188,7 +188,7 @@ export default class Query {
     }
 
     private findDatasetOptions(tfs: any): Set<string> {
-        return undefined;
+        return new Set<string>();
     }
 
     private static union(setA: Set<string>, setB: Set<string>): Set<string> {
