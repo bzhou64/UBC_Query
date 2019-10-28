@@ -188,7 +188,29 @@ export default class Query {
     }
 
     private findDatasetOptions(tfs: any): Set<string> {
-        return new Set<string>();
+        let datasetIdSet: Set<string> = new Set<string>();
+        if (tfs.hasOwnProperty("OPTIONS")) {
+            if (tfs["OPTIONS"].hasOwnProperty("COLUMNS"))  {
+                let set: string[] = this.helperForFields(tfs.OPTIONS.COLUMNS);
+                for (let s of set) {
+                    datasetIdSet.add(s);
+                }
+            } else {
+                throw new InsightError ("No Columns Field");
+            }
+            if (tfs["OPTIONS"].hasOwnProperty("ORDER")) {
+                let sete: string[] = this.helperForOrder(tfs.OPTIONS.ORDER);
+                let seta: string[] = this.helperForFields(sete);
+                for (let s of seta) {
+                    datasetIdSet.add(s);
+                }
+            } else {
+                throw new InsightError ("No Columns Field");
+            }
+        } else {
+            throw new InsightError("No Options Field Specified");
+        }
+        return datasetIdSet;
     }
 
     private static union(setA: Set<string>, setB: Set<string>): Set<string> {
@@ -197,6 +219,37 @@ export default class Query {
             unionSet.add(elem);
         }
         return unionSet;
+    }
+
+    private helperForOrder(clause: any): string[] {
+        let str: string[] = [];
+        if (clause === Object(clause)) {
+            if (clause.hasOwnProperty("keys")) {
+                if (Array.isArray(clause["keys"])) {
+                    str = clause["keys"];
+                } else {
+                    throw new InsightError("Keys Wrong Format Specified");
+                }
+            } else {
+                throw new InsightError("Order has no Keys Specified");
+            }
+        } else {
+            str.push(clause);
+        }
+        return str;
+    }
+
+    private helperForFields(clause: any): string[] {
+        let str: string[] = [];
+        if (Array.isArray(clause)) {
+            for (let clau of clause) {
+                if (clau.include("_")) {
+                    let temp = clau.split("_");
+                    str.push(temp[0]);
+                }
+            }
+        }
+        return str;
     }
 
 }
