@@ -132,7 +132,7 @@ export default class InsightFacade implements IInsightFacade {
                     let buildings: Building[] = [];
                     // TODO: expand for multiple tables
                     tables.forEach((table: any) => {
-                        buildings = dh.exploreTable(table);
+                        buildings = buildings.concat(dh.exploreTable(table));
                     });
                     let promiseBuildings = dh.createBuildingReadPromises(data, buildings);
                     let latLonPromises: Array<Promise<any>> = [];
