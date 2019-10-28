@@ -48,7 +48,8 @@ export default class Group {
         let first = this.obj.shift(); // Should Remove the First Element and Return That Element
         let rest = this.obj; // Should Now Only Contain The Rest of The Elements
         this.grouping = new Grouping(this.dataset, first, rest, { });
-        return this.grouping.showGroups([]);
+        let gp = this.grouping.showGroups([]);
+        return gp;
     }
 
     /*
