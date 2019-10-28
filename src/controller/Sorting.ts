@@ -139,12 +139,11 @@ export default class Sorting {
         let queryFieldSet = new Set();
         let cols: string[] = this.criteria.slice();
         for (let col of cols) {
+            if (col.includes("_")) {
                 let temp = col.split("_");
                 queryFieldSet.add(temp[0]);
             }
-        if (queryFieldSet.size === 1) {
-            return true;
         }
-        return false;
+        return queryFieldSet.size <= 1;
     }
 }

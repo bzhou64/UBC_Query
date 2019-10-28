@@ -91,15 +91,17 @@ export default class Options {
             throw new InsightError("Invalid Column Request");
         }
         try {
-            this.order = new Sorting(records, this.options.ORDER);
-            // notice this is reinitialized (from line 50)?
-            // This is to use the updated dataset with limited columns in Order.
-            // The first initialization was required only to test validity before creating.
-            // No new syntactical errors will be thrown but its still throwing by convention so we must catch
-            if (this.order.isSortValid(Object.keys(records[0]))) {
-                return this.order.applySort();
-            } else {
-                throw new InsightError("Sorting Criteria Not Valid");
+            if (this.options.hasOwnProperty("ORDER")) {
+                this.order = new Sorting(records, this.options.ORDER);
+                // notice this is reinitialized (from line 50)?
+                // This is to use the updated dataset with limited columns in Order.
+                // The first initialization was required only to test validity before creating.
+                // No new syntactical errors will be thrown but its still throwing by convention so we must catch
+                if (this.order.isSortValid(Object.keys(records[0]))) {
+                    return this.order.applySort();
+                } else {
+                    throw new InsightError("Sorting Criteria Not Valid");
+                }
             }
         } catch (er) {
             throw new InsightError("Error initializing the sort variable: " + er);
