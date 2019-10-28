@@ -186,12 +186,12 @@ export default class InsightFacade implements IInsightFacade {
                     } else if (td.attrs[0].value === "views-field views-field-field-room-type") {
                         room.type = td.childNodes[0].value.trim();
                     } else if (td.attrs[0].value === "views-field views-field-field-room-number") {
-                        room.numberRename = td.childNodes[1].childNodes[0].value.trim();
+                        room.number = td.childNodes[1].childNodes[0].value.trim();
                     } else if (td.attrs[0].value === "views-field views-field-nothing") {
                         room.href = td.childNodes[1].attrs[0].value.trim();
                     }
                 });
-                room.name = room.shortname + "_" + room.numberRename;
+                room.name = room.shortname + "_" + room.number;
                 if (dh.roomDefined(room)) {
                     currDataset.addRecord(room);
                 }

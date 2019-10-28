@@ -2,7 +2,8 @@
 export default class Room {
     public fullname: string;
     public shortname: string;
-    public numberRename: string;
+    // public numberRename: string;
+    public number: string;
     public name: string;
     public address: string;
     public lat: number;

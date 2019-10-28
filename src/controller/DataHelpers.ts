@@ -163,7 +163,7 @@ export function assignBuildingDataRoom(room: Room, building: Building) {
 export function roomDefined(room: Room): boolean {
     return room.fullname !== undefined
     && room.shortname !== undefined
-    && room.numberRename !== undefined
+    && room.number !== undefined
     && room.name !== undefined
     && room.address !== undefined
     && room.lat !== undefined
