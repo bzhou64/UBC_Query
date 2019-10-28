@@ -120,8 +120,7 @@ export function exploreTable(table: any): Building[] {
             } else if (td.attrs[0].value === "views-field views-field-field-building-address") {
                 building.address = td.childNodes[0].value.trim();
             } else if (td.attrs[0].value === "views-field views-field-title") {
-                building.fullname = td.childNodes[1].attrs[1].value.trim();
-                // TODO: Check this might be an issue
+                building.fullname = td.childNodes[1].childNodes[0].value.trim();
                 building.link = td.childNodes[1].attrs[0].value.trim();
             }
         });
