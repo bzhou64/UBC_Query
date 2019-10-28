@@ -15,7 +15,7 @@ export default class Columns {
     private readonly columndesired: string[];
     constructor(dataset: any[], columns: any) {
         this.rds = dataset;
-        if (Array.isArray(columns)) {
+        if (Array.isArray(columns) && columns.length > 0) {
             this.columndesired = columns;
         } else {
             throw new InsightError("Incorrect Format");
