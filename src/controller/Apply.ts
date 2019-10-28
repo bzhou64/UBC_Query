@@ -60,9 +60,7 @@ export default class Apply {
             let tempArrRecords: any[] = group["result"];
             for (let i = 0; i < this.ruleNames.length; i++) {
                 let field: string = this.rules[i][Object.keys(this.rules[i])[0]];
-                let splitted: string[] = field.split("_");
-                let tempKey: string = splitted[1];
-                group[this.ruleNames[i]] = Apply.setApplyHelper(this.ruleNames[i], tempArrRecords, tempKey);
+                group[this.ruleNames[i]] = Apply.setApplyHelper(Object.keys(this.rules[i])[0], tempArrRecords, field);
             }
         }
         records = this.groupDS;
