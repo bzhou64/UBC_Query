@@ -45,6 +45,7 @@ export default class InsightFacade implements IInsightFacade {
         });
     }
 
+    // todo: fix case where id is invalid but is still being added despite giving insighterror.
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
         return new Promise<string[]>((resolve, reject) => {
             this.loadDatasetDisk();
@@ -85,6 +86,9 @@ export default class InsightFacade implements IInsightFacade {
                                 } else {
                                     reject(new InsightError("No valid section in Zip File"));
                                 }
+                                // added the next two lines because "rooms/index.html not found" error was not handled.
+                            }).catch((err: any) => {
+                                reject(new InsightError(err));
                             });
                         }
                         ).catch((errGlo: any) => {
