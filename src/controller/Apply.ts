@@ -148,7 +148,6 @@ export default class Apply {
                 let tempNum = new Decimal(section[key]);
                 tempTotal = tempTotal.plus(tempNum);
             }
-            // TODO: what happens if recordsArr is empty??
             let tempAvg: number = tempTotal.toNumber();
             if (recordsArr.length !== 0) {
                 tempAvg = tempTotal.toNumber() / recordsArr.length;
