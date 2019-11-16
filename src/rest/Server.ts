@@ -132,8 +132,7 @@ export default class Server {
 
     private remove(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace("Server::remove() - params.id: " + JSON.stringify(req.params.id));
-        try {
-            this.insf.removeDataset(req.params.id).then((resultID: string) => {
+        this.insf.removeDataset(req.params.id).then((resultID: string) => {
                 Log.trace(resultID);
                 Log.info("Server::remove() - responding " + 200);
                 res.json(200, {result: resultID});
@@ -147,14 +146,10 @@ export default class Server {
                     res.json(200, {error: err.message});
                 }
             });
-        } catch (e) {
-            res.json(400, {error: e.message});
-        }
         return next();
     }
 
     private resultQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
-        try {
             this.insf.performQuery(req.body).then((query: any) => {
                 Log.trace(query);
                 Log.info("Server::resultQuery() - responding " + 200);
@@ -163,10 +158,7 @@ export default class Server {
                 Log.error("Server::resultQuery() - responding 400: " + err.message);
                 res.json(200, {error: err.message});
             });
-        } catch (e) {
-            res.json(400, {error: e.message});
-        }
-        return next();
+            return next();
     }
 
     private listOfDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
