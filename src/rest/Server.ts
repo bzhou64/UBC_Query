@@ -63,7 +63,7 @@ export default class Server {
 
                 // This is an example endpoint that you can invoke by accessing this URL in your browser:
                 // http://localhost:4321/echo/hello
-                that.rest.get("/echo/:msg", Server.echo);
+                /*that.rest.get("/echo/:msg", Server.echo);*/
 
                 // NOTE: your endpoints should go here
                 // that.rest.put("/dataset/:id/:kind", Server.add);
@@ -192,7 +192,7 @@ export default class Server {
     // The next two methods handle the echo service.
     // These are almost certainly not the best place to put these, but are here for your reference.
     // By updating the Server.echo function pointer above, these methods can be easily moved.
-    private static echo(req: restify.Request, res: restify.Response, next: restify.Next) {
+    /*private static echo(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace("Server::echo(..) - params: " + JSON.stringify(req.params));
         try {
             const response = Server.performEcho(req.params.msg);
@@ -211,6 +211,6 @@ export default class Server {
         } else {
             return "Message not provided";
         }
-    }
+    }*/
 
 }
