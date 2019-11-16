@@ -1,4 +1,4 @@
-import { expect } from "chai";
+import {expect} from "chai";
 import * as fs from "fs-extra";
 import {InsightDataset, InsightDatasetKind, InsightError, NotFoundError} from "../src/controller/IInsightFacade";
 import InsightFacade from "../src/controller/InsightFacade";
@@ -124,21 +124,21 @@ describe("InsightFacade Add/Remove Dataset", function () {
         });
 
     });
-    // it("Should add a valid rooms dataset", function () {
-    //     const id: string = "rooms";
-    //     const expected: string[] = [id];
-    //     return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms).then((result: string[]) => {
-    //         expect(result).to.deep.equal(expected);
-    //         return insightFacade.listDatasets().then((returnedData: InsightDataset[]) => {
-    //             expect(returnedData).to.have.length(1);
-    //         }).catch((err: any) => {
-    //             expect.fail(err, expected, "Should not have rejected");
-    //         });
-    //     }).catch((err: any) => {
-    //         expect.fail(err, expected, "Should not have rejected");
-    //     });
-    //
-    // });
+    it("Should add a valid rooms dataset", function () {
+        const id: string = "rooms";
+        const expected: string[] = [id];
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms).then((result: string[]) => {
+            expect(result).to.deep.equal(expected);
+            return insightFacade.listDatasets().then((returnedData: InsightDataset[]) => {
+                expect(returnedData).to.have.length(1);
+            }).catch((err: any) => {
+                expect.fail(err, expected, "Should not have rejected");
+            });
+        }).catch((err: any) => {
+            expect.fail(err, expected, "Should not have rejected");
+        });
+
+    });
     it("Check nrows in rooms.zip", function () {
         const id: string = "rooms";
         const expected: string[] = [id];
@@ -214,6 +214,15 @@ describe("InsightFacade Add/Remove Dataset", function () {
             expect(err).to.be.instanceOf(InsightError);
         });
     });
+    it("reject adding dataset with invalid id", function () {
+        const id: string = "illegal_id";
+        const expected: string[] = [id];
+        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
+            expect.fail(result, expected, "Should be rejected");
+        }).catch((err: any) => {
+            expect(err).to.be.instanceof(InsightError);
+        });
+    });
     // reject with corrupted zip file
     it("Reject adding dataset with corrupted zip file", function () {
         const id: string = "corrupt";
@@ -257,15 +266,6 @@ describe("InsightFacade Add/Remove Dataset", function () {
         const id: string = "illegal_id";
         const expected: string[] = [id];
         return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).then((result: string[]) => {
-            expect.fail(result, expected, "Should be rejected");
-        }).catch((err: any) => {
-            expect(err).to.be.instanceOf(InsightError);
-        });
-    });
-    it("Reject adding dataset with underscore in id room", function () {
-        const id: string = "illegal_id";
-        const expected: string[] = [id];
-        return insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms).then((result: string[]) => {
             expect.fail(result, expected, "Should be rejected");
         }).catch((err: any) => {
             expect(err).to.be.instanceOf(InsightError);
