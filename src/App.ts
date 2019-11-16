@@ -1,5 +1,7 @@
 import Server from "./rest/Server";
 import Log from "./Util";
+import * as fs from "fs-extra";
+import {InsightDatasetKind} from "./controller/IInsightFacade";
 
 /**
  * Main app class that is run with the node command. Starts the server.
@@ -14,6 +16,10 @@ export class App {
         }).catch(function (err: Error) {
             Log.error("App::initServer() - ERROR: " + err.message);
         });
+        let coursesFile: any = fs.readFileSync("./test/data/courses.zip").toString("base64");
+        let roomsFile: any = fs.readFileSync("./test/data/rooms.zip").toString("base64");
+        server.insf.addDataset("courses", coursesFile, InsightDatasetKind.Courses);
+        server.insf.addDataset("rooms", roomsFile, InsightDatasetKind.Rooms);
     }
 }
 

@@ -41,16 +41,16 @@ describe("Facade D3", function () {
         server.start().catch((err: any) => {
             Log.error("Could not start the server due to " + err);
         });
-    });
-
-    after(function () {
-        server.stop();
         try {
             fs.removeSync(cacheDir);
             fs.mkdirSync(cacheDir);
         } catch (err) {
             Log.error(err);
         }
+    });
+
+    after(function () {
+        server.stop();
     });
 
     beforeEach(function () {
