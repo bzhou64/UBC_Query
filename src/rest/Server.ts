@@ -120,8 +120,8 @@ export default class Server {
                 Log.info("Server::add() - responding " + 200);
                 res.json(200, {result: value});
             }).catch((err: any) => {
-                Log.error("Server::add() - responding 400: " + err.message);
-                res.json(400, {error: err.message});
+                Log.error("Server::add() - responding 200: " + err.message);
+                res.json(200, {error: err.message});
             });
         } catch (e) {
             Log.error("Server::add() - responding 400: " + e);
@@ -132,32 +132,40 @@ export default class Server {
 
     private remove(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace("Server::remove() - params.id: " + JSON.stringify(req.params.id));
-        this.insf.removeDataset(req.params.id).then((resultID: string) => {
-            Log.trace(resultID);
-            Log.info("Server::remove() - responding " + 200);
-            res.json(200, {result: resultID});
-        }).catch((err: any) => {
-            Log.trace(err);
-            if (err instanceof NotFoundError) {
-                Log.error("Server::remove() - responding 404: " + err.message);
-                res.json(404, {error: err.message});
-            } else {
-                Log.error("Server::remove() - responding 400: " + err.message);
-                res.json(400, {error: err.message});
-            }
-        });
+        try {
+            this.insf.removeDataset(req.params.id).then((resultID: string) => {
+                Log.trace(resultID);
+                Log.info("Server::remove() - responding " + 200);
+                res.json(200, {result: resultID});
+            }).catch((err: any) => {
+                Log.trace(err);
+                if (err instanceof NotFoundError) {
+                    Log.error("Server::remove() - responding 404: " + err.message);
+                    res.json(404, {error: err.message});
+                } else {
+                    Log.error("Server::remove() - responding 400: " + err.message);
+                    res.json(200, {error: err.message});
+                }
+            });
+        } catch (e) {
+            res.json(400, {error: e.message});
+        }
         return next();
     }
 
     private resultQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
-        this.insf.performQuery(req.body).then((query: any) => {
-            Log.trace(query);
-            Log.info("Server::resultQuery() - responding " + 200);
-            res.json(200, {result: query});
-        }).catch((err: any) => {
-            Log.error("Server::resultQuery() - responding 400: " + err.message);
-            res.json(400, {error: err.message});
-        });
+        try {
+            this.insf.performQuery(req.body).then((query: any) => {
+                Log.trace(query);
+                Log.info("Server::resultQuery() - responding " + 200);
+                res.json(200, {result: query});
+            }).catch((err: any) => {
+                Log.error("Server::resultQuery() - responding 400: " + err.message);
+                res.json(200, {error: err.message});
+            });
+        } catch (e) {
+            res.json(400, {error: e.message});
+        }
         return next();
     }
 
