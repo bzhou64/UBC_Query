@@ -146,10 +146,25 @@ describe("Facade D3 DELETE", function () {
             Log.error("Could not start the server due to " + err);
         });
         Log.test(server.insf.listDatasets());
-        let coursesFile: any = fs.readFileSync("./test/data/courses.zip").toString("base64");
-        server.insf.addDataset("courses", coursesFile, InsightDatasetKind.Courses);
-        let roomsFile: any = fs.readFileSync("./test/data/rooms.zip").toString("base64");
-        server.insf.addDataset("rooms", roomsFile, InsightDatasetKind.Rooms);
+        const datasetsToQuery: { [id: string]: any } = {
+            courses: {id: "courses", path: "./test/data/courses.zip", kind: InsightDatasetKind.Courses},
+            rooms: {id: "rooms", path: "./test/data/rooms.zip", kind: InsightDatasetKind.Rooms}
+        };
+        const loadDatasetPromises: Array<Promise<string[]>> = [];
+        let insightFacade: InsightFacade;
+        insightFacade = new InsightFacade();
+        for (const key of Object.keys(datasetsToQuery)) {
+            const ds = datasetsToQuery[key];
+            const data = fs.readFileSync(ds.path).toString("base64");
+            loadDatasetPromises.push(insightFacade.addDataset(ds.id, data, ds.kind));
+        }
+        return Promise.all(loadDatasetPromises).catch((err) => {
+            /* *IMPORTANT NOTE: This catch is to let this run even without the implemented addDataset,
+             * for the purposes of seeing all your tests run.
+             * For D1, remove this catch block (but keep the Promise.all)
+             */
+            return Promise.resolve("HACK TO LET QUERIES RUN");
+        });
     });
 
     after(function () {
@@ -255,11 +270,6 @@ describe("Facade D3 POST", () => {
         Log.test(server);
         Log.test(`Before: ${this.test.parent.title}`);
 
-        const datasetsToQuery: { [id: string]: any } = {
-            courses: {id: "courses", path: "./test/data/courses.zip", kind: InsightDatasetKind.Courses},
-            rooms: {id: "rooms", path: "./test/data/rooms.zip", kind: InsightDatasetKind.Rooms}
-        };
-
         // Load the query JSON files under test/queries.
         // Fail if there is a problem reading ANY query.
         try {
@@ -277,6 +287,10 @@ describe("Facade D3 POST", () => {
                 invalidQuery = test.query;
             }
         }
+        const datasetsToQuery: { [id: string]: any } = {
+            courses: {id: "courses", path: "./test/data/courses.zip", kind: InsightDatasetKind.Courses},
+            rooms: {id: "rooms", path: "./test/data/rooms.zip", kind: InsightDatasetKind.Rooms}
+        };
         const loadDatasetPromises: Array<Promise<string[]>> = [];
         let insightFacade: InsightFacade;
         insightFacade = new InsightFacade();
@@ -411,13 +425,24 @@ describe("GET test", function () {
         }).catch((err: any) => {
             Log.error("Could not start the server due to " + err);
         });
-        let coursesFile: any = fs.readFileSync("./test/data/courses.zip").toString("base64");
-        server.insf.addDataset("courses", coursesFile, InsightDatasetKind.Courses).catch((err) => {
-            Log.test(err);
-        });
-        let roomsFile: any = fs.readFileSync("./test/data/rooms.zip").toString("base64");
-        server.insf.addDataset("rooms", roomsFile, InsightDatasetKind.Rooms).catch((err) => {
-            Log.test(err);
+        const datasetsToQuery: { [id: string]: any } = {
+            courses: {id: "courses", path: "./test/data/courses.zip", kind: InsightDatasetKind.Courses},
+            rooms: {id: "rooms", path: "./test/data/rooms.zip", kind: InsightDatasetKind.Rooms}
+        };
+        const loadDatasetPromises: Array<Promise<string[]>> = [];
+        let insightFacade: InsightFacade;
+        insightFacade = new InsightFacade();
+        for (const key of Object.keys(datasetsToQuery)) {
+            const ds = datasetsToQuery[key];
+            const data = fs.readFileSync(ds.path).toString("base64");
+            loadDatasetPromises.push(insightFacade.addDataset(ds.id, data, ds.kind));
+        }
+        return Promise.all(loadDatasetPromises).catch((err) => {
+            /* *IMPORTANT NOTE: This catch is to let this run even without the implemented addDataset,
+             * for the purposes of seeing all your tests run.
+             * For D1, remove this catch block (but keep the Promise.all)
+             */
+            return Promise.resolve("HACK TO LET QUERIES RUN");
         });
     });
 
