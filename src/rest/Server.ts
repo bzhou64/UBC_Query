@@ -155,7 +155,7 @@ export default class Server {
                 Log.info("Server::resultQuery() - responding " + 200);
                 res.json(200, {result: query});
             }).catch((err: any) => {
-                Log.error("Server::resultQuery() - responding 200: " + err.message);
+                // Log.error("Server::resultQuery() - responding 400: " + err.message);
                 res.json(400, {error: err.message});
             });
             return next();
@@ -165,7 +165,7 @@ export default class Server {
         this.insf.listDatasets().then((insightDatasets: InsightDataset[]) => {
             Log.trace(insightDatasets);
             Log.info("Server::listOfDataset() - responding " + 200);
-            res.json(400, {result: insightDatasets});
+            res.json(200, {result: insightDatasets});
         });
         return next();
     }
