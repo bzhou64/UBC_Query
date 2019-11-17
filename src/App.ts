@@ -18,11 +18,16 @@ export class App {
         });
         if (!fs.existsSync("/data/courses")) {
             let coursesFile: any = fs.readFileSync("./test/data/courses.zip").toString("base64");
-            server.insf.addDataset("courses", coursesFile, InsightDatasetKind.Courses);
-        }
-        if (!fs.existsSync("/data/rooms")) {
-            let roomsFile: any = fs.readFileSync("./test/data/rooms.zip").toString("base64");
-            server.insf.addDataset("rooms", roomsFile, InsightDatasetKind.Rooms);
+            server.insf.addDataset("courses", coursesFile, InsightDatasetKind.Courses).then((result) => {
+                if (!fs.existsSync("/data/rooms")) {
+                    let roomsFile: any = fs.readFileSync("./test/data/rooms.zip").toString("base64");
+                    server.insf.addDataset("rooms", roomsFile, InsightDatasetKind.Rooms).then((r) => {
+                        Log.info(r);
+                    });
+                }
+            }).catch((e) => {
+                Log.info("dataset already added");
+            });
         }
     }
 }
@@ -31,3 +36,4 @@ export class App {
 Log.info("App - starting");
 const app = new App();
 app.initServer(4321);
+

@@ -1,3 +1,67 @@
 {
     "query1":{"WHERE": {"IS": {"courses_dept": "cpsc"} }, "OPTIONS": {"COLUMNS": ["courses_dept", "courses_id"], "ORDER": "courses_id"} },
+    "query2": {
+        "WHERE": {
+            "GT": {
+                "courses_avg": 90
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "hello",
+                "goodbye"
+            ]
+        },
+        "TRANSFORMATIONS": {
+            "GROUP": [
+                "courses_dept"
+            ],
+            "APPLY": [
+                {
+                    "hello": {
+                        "SUM": "courses_pass"
+                    }
+                },
+                {
+                    "goodbye": {
+                        "MIN": "courses_avg"
+                    }
+                }
+            ]
+        }},
+    "query3": {
+        "WHERE": {
+            "GT": {
+                "rooms_seats": 95
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "rooms_type",
+                "hello",
+                "goodbye"
+            ],
+            "ORDER": {
+                "dir": "DOWN",
+                "keys": ["hello", "goodbye"]
+            }
+        },
+        "TRANSFORMATIONS": {
+            "GROUP": [
+                "rooms_type"
+            ],
+            "APPLY": [
+                {
+                    "hello": {
+                        "SUM": "rooms_seats"
+                    }
+                },
+                {
+                    "goodbye": {
+                        "COUNT": "rooms_type"
+                    }
+                }
+            ]
+        }}
 }
