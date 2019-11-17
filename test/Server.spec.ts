@@ -255,14 +255,10 @@ describe("Facade D3 POST", () => {
         Log.test(server);
         Log.test(`Before: ${this.test.parent.title}`);
 
-        let coursesFile: any = fs.readFileSync("./test/data/courses.zip").toString("base64");
-        server.insf.addDataset("courses", coursesFile, InsightDatasetKind.Courses).catch((err) => {
-            Log.test(err);
-        });
-        let roomsFile: any = fs.readFileSync("./test/data/rooms.zip").toString("base64");
-        server.insf.addDataset("rooms", roomsFile, InsightDatasetKind.Rooms).catch((err) => {
-            Log.test(err);
-        });
+        const datasetsToQuery: { [id: string]: any } = {
+            courses: {id: "courses", path: "./test/data/courses.zip", kind: InsightDatasetKind.Courses},
+            rooms: {id: "rooms", path: "./test/data/rooms.zip", kind: InsightDatasetKind.Rooms}
+        };
 
         // Load the query JSON files under test/queries.
         // Fail if there is a problem reading ANY query.
@@ -281,6 +277,21 @@ describe("Facade D3 POST", () => {
                 invalidQuery = test.query;
             }
         }
+        const loadDatasetPromises: Array<Promise<string[]>> = [];
+        let insightFacade: InsightFacade;
+        insightFacade = new InsightFacade();
+        for (const key of Object.keys(datasetsToQuery)) {
+            const ds = datasetsToQuery[key];
+            const data = fs.readFileSync(ds.path).toString("base64");
+            loadDatasetPromises.push(insightFacade.addDataset(ds.id, data, ds.kind));
+        }
+        return Promise.all(loadDatasetPromises).catch((err) => {
+            /* *IMPORTANT NOTE: This catch is to let this run even without the implemented addDataset,
+             * for the purposes of seeing all your tests run.
+             * For D1, remove this catch block (but keep the Promise.all)
+             */
+            return Promise.resolve("HACK TO LET QUERIES RUN");
+        });
 
     });
 
@@ -315,7 +326,7 @@ describe("Facade D3 POST", () => {
     it("Valid query", function () {
                 return chai.request("localhost:4321")
                     .post("/query")
-                    .send(validQuery)
+                    .send(JSON.stringify(validQuery))
                     .set("Content-Type", "application/json")
                     .then(function (res: Response) {
                         expect(res.status).to.be.equal(200);
@@ -328,7 +339,7 @@ describe("Facade D3 POST", () => {
     it("Invalid query", function () {
                 return chai.request("localhost:4321")
                     .post("/query")
-                    .send(invalidQuery)
+                    .send(JSON.stringify(invalidQuery))
                     .set("Content-Type", "application/json")
                     .then(function (res: Response) {
                         expect.fail("Should not have passed");
