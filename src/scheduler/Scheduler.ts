@@ -1,5 +1,6 @@
 import {IScheduler, SchedRoom, SchedSection, TimeSlot} from "./IScheduler";
 import Sorting from "../controller/Sorting";
+import {deepEqual} from "assert";
 
 export default class Scheduler implements IScheduler {
 
@@ -27,33 +28,31 @@ export default class Scheduler implements IScheduler {
         let results: any[] = [];
         for (let v of orderedRoom) {
             for (let s of slots) {
-                let blank: any = [{}, v , s];
+                let blank: any = [ v , {}, s];
                 results.push(blank);
             }
         }
+        let tots: number = 0;
+        for (let cs of rooms) {
+            tots += cs.rooms_seats;
+        }
         while (orderedSec.length !== 0 && orderedRoom.length !== 0) { // If either are 0, we have no more work to do
             let seck: any = orderedSec.pop();
-            this.addingSectionToRooms(seck, orderedRoom, results);
+            this.addingSectionToRooms(seck, orderedRoom, results, tots);
         }
         let pruneResult: any[] = this.pruningResults(results);
         // This will remove any excess objects (room + slots with no class allocated at all).
         return pruneResult;
     }
 
-    private addEnrollmentSize(section: SchedSection[]): any[] {
+    private addEnrollmentSize(section: any[]): any[] {
         let newCopy: any[] = [];
         for (let sec of section) {
             let sece: any = {};
-            sece["courses_dept"] = sec.courses_dept;
-            sece["courses_id"] = sec.courses_id;
-            sece["courses_uuid"] = sec.courses_uuid;
-            sece["courses_pass"]  = sec.courses_pass;
-            sece["courses_fail"] = sec.courses_fail;
-            sece["courses_audit"] = sec.courses_audit;
-            sece["courses_avg"] = sec.courses_avg;
-            sece["courses_instructor"] = sec.courses_instructor;
-            sece["courses_title"] = sec.courses_title;
-            sece["courses_year"] = sec.courses_year;
+            Object.keys(sec).forEach((col) => {
+                let rawcol: string = col;
+                sece[rawcol] = sec[col];
+            });
             sece["enrol_total"] = sec.courses_pass + sec.courses_fail + sec.courses_audit;
             newCopy.push(sece);
         }
@@ -61,22 +60,17 @@ export default class Scheduler implements IScheduler {
     }
 
     /*Helper will add an extra field for the rooms outlining the harvestine distance from a given room*/
-    private addHarvestineDistance(room: SchedRoom, rooms: SchedRoom[]): any[] {
-        let newCopy: SchedRoom[] = [];
+    private addHarvestineDistance(room: any, rooms: any[], totE: number): any[] {
+        let newCopy: any[] = [];
         for (let rooma of rooms) {
             let roomo: any = {};
-            roomo["rooms_shortname"] = rooma.rooms_shortname;
-            roomo["rooms_number"] = rooma.rooms_number;
-            roomo["rooms_seats"] = rooma.rooms_seats;
-            roomo["rooms_lat"] = rooma.rooms_lat;
-            roomo["rooms_lon"] = rooma.rooms_lon;
-            roomo["rooms_name"] = rooma.rooms_name;
-            roomo["rooms_fullname"] = rooma.rooms_fullname;
-            roomo["rooms_address"] = rooma.rooms_address;
-            roomo["rooms_type"] = rooma.rooms_type;
-            roomo["rooms_furniture"] = rooma.rooms_furniture;
-            roomo["rooms_href"] = rooma.rooms_href;
-            roomo["harv_dist"] = this.havdist(room, rooma);
+            Object.keys(rooma).forEach((col) => {
+                let rawcol: string = col;
+                roomo[rawcol] = rooma[col];
+            });
+            roomo["harv_dist"] = (0.7 * rooma["rooms_seats"] / totE ) +
+                (0.3 * (1 - (this.havdist(room, rooma) / 1372)));
+            newCopy.push(roomo);
         }
         return newCopy;
     }
@@ -98,43 +92,34 @@ export default class Scheduler implements IScheduler {
     }
 
     private removeEnrollmentSize(section: any): SchedSection {
-        let b: SchedSection = {
-            courses_audit: section.courses_audit,
-            courses_avg:  section.courses_avg,
-            courses_dept: section.courses_dept,
-            courses_fail: section.courses_fail,
-            courses_id: section.courses_id,
-            courses_instructor: section.courses_instructor,
-            courses_pass: section.courses_pass,
-            courses_title: section.courses_title,
-            courses_uuid: section.courses_uuid,
-            courses_year: section.courses_year
-        };
+        let newC: any = {};
+        Object.keys(section).forEach((col) => {
+            let rawcol: string = col;
+            if (rawcol !== "enrol_total") {
+                newC[rawcol] = section[col];
+            }
+        });
+        let b: SchedSection = newC;
         return b;
     }
 
     private removeHarvestingSize(rooms: any[]): SchedRoom[] {
         let voo: SchedRoom[] = [];
         for (let r of rooms) {
-            let b: SchedRoom = {
-                rooms_address: r.rooms_address,
-                rooms_fullname: r.rooms_fullname,
-                rooms_furniture: r.rooms_furniture,
-                rooms_href: r.rooms_href,
-                rooms_lat: r.rooms_lat,
-                rooms_lon: r.rooms_lon,
-                rooms_name: r.rooms_name,
-                rooms_number: r.rooms_number,
-                rooms_seats: r.rooms_seats,
-                rooms_shortname: r.rooms_shortname,
-                rooms_type: r.rooms_type
-            };
+            let newC: any = {};
+            Object.keys(r).forEach((col) => {
+                let rawcol: string = col;
+                if (rawcol !== "harv_dist") {
+                    newC[rawcol] = r[col];
+                }
+            });
+            let b: SchedRoom = newC;
             voo.push(b);
         }
         return voo;
     }
 
-    private addingSectionToRooms(sec: any, orderedRoom: any[], results: any[]) {
+    private addingSectionToRooms(sec: any, orderedRoom: any[], results: any[], totalE: number) {
         // Check if all slots are filled for the Room
         // if it is, reorder the remaining rooms by that room - DONE
         // else for each slot check for conflicts
@@ -148,7 +133,7 @@ export default class Scheduler implements IScheduler {
         while (orderedRoom.length !== 0) {
             if (this.checkAllSlotsAreFilled(orderedRoom[0], results)) {
                 ordRom = orderedRoom.shift();
-                orderedRoom = this.sortByHavestine(ordRom, orderedRoom);
+                orderedRoom = this.sortByHavestine(ordRom, orderedRoom, totalE);
             } else {
                 ordRom = orderedRoom[0];
                 break;
@@ -158,7 +143,7 @@ export default class Scheduler implements IScheduler {
             return;
         }
         for (let r of results) {
-            if (r[1] === ordRom) { // an area with free space
+            if (this.areTheyEqual(r[0], ordRom)) { // an area with free space
                 if (!this.thereAreConflictingSections(sec, results, r,  r[2])) {
                     this.tryInsertingSection(sec, r);
                     return; // This principle seeks to ensure that the class is choosing the best enrolment room
@@ -169,9 +154,9 @@ export default class Scheduler implements IScheduler {
 
 /* Helper that will add the Havestine Distance of All Remaining Rooms, Sort Those Rooms By That Criteria
    Then Remove The Distance (For obtaining the ordered SchedRooms by Distance) */
-    private sortByHavestine(roomOne: any, roomsRemaining: any[]): SchedRoom[] {
-        this.addHarvestineDistance(roomOne, roomsRemaining);
-        let sorte: Sorting = new Sorting(roomsRemaining, {dir: "up", keys: ["harv_dist"]});
+    private sortByHavestine(roomOne: any, roomsRemaining: any[], tot: number): SchedRoom[] {
+        let newAny: any[] = this.addHarvestineDistance(roomOne, roomsRemaining, tot);
+        let sorte: Sorting = new Sorting(newAny, {dir: "down", keys: ["harv_dist"]});
         let reordered: any[] = sorte.applySort();
         let reorder: SchedRoom[] = this.removeHarvestingSize(reordered);
         return reorder;
@@ -181,7 +166,8 @@ export default class Scheduler implements IScheduler {
     * be filled by the best classes (those that maximize enrolment size) */
     private checkAllSlotsAreFilled(desiredRoom: any, results: any[]): boolean {
         for (let e of results) {
-            if (e[0] === {} && e[1] === desiredRoom) { // Check if each slot is filled for the class
+            if (this.areTheyEqual(e[1], {}) && this.areTheyEqual(e[0], desiredRoom)) {
+                // Check if each slot is filled for the class
                 return false;
             }
         }
@@ -191,12 +177,12 @@ export default class Scheduler implements IScheduler {
     /* Helper that will check if there are conflicts. Conflicts occur iff, there exists a section of the same course
     * as the one in question, which occurs at the time in question OR if this is filled by an existing section so far*/
     private thereAreConflictingSections(sec: any, results: any[], r: any,  rTime: any): boolean {
-        if (r[0] !== {}) { // The best class has already been added earlier
+        if (!this.areTheyEqual(r[1], {})) { // The best class has already been added earlier
             return true;
         }
         for (let e of results) { // Check if that class (irrespective of section) is in other rooms at the same time
             if (e[2] === rTime) {
-                if (sec.courses_id === e[0].courses_id && sec.courses_dept === e[0].courses_dept) { // same class
+                if (sec.courses_id === e[1].courses_id && sec.courses_dept === e[1].courses_dept) { // same class
                    return true;
                 }
             }
@@ -210,21 +196,25 @@ export default class Scheduler implements IScheduler {
 
     /*Helper tries to insert the section into the available space. It checks that the space is large enough to use*/
     private tryInsertingSection(sec: any, r: any) {
-        if (sec.enrol_total <= r[1].rooms_seats) { // if the section will fit, insert, else discard it.
+        if (sec.enrol_total <= r[0].rooms_seats) { // if the section will fit, insert, else discard it.
             let newsec: SchedSection = this.removeEnrollmentSize(sec);
-            r[0] = newsec;
+            r[1] = newsec;
         }
     }
 
     /*Helper basically strips the result array which is  Rooms x Timeslots size, and shrinks it by stripping the
     *times with empty classrooms. It will return only times where the classes are filled*/
-    private pruningResults(result: any[]): any[] {
+    public pruningResults(result: any[]): any[] {
       let res: any[] = [];
       for (let r of result) {
-          if (r[0] !== {}) {
+          if (!this.areTheyEqual(r[1], {})) {
               res.push(r);
           }
       }
       return res;
+    }
+
+    private areTheyEqual(a: any, b: any): boolean {
+        return JSON.stringify(a) === JSON.stringify(b);
     }
 }
