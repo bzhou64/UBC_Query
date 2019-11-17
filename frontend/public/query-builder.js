@@ -114,8 +114,8 @@ function buildWhere(dataSetKind) {
     let where = {};
     let tabDatasetKind = document.getElementById("tab-" + dataSetKind);
     let conditionRadios = {
-        AND: "courses-conditiontype-all",
-        OR: "courses-conditiontype-any", NONE: "courses-conditiontype-none"
+        AND: dataSetKind + "-conditiontype-all",
+        OR: dataSetKind + "-conditiontype-any", NONE: dataSetKind + "-conditiontype-none"
     };
     let condition = "";
 
