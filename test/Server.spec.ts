@@ -274,7 +274,10 @@ describe("Facade D3 POST", () => {
         for (let test of testQueries) {
             if (test.filename === "test/queries/ANDvalid.json") {
                 validQuery = test.query;
-            } else if (test.filename === "test/queries/ANDinvalidObj.json") {
+            } else {
+                if (test.filename !== "test/queries/ANDinvalidObj.json") {
+                    continue;
+                }
                 invalidQuery = test.query;
             }
         }
@@ -377,7 +380,6 @@ describe("GET test", function () {
 
     chai.use(chaiHttp);
 
-    // Load all the test queries, and call addDataset on the insightFacade instance for all the datasets
     before(function () {
         try {
             if (fs.existsSync(cacheDir + "/courses")) {
