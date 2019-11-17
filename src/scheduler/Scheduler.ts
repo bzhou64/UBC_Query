@@ -31,7 +31,7 @@ export default class Scheduler implements IScheduler {
                 results.push(blank);
             }
         }
-        while (orderedSec.length !== 0 && orderedRoom.length !== 0) { // If these are 0, we have no more work to do
+        while (orderedSec.length !== 0 && orderedRoom.length !== 0) { // If either are 0, we have no more work to do
             let seck: any = orderedSec.pop();
             this.addingSectionToRooms(seck, orderedRoom, results);
         }
@@ -60,6 +60,7 @@ export default class Scheduler implements IScheduler {
         return newCopy;
     }
 
+    /*Helper will add an extra field for the rooms outlining the harvestine distance from a given room*/
     private addHarvestineDistance(room: SchedRoom, rooms: SchedRoom[]): any[] {
         let newCopy: SchedRoom[] = [];
         for (let rooma of rooms) {
@@ -80,6 +81,8 @@ export default class Scheduler implements IScheduler {
         return newCopy;
     }
 
+    /*Helper that calculates the havestine distance based on the formula provided on the website. Taking two rooms
+    * we apply the equation to develop our result*/
     private havdist(room1: SchedRoom, room2: SchedRoom): number {
         let pi: number = Math.PI;
         let rd: number = 6371e3;
@@ -164,6 +167,8 @@ export default class Scheduler implements IScheduler {
         }
     }
 
+/* Helper that will add the Havestine Distance of All Remaining Rooms, Sort Those Rooms By That Criteria
+   Then Remove The Distance (For obtaining the ordered SchedRooms by Distance) */
     private sortByHavestine(roomOne: any, roomsRemaining: any[]): SchedRoom[] {
         this.addHarvestineDistance(roomOne, roomsRemaining);
         let sorte: Sorting = new Sorting(roomsRemaining, {dir: "up", keys: ["harv_dist"]});
@@ -172,6 +177,8 @@ export default class Scheduler implements IScheduler {
         return reorder;
     }
 
+    /* Helper that will check if all time slots of the Room in question are filled. These rooms should
+    * be filled by the best classes (those that maximize enrolment size) */
     private checkAllSlotsAreFilled(desiredRoom: any, results: any[]): boolean {
         for (let e of results) {
             if (e[0] === {} && e[1] === desiredRoom) { // Check if each slot is filled for the class
@@ -181,6 +188,8 @@ export default class Scheduler implements IScheduler {
         return true;
     }
 
+    /* Helper that will check if there are conflicts. Conflicts occur iff, there exists a section of the same course
+    * as the one in question, which occurs at the time in question OR if this is filled by an existing section so far*/
     private thereAreConflictingSections(sec: any, results: any[], r: any,  rTime: any): boolean {
         if (r[0] !== {}) { // The best class has already been added earlier
             return true;
@@ -199,6 +208,7 @@ export default class Scheduler implements IScheduler {
     // Also, since the classes are ordered by their size as well, any previous rooms already filled would have higher
     // enrollment.
 
+    /*Helper tries to insert the section into the available space. It checks that the space is large enough to use*/
     private tryInsertingSection(sec: any, r: any) {
         if (sec.enrol_total <= r[1].rooms_seats) { // if the section will fit, insert, else discard it.
             let newsec: SchedSection = this.removeEnrollmentSize(sec);
@@ -206,6 +216,8 @@ export default class Scheduler implements IScheduler {
         }
     }
 
+    /*Helper basically strips the result array which is  Rooms x Timeslots size, and shrinks it by stripping the
+    *times with empty classrooms. It will return only times where the classes are filled*/
     private pruningResults(result: any[]): any[] {
       let res: any[] = [];
       for (let r of result) {
