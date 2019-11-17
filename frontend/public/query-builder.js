@@ -149,7 +149,9 @@ function formatConditions(conditions, datasetKind) {
         let term = cond.getElementsByClassName("control term")[0].getElementsByTagName("input")[0].value;
 
         if (operator === "EQ" || operator === "GT" || operator === "LT") {
-            term = parseInt(term, 10);
+            if (!isNaN(parseInt(term, 10))) {
+                term = parseInt(term, 10);
+            }
         }
 
         let conditionJson = {};
