@@ -79,18 +79,14 @@ function buildOrder(dataSetKind) {
 
 function buildColumns(dataSetKind) {
     let columns = [];
-    let columnIds = [];
-    if (dataSetKind === "courses") {
-        columnIds = coursesColumns;
-    } else {
-        columnIds = roomsColumns;
-    }
-    columnIds.forEach((colId) => {
-        let currElement = document.getElementById(dataSetKind + "-columns-field-" + colId);
-        if (currElement.checked === true) {
-            columns.push(dataSetKind + "_" + currElement.value)
+    let tabDatasetKind = document.getElementById("tab-" + dataSetKind);
+    let columnsDiv = tabDatasetKind.getElementsByClassName("form-group columns")[0];
+    let columnInputs = columnsDiv.getElementsByTagName("input");
+    for (let input of columnInputs) {
+        if (input.checked === true) {
+            columns.push(dataSetKind + "_" + input.value)
         }
-    });
+    }
     return columns;
 }
 
