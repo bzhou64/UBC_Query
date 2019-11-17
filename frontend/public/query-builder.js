@@ -61,13 +61,23 @@ function buildGroup(dataSetKind) {
 
 function buildOrder(dataSetKind) {
     let keys = [];
+    let orderDataset = [];
+    if (dataSetKind === "courses") {
+        orderDataset = coursesColumns;
+    } else {
+        orderDataset = roomsColumns;
+    }
     let tabDatasetKind = document.getElementById("tab-" + dataSetKind);
     let orderDiv = tabDatasetKind.getElementsByClassName("form-group order")[0];
     let selectTagOptions = orderDiv.getElementsByTagName("select")[0].selectedOptions;
     for (let option of selectTagOptions) {
-        keys.push(dataSetKind + "_" + option.value)
+        if (orderDataset.includes(option.value)) {
+            keys.push(dataSetKind + "_" + option.value)
+        } else {
+            keys.push(option.value)
+        }
     }
-    let isDescending = document.getElementById("courses-order").checked;
+    let isDescending = document.getElementById(dataSetKind+ "-order").checked;
     let order = {keys: keys};
     if (isDescending === true) {
         order["dir"] = "DOWN";
@@ -79,12 +89,22 @@ function buildOrder(dataSetKind) {
 
 function buildColumns(dataSetKind) {
     let columns = [];
+    let columnsDataset = [];
+    if (dataSetKind === "courses") {
+        columnsDataset = coursesColumns;
+    } else {
+        columnsDataset = roomsColumns;
+    }
     let tabDatasetKind = document.getElementById("tab-" + dataSetKind);
     let columnsDiv = tabDatasetKind.getElementsByClassName("form-group columns")[0];
     let columnInputs = columnsDiv.getElementsByTagName("input");
     for (let input of columnInputs) {
         if (input.checked === true) {
-            columns.push(dataSetKind + "_" + input.value)
+            if (columnsDataset.includes(input.value)) {
+                columns.push(dataSetKind + "_" + input.value)
+            } else {
+                columns.push(input.value)
+            }
         }
     }
     return columns;
