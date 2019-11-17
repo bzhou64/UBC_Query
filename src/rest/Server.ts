@@ -121,11 +121,11 @@ export default class Server {
                 res.json(200, {result: value});
             }).catch((err: any) => {
                 Log.error("Server::add() - responding 200: " + err.message);
-                res.json(200, {error: err.message});
+                res.json(400, {error: err.message});
             });
         } catch (e) {
-            Log.error("Server::add() - responding 400: " + e);
-            res.json(400, {error: e});
+            Log.error("Server::add() - responding 400: " + e.message);
+            res.json(400, {error: e.message});
         }
         return next();
     }
@@ -143,7 +143,7 @@ export default class Server {
                     res.json(404, {error: err.message});
                 } else {
                     Log.error("Server::remove() - responding 400: " + err.message);
-                    res.json(200, {error: err.message});
+                    res.json(400, {error: err.message});
                 }
             });
         return next();
@@ -155,8 +155,8 @@ export default class Server {
                 Log.info("Server::resultQuery() - responding " + 200);
                 res.json(200, {result: query});
             }).catch((err: any) => {
-                Log.error("Server::resultQuery() - responding 400: " + err.message);
-                res.json(200, {error: err.message});
+                Log.error("Server::resultQuery() - responding 200: " + err.message);
+                res.json(400, {error: err.message});
             });
             return next();
     }
@@ -165,7 +165,7 @@ export default class Server {
         this.insf.listDatasets().then((insightDatasets: InsightDataset[]) => {
             Log.trace(insightDatasets);
             Log.info("Server::listOfDataset() - responding " + 200);
-            res.json(200, {result: insightDatasets});
+            res.json(400, {result: insightDatasets});
         });
         return next();
     }

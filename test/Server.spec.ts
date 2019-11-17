@@ -11,7 +11,7 @@ import {InsightDatasetKind, InsightError} from "../src/controller/IInsightFacade
 import TestUtil from "./TestUtil";
 import {ITestQuery} from "./InsightFacade.spec";
 
-describe("Facade D3", function () {
+describe("Facade D3 PUT", function () {
 
     let facade: InsightFacade = null;
     let server: Server = null;
@@ -51,6 +51,7 @@ describe("Facade D3", function () {
 
     after(function () {
         server.stop();
+        Log.test("server stopped");
     });
 
     beforeEach(function () {
@@ -79,7 +80,7 @@ describe("Facade D3", function () {
                                 Log.test("Response body is: " + res.body.result);
                                 expect(res.status).to.be.equal(200);
                             }).catch((err: any) => {
-                                Log.test("error is: " + err);
+                                Log.test("error is: " + err["response"].error.text);
                                 expect.fail("Should not have failed");
                             });
                     } else {
@@ -92,18 +93,18 @@ describe("Facade D3", function () {
                                 expect.fail("Should not have added dataset");
                             }).catch((err: any) => {
                                 Log.test("error is: " + err["response"]["error"].text);
-                                expect(err);
+                                expect(err.status).to.be.equal(400);
                             });
                     }
                 } catch (err) {
-                        Log.test(err);
-                    }
+                    Log.test(err);
+                }
             });
         }
     });
 });
 
-describe("DELETE test for datasets", function () {
+describe("Facade D3 DELETE", function () {
     let facade: InsightFacade = null;
     let server: Server = null;
     // array of ids to test DELETE for
@@ -119,6 +120,7 @@ describe("DELETE test for datasets", function () {
         courses: {id: "courses", kind: InsightDatasetKind.Courses},
         rooms: {id: "rooms", kind: InsightDatasetKind.Rooms}
     };
+    const cacheDir = __dirname + "/../data";
 
     chai.use(chaiHttp);
 
@@ -128,19 +130,21 @@ describe("DELETE test for datasets", function () {
         server.start().catch((err: any) => {
             Log.error("Could not start the server due to " + err);
         });
-        const loadDatasetPromises: Array<Promise<string[]>> = [];
-        for (const key of Object.keys(datasetsToRemoveValid)) {
-            const ds = datasetsToRemoveValid[key];
-            const data = fs.readFileSync("./test/data/" + ds.id + ".zip").toString("base64");
-            loadDatasetPromises.push(server.insf.addDataset(ds.id, data, ds.kind));
-        }
-        return Promise.all(loadDatasetPromises).catch((err) => {
-            return Promise.resolve("HACK TO LET QUERIES RUN");
-        });
+        let coursesFile: any = fs.readFileSync("./test/data/courses.zip").toString("base64");
+        server.insf.addDataset("courses", coursesFile, InsightDatasetKind.Courses);
+        let roomsFile: any = fs.readFileSync("./test/data/rooms.zip").toString("base64");
+        server.insf.addDataset("rooms", roomsFile, InsightDatasetKind.Rooms);
     });
 
     after(function () {
         server.stop();
+        try {
+            fs.removeSync(cacheDir);
+            fs.mkdirSync(cacheDir);
+        } catch (err) {
+            Log.error(err);
+        }
+        Log.test("server stopped");
     });
 
     beforeEach(function () {
@@ -153,22 +157,33 @@ describe("DELETE test for datasets", function () {
         Log.test(server.insf.listDatasets());
     });
 
+    it(datasetsToRemove["validButNonExistent"] + " DELETE dataset test", function () {
+        let ds: any = datasetsToRemove[Object.keys(datasetsToRemove)[0]];
+        return chai.request("http://localhost:4321")
+                .del("/dataset/" + ds.id)
+                .then((res: Response) => {
+                    expect.fail("Should not have deleted dataset");
+                }).catch((err: any) => {
+                    Log.test("error is: " + err);
+                    expect(err.status).to.be.equal(404);
+                });
+    });
+
     describe("DELETE test for datasets", function () {
         for (let key of Object.keys(datasetsToRemove)) {
             it(key + " DELETE dataset test", function () {
-                try {
                     let ds: any = datasetsToRemove[key];
                     if (ds.valid) {
-                            return chai.request("http://localhost:4321")
-                                .del("/dataset/" + ds.id)
-                                .then((res: Response) => {
-                                    Log.test("status is: " + res.status);
-                                    Log.test("result is: " + res.body.result);
-                                    expect(res.status).to.be.equal(200);
-                                }).catch((err: any) => {
-                                    Log.test("error is: " + err);
-                                    expect.fail();
-                                });
+                        return chai.request("http://localhost:4321")
+                            .del("/dataset/" + ds.id)
+                            .then((res: Response) => {
+                                Log.test("status is: " + res.status);
+                                Log.test("result is: " + res.body.result);
+                                expect(res.status).to.be.equal(200);
+                            }).catch((err: any) => {
+                                Log.test("error is: " + err);
+                                expect.fail();
+                            });
                     } else {
                         return chai.request("http://localhost:4321")
                             .del("/dataset/" + ds.id)
@@ -176,21 +191,18 @@ describe("DELETE test for datasets", function () {
                                 Log.test("status is: " + res.status);
                                 expect.fail();
                             }).catch((err: any) => {
-                                Log.test("error is: " + err);
-                                expect(err);
+                                Log.test("error is: " + err.status);
+                                expect(err.status).to.be.equal(400);
                             });
                     }
-                } catch (e) {
-                    Log.test(e);
-                }
             });
         }
     });
 });
 
-describe("POST query test", function () {
+describe("Facade D3 POST", () => {
     let facade: InsightFacade = null;
-    let server: Server;
+    let server: Server = null;
     const cacheDir = __dirname + "/../data";
     const datasetsToQuery: { [id: string]: any } = {
         courses: {id: "courses", kind: InsightDatasetKind.Courses},
@@ -204,10 +216,20 @@ describe("POST query test", function () {
     before(function () {
         facade = new InsightFacade();
         server = new Server(4321);
-        server.start().catch((err: any) => {
+        server.start().then(function (val: boolean) {
+            Log.test("Server started: " + val);
+        }).catch((err: any) => {
             Log.error("Could not start the server due to " + err);
         });
+        Log.test("Server started");
+        Log.test(server);
         Log.test(`Before: ${this.test.parent.title}`);
+
+        let coursesFile: any = fs.readFileSync("./test/data/courses.zip").toString("base64");
+        server.insf.addDataset("courses", coursesFile, InsightDatasetKind.Courses);
+        let roomsFile: any = fs.readFileSync("./test/data/rooms.zip").toString("base64");
+        server.insf.addDataset("rooms", roomsFile, InsightDatasetKind.Rooms);
+
         // Load the query JSON files under test/queries.
         // Fail if there is a problem reading ANY query.
         try {
@@ -215,27 +237,11 @@ describe("POST query test", function () {
         } catch (err) {
             expect.fail("", "", `Failed to read one or more test queries. ${err}`);
         }
-        // load datasets to the server
-        const loadDatasetPromises: Array<Promise<string[]>> = [];
-        for (const key of Object.keys(datasetsToQuery)) {
-            const ds = datasetsToQuery[key];
-            if (ds.valid) {
-                const data = fs.readFileSync("./test/data/" + ds.id + ".zip").toString("base64");
-                loadDatasetPromises.push(server.insf.addDataset(ds.id, data, ds.kind));
-            }
-        }
-        return Promise.all(loadDatasetPromises).catch((err) => {
-            return Promise.resolve("HACK TO LET POST RUN");
-        });
-    });
 
-    beforeEach(function () {
-        Log.test(`BeforeTest: ${this.currentTest.title}`);
-        Log.test("server currently has: " + server.insf.listDatasets());
     });
 
     after(function () {
-        Log.test(`After: ${this.test.parent.title}`);
+        // Log.test(`After: ${this.test.parent.title}`);
         server.stop();
         try {
             fs.removeSync(cacheDir);
@@ -243,44 +249,88 @@ describe("POST query test", function () {
         } catch (err) {
             Log.error(err);
         }
+        Log.test("bla bla bla");
     });
 
-    afterEach(function () {
-        Log.test(`AfterTest: ${this.currentTest.title}`);
+    beforeEach(function () {
+        // Log.test(`BeforeTest: ${this.currentTest.title}`);
         Log.test("server currently has: " + server.insf.listDatasets());
     });
 
-
-    it("Should run POST and return queries if valid", function () {
-        describe("Dynamic InsightFacade PerformQuery tests", function () {
-            for (const test of testQueries) {
-                it(`[${test.filename}] ${test.title}`, function () {
-                    if (test.isQueryValid) {
-                        return chai.request("localhost:4321")
-                            .post("/query")
-                            .send(test.query)
-                            .set("content-type", "application/json")
-                            .then((res: Response) => {
-                                expect(res.status).to.be.equal(200);
-                            }).catch((err) => {
-                                expect.fail("Should not have failed");
-                            });
-                    } else {
-                        return chai.request("localhost:4321")
-                            .post("/query")
-                            .send(test.query)
-                            .set("content-type", "application/json")
-                            .then((res: Response) => {
-                                expect.fail("Should not have failed");
-                            }).catch((err) => {
-                                expect(err);
-                            });
-                    }
-                });
-            }
-        });
+    afterEach(function () {
+        // Log.test(`AfterTest: ${this.currentTest.title}`);
+        Log.test("server currently has: " + server.insf.listDatasets());
     });
+
+    it("Valid query", function () {
+        for (let test of testQueries) {
+            if (test.title === "ANDvalid") {
+                return chai.request("localhost:4321")
+                    .post("/query")
+                    .send(testQueries[0].query)
+                    .set("Content-Type", "application/json")
+                    .then(function (res: Response) {
+                        expect(res.status).to.be.equal(200);
+                    }).catch(function (err) {
+                        Log.test(err);
+                        expect.fail("should not have failed");
+                    });
+            }
+        }
+    });
+
+    it("Invalid query", function () {
+        for (let test of testQueries) {
+            if (test.title === "ANDinvalidObj") {
+                return chai.request("localhost:4321")
+                    .post("/query")
+                    .send(testQueries[0].query)
+                    .set("Content-Type", "application/json")
+                    .then(function (res: Response) {
+                        expect.fail("Should not have passed");
+                    }).catch(function (err) {
+                        Log.test(err);
+                        expect(err.status).to.be.equal(400);
+                    });
+            }
+        }
+    });
+
+    /*for (let test of testQueries) {
+        describe("POST tests", function () {
+            it(test.filename + " " + test.title, function (done) {
+                if (test.isQueryValid) {
+                    return chai.request("localhost:4321")
+                        .post("/query")
+                        .send(test.query)
+                        .set("Content-Type", "application/json")
+                        .then(function (res: Response) {
+                            expect(res.status).to.be.equal(200);
+                            done();
+                        }).catch(function (err) {
+                            Log.test(err);
+                            expect.fail("Should not have failed");
+                            done();
+                        });
+                } else {
+                    return chai.request("localhost:4321")
+                        .post("/query")
+                        .send(test.query)
+                        .set("Content-Type", "application/json")
+                        .then((res: Response) => {
+                            expect.fail("Should not have passed");
+                            done();
+                        }).catch((err) => {
+                            Log.test(err);
+                            expect(err);
+                            done();
+                        });
+                }
+            });
+        });
+    }*/
 });
+
 
     // Sample on how to format PUT requests
     /*
