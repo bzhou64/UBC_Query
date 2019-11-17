@@ -26,23 +26,23 @@ describe("Facade D3 PUT", function () {
     chai.use(chaiHttp);
 
     before(function () {
+        try {
+        if (fs.existsSync(cacheDir + "/courses")) {
+            fs.unlinkSync(cacheDir + "/courses");
+        }
+        if (fs.existsSync(cacheDir + "/rooms")) {
+            fs.unlinkSync(cacheDir + "/rooms");
+        }
+        fs.removeSync(cacheDir);
+        fs.mkdirSync(cacheDir);
+    } catch (err) {
+        Log.error(err);
+    }
         facade = new InsightFacade();
         server = new Server(4321);
         server.start().catch((err: any) => {
             Log.error("Could not start the server due to " + err);
         });
-        try {
-            if (fs.existsSync(cacheDir + "/courses")) {
-                fs.unlinkSync(cacheDir + "/courses");
-            }
-            if (fs.existsSync(cacheDir + "/rooms")) {
-                fs.unlinkSync(cacheDir + "/rooms");
-            }
-            fs.removeSync(cacheDir);
-            fs.mkdirSync(cacheDir);
-        } catch (err) {
-            Log.error(err);
-        }
     });
 
     after(function () {
