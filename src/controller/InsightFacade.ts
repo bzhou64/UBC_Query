@@ -50,11 +50,11 @@ export default class InsightFacade implements IInsightFacade {
         return new Promise<string[]>((resolve, reject) => {
             this.loadDatasetDisk();
             if (!dh.isIDValid(id)) {
-                reject(new InsightError("Invalid Id"));
+                return reject(new InsightError("Invalid Id"));
             }
             this.isAdded(id).then(async (cond) => {
                 if (cond) {
-                    reject(new InsightError("Dataset already exists"));
+                    return reject(new InsightError("Dataset already exists"));
                 } else {
                     let zipFile = new JSZip();
                     let currDataset: DataSet = new DataSet(id, kind);
@@ -66,33 +66,33 @@ export default class InsightFacade implements IInsightFacade {
                                 try {
                                     resolve(this.checkEmptyDatasetAndAdd(currDataset));
                                 } catch (e) {
-                                  reject(e);
+                                  return reject(e);
                                 }
                             })
                                 .catch((errAll: any) => {
-                                    reject(new InsightError(errAll));
+                                    return reject(new InsightError(errAll));
                                     // throw new InsightError("Invalid Promises to read zip");
                                 });
                             }
                         ).catch((errGlo: any) => {
-                            reject(new InsightError("Invalid Zip File"));
+                            return reject(new InsightError("Invalid Zip File"));
                         });
                     } else if (kind === InsightDatasetKind.Rooms) {
                         zipFile.loadAsync(content, {base64: true}).then((data) => {
                             this.readRoomsHTML(data, currDataset).then(() => {
                                 if (Object.keys(currDataset.records).length) {
                                     this.addDatasetDisk(currDataset);
-                                    resolve(Object.keys(this.datasets.datasets));
+                                    return resolve(Object.keys(this.datasets.datasets));
                                 } else {
-                                    reject(new InsightError("No valid section in Zip File"));
+                                    return reject(new InsightError("No valid section in Zip File"));
                                 }
                                 // added the next two lines because "rooms/index.html not found" error was not handled.
                             }).catch((err: any) => {
-                                reject(new InsightError(err));
+                                return reject(new InsightError(err));
                             });
                         }
                         ).catch((errGlo: any) => {
-                            reject(new InsightError("Invalid Zip File"));
+                            return reject(new InsightError("Invalid Zip File"));
                         });
                     }
                 }
