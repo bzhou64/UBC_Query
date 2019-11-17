@@ -91,39 +91,35 @@ export default class Query {
         if (where === undefined) {
             throw (new InsightError("WHERE missing in query"));
         }
-        if (Object.keys(where).length !== 1) {
+        if (Object.keys(where).length > 1) {
             throw (new InsightError("Too many keys in where"));
+        } else if (Object.keys(where).length === 1) {
+            let whereOpt = Object.keys(where)[0];
+            if (whereOpt === "AND") {
+                this.filter = new LogicComparison ("AND", where[whereOpt]);
+            } else if (whereOpt === "OR") {
+                this.filter = new LogicComparison ("OR", where[whereOpt]);
+            } else if (whereOpt === "IS") {
+                this.filter = new SComparison ("IS", where[whereOpt]);
+            } else if (whereOpt === "LT") {
+                this.filter = new MComparison ("LT", where[whereOpt]);
+            } else if (whereOpt === "GT") {
+                this.filter = new MComparison ("GT", where[whereOpt]);
+            } else if (whereOpt === "EQ") {
+                this.filter = new MComparison ("EQ", where[whereOpt]);
+            } else if (whereOpt === "NOT") {
+                this.filter = new Negation ("NOT", where[whereOpt]);
+            } else {
+                throw new InsightError("Invalid WHERE field");
+            }
         }
-        let whereOpt = Object.keys(where)[0];
-        if (whereOpt === "AND") {
-            this.filter = new LogicComparison ("AND", where[whereOpt]);
-        } else if (whereOpt === "OR") {
-            this.filter = new LogicComparison ("OR", where[whereOpt]);
-        } else if (whereOpt === "IS") {
-            this.filter = new SComparison ("IS", where[whereOpt]);
-        } else if (whereOpt === "LT") {
-            this.filter = new MComparison ("LT", where[whereOpt]);
-        } else if (whereOpt === "GT") {
-            this.filter = new MComparison ("GT", where[whereOpt]);
-        } else if (whereOpt === "EQ") {
-            this.filter = new MComparison ("EQ", where[whereOpt]);
-        } else if (whereOpt === "NOT") {
-            this.filter = new Negation ("NOT", where[whereOpt]);
-        } else {
-            throw new InsightError("Invalid WHERE field");
-        }
-        /*
-         TODO: Incorporate new functionality here
-            Where (FILTER): Accepts a key, and value of that key - returns a filtered dataset
-            Transformations (TRANSFORMATIONS): Accepts a transformation query, and a filtered dataset
-            - returns a grouped and applied dataset (same structure as filtered dataset, just potentially
-            different columns)
-            Options (OPTIONS): Accepts an options value and a group/applied/filtered dataset, returns a fully processed
-            dataset
-         */
-        // let optionsObj: Options = new Options(options, Object.keys(this.datasets.datasets), this.datasetId);
         try {
-            let filteredDataset = this.filter.applyFilter(this.dataset, Object.values(this.dataset.records));
+            let filteredDataset = [];
+            if (Object.keys(where).length === 1) {
+                filteredDataset = this.filter.applyFilter(this.dataset, Object.values(this.dataset.records));
+            } else {
+                filteredDataset = Object.values(this.dataset.records);
+            }
             let dataobj: DataObject = new DataObject();
             let resultsArray: any[] = [];
             let processedDataset: any[] = [];

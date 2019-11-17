@@ -18,6 +18,6 @@ function bindSubmit() {
     CampusExplorer.sendQuery(query).then((response) => {
         CampusExplorer.renderResult(JSON.parse(response));
     }).catch((e) => {
-        console.log(e);
+        CampusExplorer.renderResult(JSON.parse(e));
     })
 }
