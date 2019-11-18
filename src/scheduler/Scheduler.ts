@@ -1,6 +1,5 @@
 import {IScheduler, SchedRoom, SchedSection, TimeSlot} from "./IScheduler";
 import Sorting from "../controller/Sorting";
-import {deepEqual} from "assert";
 
 export default class Scheduler implements IScheduler {
 
@@ -21,14 +20,15 @@ export default class Scheduler implements IScheduler {
         "TR  0800-0930", "TR  0930-1100", "TR  1100-1230",
         "TR  1230-1400", "TR  1400-1530", "TR  1530-1700"];
         let sortinRoom: Sorting = new Sorting(rooms, {dir: "down", keys: ["rooms_seats"]});
+        // Removing highest by shift
         let sects: any[] = this.addEnrollmentSize(sections);
-        let sortinSec: Sorting = new Sorting(sects, {dir: "up", keys: ["enrol_total"]});
+        let sortinSec: Sorting = new Sorting(sects, {dir: "down", keys: ["enrol_total"]}); // Removing by shift
         let orderedRoom: any[] = sortinRoom.applySort();
         let orderedSec: any[] = sortinSec.applySort();
         let results: any[] = [];
         for (let v of orderedRoom) {
             for (let s of slots) {
-                let blank: any = [ v , {}, s];
+                let blank: any = [ v , {}, s]; // All Rooms and their available timeslots are created
                 results.push(blank);
             }
         }
@@ -37,7 +37,7 @@ export default class Scheduler implements IScheduler {
             tots += cs.rooms_seats;
         }
         while (orderedSec.length !== 0 && orderedRoom.length !== 0) { // If either are 0, we have no more work to do
-            let seck: any = orderedSec.pop();
+            let seck: any = orderedSec.shift(); // Each Time Take The Largest Section and try adding it
             this.addingSectionToRooms(seck, orderedRoom, results, tots);
         }
         let pruneResult: any[] = this.pruningResults(results);
@@ -99,7 +99,7 @@ export default class Scheduler implements IScheduler {
                 newC[rawcol] = section[col];
             }
         });
-        let b: SchedSection = newC;
+        let b: SchedSection = newC; // masked
         return b;
     }
 
@@ -113,7 +113,7 @@ export default class Scheduler implements IScheduler {
                     newC[rawcol] = r[col];
                 }
             });
-            let b: SchedRoom = newC;
+            let b: SchedRoom = newC; // masked
             voo.push(b);
         }
         return voo;
@@ -127,24 +127,24 @@ export default class Scheduler implements IScheduler {
         // else test if the class can fit
         // if it fits add it, else don't add
         let ordRom: any;
-        if (orderedRoom.length === 0) {
+        if (orderedRoom.length === 0) { // if the length is zero, there are no more rooms available to be filled
             return;
         }
         while (orderedRoom.length !== 0) {
-            if (this.checkAllSlotsAreFilled(orderedRoom[0], results)) {
-                ordRom = orderedRoom.shift();
-                orderedRoom = this.sortByHavestine(ordRom, orderedRoom, totalE);
+            if (this.checkAllSlotsAreFilled(orderedRoom[0], results)) { // Check if first room is filled all slots
+                ordRom = orderedRoom.shift(); // if the room is filled go to the next best room and check if that's
+                orderedRoom = this.sortByHavestine(ordRom, orderedRoom, totalE); // filled
             } else {
-                ordRom = orderedRoom[0];
+                ordRom = orderedRoom[0]; // if best room is not filled, select as best room
                 break;
             }
         }
         if (orderedRoom.length === 0) {
             return;
         }
-        for (let r of results) {
-            if (this.areTheyEqual(r[0], ordRom)) { // an area with free space
-                if (!this.thereAreConflictingSections(sec, results, r,  r[2])) {
+        for (let r of results) { // for all timeslots available across all buildings
+            if (this.areTheyEqual(r[0], ordRom)) { // the best room with an available timeslot
+                if (!this.thereAreConflictingSections(sec, results, r,  r[2])) { // check for section conflicts
                     this.tryInsertingSection(sec, r);
                     return; // This principle seeks to ensure that the class is choosing the best enrolment room
                 }
@@ -167,7 +167,7 @@ export default class Scheduler implements IScheduler {
     private checkAllSlotsAreFilled(desiredRoom: any, results: any[]): boolean {
         for (let e of results) {
             if (this.areTheyEqual(e[1], {}) && this.areTheyEqual(e[0], desiredRoom)) {
-                // Check if each slot is filled for the class
+                // Check if each slot is filled for the classroom
                 return false;
             }
         }
@@ -214,6 +214,7 @@ export default class Scheduler implements IScheduler {
       return res;
     }
 
+    /* Helper that tests equality between two objects - no need for deep equal here */
     private areTheyEqual(a: any, b: any): boolean {
         return JSON.stringify(a) === JSON.stringify(b);
     }
